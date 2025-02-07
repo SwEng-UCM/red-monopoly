@@ -106,7 +106,7 @@ public class MainWindow extends JFrame {
         volumeLabel.setFont(new Font("Arial", Font.PLAIN, 18));
         volumeLabel.setForeground(Color.WHITE);
 
-        JSlider volumeSlider = new JSlider(0, 100, 50); // Min: 0, Max: 100, Default: 50
+        JSlider volumeSlider = new JSlider(0, 100, 75); // Min: 0, Max: 100, Default: 50
         volumeSlider.addChangeListener(e -> {
             int value = volumeSlider.getValue();
             float volume = value / 100f; // Convert to range 0.0 - 1.0
