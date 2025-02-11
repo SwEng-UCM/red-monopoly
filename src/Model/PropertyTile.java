@@ -8,6 +8,6 @@ public class PropertyTile extends Tile{
 
     @Override
     public void action(Player player) {
-
+        System.out.println(player.getName() + " landed on " + name);
     }
 }
