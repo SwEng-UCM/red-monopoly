@@ -15,7 +15,7 @@ public class Board {
     * //TODO: here we would add our configuration on the board, as its immutable, and the TYPE of tile
     * */
     private void initBoard(){
-        //usage example
+        //usage example asiopudadopnfu
         _tiles.add(new PropertyTile("Property 1", 1));
         _tiles.add(new CommunityChestTile("Community Chest 1", 2));
         _tiles.add(new PropertyTile("Property 2", 3));
