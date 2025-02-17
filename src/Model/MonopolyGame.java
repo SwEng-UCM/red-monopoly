@@ -15,33 +15,64 @@ public class MonopolyGame {
         board = new Board();
         currentPlayerIndex = 0;
         dice = new Random();
-        initPlayers();
+        // We won't call initPlayers() here anymore, because we will let the user pick the # of players
     }
 
-    private void initPlayers() {
-        players.add(new Player("Player 1"));
-        players.add(new Player("Player 2"));
-        // Add more players as needed
+    /**
+     * Sets the number of players in the game (from 1 up to 8) and creates them.
+     * Resets the current player index to 0.
+     */
+    public void setNumberOfPlayers(int count) {
+        if (count < 1) count = 1;
+        if (count > 8) count = 8;
+
+        players.clear();
+        for (int i = 1; i <= count; i++) {
+            players.add(new Player("Player " + i));
+        }
+        currentPlayerIndex = 0;
     }
 
     public Player getCurrentPlayer() {
         return players.get(currentPlayerIndex);
     }
 
+    /**
+     * Rolls two dice (2 x 1-6) and returns the sum
+     */
     public int rollDice() {
-        return dice.nextInt(6) + 1 + dice.nextInt(6) + 1; // Rolling two dice
+        return (dice.nextInt(6) + 1) + (dice.nextInt(6) + 1);
     }
 
+    /**
+     * Moves a player by the specified steps. If passing beyond the board size,
+     * it wraps around using modulo. Then triggers the tile action.
+     */
     public void movePlayer(Player player, int steps) {
-        int newPosition = (player.getPosition() + steps) % board.getSize();
+        int boardSize = board.getSize();
+        int newPosition = (player.getPosition() + steps) % boardSize;
         player.setPosition(newPosition);
+
+        // Perform the action of the tile just landed on
+        Tile tile = board.getTile(newPosition);
+        tile.action(player);
+    }
+
+    /**
+     * Moves to the next player's turn in a round-robin fashion.
+     */
+    public void nextTurn() {
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
     }
 
     public Board getBoard() {
         return board;
     }
 
-    public void nextTurn() {
-        currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+    /**
+     * Returns the total number of players. Might be useful in the UI.
+     */
+    public int getNumberOfPlayers() {
+        return players.size();
     }
 }
