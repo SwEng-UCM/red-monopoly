@@ -1,8 +1,8 @@
 package View;
 
+import Controller.Controller;
 import java.awt.*;
 import javax.swing.*;
-import Controller.Controller;
 
 public class MainWindow extends JFrame {
     private Controller _controller;
@@ -13,7 +13,7 @@ public class MainWindow extends JFrame {
     public MainWindow(Controller controller) {
         _controller = controller;
         musicPlayer = new MusicPlayer();
-        musicPlayer.playMusic("resources/Dark_is_the_Night_-_Soviet_WW2_Song.wav"); // Path to your music file
+        musicPlayer.playMusic("resources/Dark_is_the_Night_-_Soviet_WW2_Song.wav");
         initGUI();
     }
 
@@ -21,19 +21,17 @@ public class MainWindow extends JFrame {
         setTitle("[RED MONOPOLY]");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
+        setResizable(false); // Make the main menu window non-resizable
         setLocationRelativeTo(null);
 
         _cardLayout = new CardLayout();
         _mainPanel = new JPanel(_cardLayout);
-
         _mainPanel.add(createMainMenu(), "Main Menu");
         _mainPanel.add(createOptionsMenu(), "Options");
-        _mainPanel.add(createGameScreen(), "Game");
+        // We no longer add the Game panel here because the game uses its own window
 
         add(_mainPanel);
-
         _cardLayout.show(_mainPanel, "Main Menu");
-
         setVisible(true);
     }
 
@@ -54,7 +52,29 @@ public class MainWindow extends JFrame {
         buttonPanel.setBounds(0, 0, 800, 600);
 
         JButton playButton = createStyledButton("Play Game");
-        playButton.addActionListener(e -> _cardLayout.show(_mainPanel, "Game"));
+        playButton.addActionListener(e -> {
+            String input = JOptionPane.showInputDialog(
+                    this,
+                    "How many players? (1-8)",
+                    "Number of Players",
+                    JOptionPane.QUESTION_MESSAGE
+            );
+            if (input != null) {
+                try {
+                    int numPlayers = Integer.parseInt(input);
+                    _controller.setNumberOfPlayers(numPlayers);
+                    // Instead of switching cards, open a new Game window
+                    GameWindow gameWindow = new GameWindow(_controller, this);
+                    this.setVisible(false); // Hide main menu window
+                    gameWindow.setVisible(true);
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this,
+                            "Invalid number of players!",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
 
         JButton optionsButton = createStyledButton("Options");
         optionsButton.addActionListener(e -> _cardLayout.show(_mainPanel, "Options"));
@@ -99,17 +119,16 @@ public class MainWindow extends JFrame {
         optionsLabel.setForeground(Color.WHITE);
         optionsPanel.add(optionsLabel, BorderLayout.NORTH);
 
-        // Volume Slider
         JPanel volumePanel = new JPanel();
         volumePanel.setOpaque(false);
         JLabel volumeLabel = new JLabel("Volume:");
         volumeLabel.setFont(new Font("Arial", Font.PLAIN, 18));
         volumeLabel.setForeground(Color.WHITE);
 
-        JSlider volumeSlider = new JSlider(0, 100, 75); // Min: 0, Max: 100, Default: 50
+        JSlider volumeSlider = new JSlider(0, 100, 75);
         volumeSlider.addChangeListener(e -> {
             int value = volumeSlider.getValue();
-            float volume = value / 100f; // Convert to range 0.0 - 1.0
+            float volume = value / 100f;
             musicPlayer.setVolume(volume);
         });
 
@@ -123,22 +142,5 @@ public class MainWindow extends JFrame {
         optionsPanel.add(backButton, BorderLayout.SOUTH);
 
         return optionsPanel;
-    }
-
-    private JPanel createGameScreen() {
-        JPanel gamePanel = new JPanel();
-        gamePanel.setLayout(new BorderLayout());
-        gamePanel.setBackground(Color.RED);
-
-        JLabel gameLabel = new JLabel("Game Screen (Board will go here)", JLabel.CENTER);
-        gameLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        gameLabel.setForeground(Color.WHITE);
-        gamePanel.add(gameLabel, BorderLayout.CENTER);
-
-        JButton backButton = createStyledButton("Back to Main Menu");
-        backButton.addActionListener(e -> _cardLayout.show(_mainPanel, "Main Menu"));
-        gamePanel.add(backButton, BorderLayout.SOUTH);
-
-        return gamePanel;
     }
 }
