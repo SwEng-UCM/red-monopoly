@@ -1,14 +1,18 @@
 package View;
 
+import Controller.Controller;
 import java.awt.*;
 import javax.swing.*;
-import Controller.Controller;
 
 public class MainWindow extends JFrame {
     private Controller _controller;
     private CardLayout _cardLayout;
     private JPanel _mainPanel;
     private MusicPlayer musicPlayer;
+
+    // --- New fields for our game UI components ---
+    private JLabel currentPlayerLabel;     // Shows "Current Player: X"
+    private JTextArea gameMessagesArea;    // Displays dice roll messages, etc.
 
     public MainWindow(Controller controller) {
         _controller = controller;
@@ -33,7 +37,6 @@ public class MainWindow extends JFrame {
         add(_mainPanel);
 
         _cardLayout.show(_mainPanel, "Main Menu");
-
         setVisible(true);
     }
 
@@ -54,7 +57,33 @@ public class MainWindow extends JFrame {
         buttonPanel.setBounds(0, 0, 800, 600);
 
         JButton playButton = createStyledButton("Play Game");
-        playButton.addActionListener(e -> _cardLayout.show(_mainPanel, "Game"));
+        // ---------------------
+        // On "Play Game", ask how many players, then set the number in the controller
+        // and go to the "Game" screen.
+        playButton.addActionListener(e -> {
+            String input = JOptionPane.showInputDialog(
+                    this,
+                    "How many players? (1-8)",
+                    "Number of Players",
+                    JOptionPane.QUESTION_MESSAGE
+            );
+            if (input != null) {
+                try {
+                    int numPlayers = Integer.parseInt(input);
+                    _controller.setNumberOfPlayers(numPlayers);
+                    // Optional: Could do a check if numPlayers < 1 or > 8
+                    // Then show the "Game" panel
+                    _cardLayout.show(_mainPanel, "Game");
+                    updateCurrentPlayerLabel(); // Initialize label for the new game
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this,
+                            "Invalid number of players!",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        // ---------------------
 
         JButton optionsButton = createStyledButton("Options");
         optionsButton.addActionListener(e -> _cardLayout.show(_mainPanel, "Options"));
@@ -106,7 +135,7 @@ public class MainWindow extends JFrame {
         volumeLabel.setFont(new Font("Arial", Font.PLAIN, 18));
         volumeLabel.setForeground(Color.WHITE);
 
-        JSlider volumeSlider = new JSlider(0, 100, 75); // Min: 0, Max: 100, Default: 50
+        JSlider volumeSlider = new JSlider(0, 100, 75); // Min: 0, Max: 100, Default: 75
         volumeSlider.addChangeListener(e -> {
             int value = volumeSlider.getValue();
             float volume = value / 100f; // Convert to range 0.0 - 1.0
@@ -125,20 +154,64 @@ public class MainWindow extends JFrame {
         return optionsPanel;
     }
 
+    /**
+     * Creates the main "Game" screen with a layout:
+     *  - Top: label showing current player
+     *  - Center: a text area with messages about dice rolls, etc.
+     *  - Bottom: buttons (Roll Dice, Back to Menu)
+     */
     private JPanel createGameScreen() {
-        JPanel gamePanel = new JPanel();
-        gamePanel.setLayout(new BorderLayout());
+        JPanel gamePanel = new JPanel(new BorderLayout());
         gamePanel.setBackground(Color.RED);
 
-        JLabel gameLabel = new JLabel("Game Screen (Board will go here)", JLabel.CENTER);
-        gameLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        gameLabel.setForeground(Color.WHITE);
-        gamePanel.add(gameLabel, BorderLayout.CENTER);
+        // ---------- Top Panel: current player label ----------
+        currentPlayerLabel = new JLabel("Current Player: (not set yet)");
+        currentPlayerLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        currentPlayerLabel.setForeground(Color.WHITE);
+        currentPlayerLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        gamePanel.add(currentPlayerLabel, BorderLayout.NORTH);
 
+        // ---------- Center: text area for game messages ----------
+        gameMessagesArea = new JTextArea();
+        gameMessagesArea.setEditable(false);
+        gameMessagesArea.setBackground(Color.BLACK);
+        gameMessagesArea.setForeground(Color.WHITE);
+        gameMessagesArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        JScrollPane scrollPane = new JScrollPane(gameMessagesArea);
+        gamePanel.add(scrollPane, BorderLayout.CENTER);
+
+        // ---------- Bottom Panel: buttons ----------
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setOpaque(false);
+
+        // Roll Dice button
+        JButton rollDiceButton = createStyledButton("Roll Dice");
+        rollDiceButton.addActionListener(e -> {
+            // We ask the controller to do the dice roll, move player, etc.
+            String result = _controller.rollDiceAndMove();
+            // Display the result in the text area
+            gameMessagesArea.append(result + "\n");
+
+            // Update the label for the new current player after the move
+            updateCurrentPlayerLabel();
+        });
+        bottomPanel.add(rollDiceButton);
+
+        // Back to main menu button
         JButton backButton = createStyledButton("Back to Main Menu");
         backButton.addActionListener(e -> _cardLayout.show(_mainPanel, "Main Menu"));
-        gamePanel.add(backButton, BorderLayout.SOUTH);
+        bottomPanel.add(backButton);
+
+        gamePanel.add(bottomPanel, BorderLayout.SOUTH);
 
         return gamePanel;
+    }
+
+    /**
+     * Helper method to refresh the label showing which player's turn it is.
+     */
+    private void updateCurrentPlayerLabel() {
+        String currentPlayer = _controller.getCurrentPlayerName();
+        currentPlayerLabel.setText("Current Player: " + currentPlayer);
     }
 }
