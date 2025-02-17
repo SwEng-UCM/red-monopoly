@@ -10,14 +10,10 @@ public class MainWindow extends JFrame {
     private JPanel _mainPanel;
     private MusicPlayer musicPlayer;
 
-    // --- New fields for our game UI components ---
-    private JLabel currentPlayerLabel;     // Shows "Current Player: X"
-    private JTextArea gameMessagesArea;    // Displays dice roll messages, etc.
-
     public MainWindow(Controller controller) {
         _controller = controller;
         musicPlayer = new MusicPlayer();
-        musicPlayer.playMusic("resources/Dark_is_the_Night_-_Soviet_WW2_Song.wav"); // Path to your music file
+        musicPlayer.playMusic("resources/Dark_is_the_Night_-_Soviet_WW2_Song.wav");
         initGUI();
     }
 
@@ -25,17 +21,16 @@ public class MainWindow extends JFrame {
         setTitle("[RED MONOPOLY]");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
+        setResizable(false); // Make the main menu window non-resizable
         setLocationRelativeTo(null);
 
         _cardLayout = new CardLayout();
         _mainPanel = new JPanel(_cardLayout);
-
         _mainPanel.add(createMainMenu(), "Main Menu");
         _mainPanel.add(createOptionsMenu(), "Options");
-        _mainPanel.add(createGameScreen(), "Game");
+        // We no longer add the Game panel here because the game uses its own window
 
         add(_mainPanel);
-
         _cardLayout.show(_mainPanel, "Main Menu");
         setVisible(true);
     }
@@ -57,9 +52,6 @@ public class MainWindow extends JFrame {
         buttonPanel.setBounds(0, 0, 800, 600);
 
         JButton playButton = createStyledButton("Play Game");
-        // ---------------------
-        // On "Play Game", ask how many players, then set the number in the controller
-        // and go to the "Game" screen.
         playButton.addActionListener(e -> {
             String input = JOptionPane.showInputDialog(
                     this,
@@ -71,10 +63,10 @@ public class MainWindow extends JFrame {
                 try {
                     int numPlayers = Integer.parseInt(input);
                     _controller.setNumberOfPlayers(numPlayers);
-                    // Optional: Could do a check if numPlayers < 1 or > 8
-                    // Then show the "Game" panel
-                    _cardLayout.show(_mainPanel, "Game");
-                    updateCurrentPlayerLabel(); // Initialize label for the new game
+                    // Instead of switching cards, open a new Game window
+                    GameWindow gameWindow = new GameWindow(_controller, this);
+                    this.setVisible(false); // Hide main menu window
+                    gameWindow.setVisible(true);
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(this,
                             "Invalid number of players!",
@@ -83,7 +75,6 @@ public class MainWindow extends JFrame {
                 }
             }
         });
-        // ---------------------
 
         JButton optionsButton = createStyledButton("Options");
         optionsButton.addActionListener(e -> _cardLayout.show(_mainPanel, "Options"));
@@ -128,17 +119,16 @@ public class MainWindow extends JFrame {
         optionsLabel.setForeground(Color.WHITE);
         optionsPanel.add(optionsLabel, BorderLayout.NORTH);
 
-        // Volume Slider
         JPanel volumePanel = new JPanel();
         volumePanel.setOpaque(false);
         JLabel volumeLabel = new JLabel("Volume:");
         volumeLabel.setFont(new Font("Arial", Font.PLAIN, 18));
         volumeLabel.setForeground(Color.WHITE);
 
-        JSlider volumeSlider = new JSlider(0, 100, 75); // Min: 0, Max: 100, Default: 75
+        JSlider volumeSlider = new JSlider(0, 100, 75);
         volumeSlider.addChangeListener(e -> {
             int value = volumeSlider.getValue();
-            float volume = value / 100f; // Convert to range 0.0 - 1.0
+            float volume = value / 100f;
             musicPlayer.setVolume(volume);
         });
 
@@ -152,66 +142,5 @@ public class MainWindow extends JFrame {
         optionsPanel.add(backButton, BorderLayout.SOUTH);
 
         return optionsPanel;
-    }
-
-    /**
-     * Creates the main "Game" screen with a layout:
-     *  - Top: label showing current player
-     *  - Center: a text area with messages about dice rolls, etc.
-     *  - Bottom: buttons (Roll Dice, Back to Menu)
-     */
-    private JPanel createGameScreen() {
-        JPanel gamePanel = new JPanel(new BorderLayout());
-        gamePanel.setBackground(Color.RED);
-
-        // ---------- Top Panel: current player label ----------
-        currentPlayerLabel = new JLabel("Current Player: (not set yet)");
-        currentPlayerLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        currentPlayerLabel.setForeground(Color.WHITE);
-        currentPlayerLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        gamePanel.add(currentPlayerLabel, BorderLayout.NORTH);
-
-        // ---------- Center: text area for game messages ----------
-        gameMessagesArea = new JTextArea();
-        gameMessagesArea.setEditable(false);
-        gameMessagesArea.setBackground(Color.BLACK);
-        gameMessagesArea.setForeground(Color.WHITE);
-        gameMessagesArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
-        JScrollPane scrollPane = new JScrollPane(gameMessagesArea);
-        gamePanel.add(scrollPane, BorderLayout.CENTER);
-
-        // ---------- Bottom Panel: buttons ----------
-        JPanel bottomPanel = new JPanel();
-        bottomPanel.setOpaque(false);
-
-        // Roll Dice button
-        JButton rollDiceButton = createStyledButton("Roll Dice");
-        rollDiceButton.addActionListener(e -> {
-            // We ask the controller to do the dice roll, move player, etc.
-            String result = _controller.rollDiceAndMove();
-            // Display the result in the text area
-            gameMessagesArea.append(result + "\n");
-
-            // Update the label for the new current player after the move
-            updateCurrentPlayerLabel();
-        });
-        bottomPanel.add(rollDiceButton);
-
-        // Back to main menu button
-        JButton backButton = createStyledButton("Back to Main Menu");
-        backButton.addActionListener(e -> _cardLayout.show(_mainPanel, "Main Menu"));
-        bottomPanel.add(backButton);
-
-        gamePanel.add(bottomPanel, BorderLayout.SOUTH);
-
-        return gamePanel;
-    }
-
-    /**
-     * Helper method to refresh the label showing which player's turn it is.
-     */
-    private void updateCurrentPlayerLabel() {
-        String currentPlayer = _controller.getCurrentPlayerName();
-        currentPlayerLabel.setText("Current Player: " + currentPlayer);
     }
 }
