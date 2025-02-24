@@ -10,7 +10,7 @@ public class Controller {
     }
 
     public void run_game(){
-        // You can still leave this method empty or implement console logic if you want
+
     }
 
     /**
@@ -44,9 +44,27 @@ public class Controller {
         int roll = _game.rollDice();
         _game.movePlayer(current, roll);
 
-        // Build a message about the player's move
-        String tileName = _game.getBoard().getTile(current.getPosition()).getName();
+        // Get the tile the player landed on
+        Tile tile = _game.getBoard().getTile(current.getPosition());
+        String tileName = tile.getName();
         String message = current.getName() + " rolled a " + roll + " and landed on " + tileName + ".\n";
+
+        // Check if the tile is a PropertyTile
+        if (tile instanceof PropertyTile) {
+            PropertyTile propertyTile = (PropertyTile) tile;
+            if (propertyTile.getOwner() == null) {
+                // Property is unowned
+                message += "This property is unowned. Price: $" + propertyTile.getPrice() + ".\n";
+            } else if (propertyTile.getOwner() != current) {
+                // Property is owned by another player
+                message += "This property is owned by " + propertyTile.getOwner().getName() + ". Rent: $" + propertyTile.getRent() + ".\n";
+            } else {
+                // Property is owned by the current player
+                message += "This property is owned by you.\n";
+            }
+        }
+
+        // Add the player's current balance to the message
         message += "Current balance: $" + current.getMoney() + "\n";
 
         // Advance to next player's turn
