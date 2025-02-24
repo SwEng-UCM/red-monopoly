@@ -31,6 +31,7 @@ public class MonopolyGame {
             players.add(new Player("Player " + i));
         }
         currentPlayerIndex = 0;
+
     }
 
     public Player getCurrentPlayer() {

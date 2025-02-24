@@ -28,6 +28,13 @@ public class Controller {
     }
 
     /**
+     * Returns the current player's balance.
+     */
+    public int getCurrentPlayerBalance() {
+        return _game.getCurrentPlayer().getMoney();
+    }
+
+    /**
      * Rolls dice, moves the current player, performs the tile action,
      * and then advances to the next turn.
      * Returns a message about what happened, so the UI can display it.
@@ -39,7 +46,8 @@ public class Controller {
 
         // Build a message about the player's move
         String tileName = _game.getBoard().getTile(current.getPosition()).getName();
-        String message = current.getName() + " rolled a " + roll + " and landed on " + tileName + ".";
+        String message = current.getName() + " rolled a " + roll + " and landed on " + tileName + ".\n";
+        message += "Current balance: $" + current.getMoney() + "\n";
 
         // Advance to next player's turn
         _game.nextTurn();

@@ -8,6 +8,7 @@ public class GameWindow extends JFrame {
     private Controller _controller;
     private MainWindow _mainWindow; // Reference to the main menu window
     private JLabel currentPlayerLabel;
+    private JLabel currentBalanceLabel;
     private JTextArea gameMessagesArea;
 
     public GameWindow(Controller controller, MainWindow mainWindow) {
@@ -25,12 +26,23 @@ public class GameWindow extends JFrame {
         JPanel gamePanel = new JPanel(new BorderLayout());
         gamePanel.setBackground(Color.RED);
 
-        // Top Panel: Current player label
+        // Top Panel: Current player label and balance
+        JPanel topPanel = new JPanel(new GridLayout(2, 1));
+        topPanel.setOpaque(false);
+
         currentPlayerLabel = new JLabel("Current Player: (not set yet)");
         currentPlayerLabel.setFont(new Font("Arial", Font.BOLD, 24));
         currentPlayerLabel.setForeground(Color.WHITE);
         currentPlayerLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        gamePanel.add(currentPlayerLabel, BorderLayout.NORTH);
+        topPanel.add(currentPlayerLabel);
+
+        currentBalanceLabel = new JLabel("Current Balance: $0");
+        currentBalanceLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        currentBalanceLabel.setForeground(Color.WHITE);
+        currentBalanceLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        topPanel.add(currentBalanceLabel);
+
+        gamePanel.add(topPanel, BorderLayout.NORTH);
 
         // Center: Game messages area
         gameMessagesArea = new JTextArea();
@@ -50,6 +62,7 @@ public class GameWindow extends JFrame {
             String result = _controller.rollDiceAndMove();
             gameMessagesArea.append(result + "\n");
             updateCurrentPlayerLabel();
+            updateCurrentBalanceLabel();
         });
         bottomPanel.add(rollDiceButton);
 
@@ -64,6 +77,7 @@ public class GameWindow extends JFrame {
 
         add(gamePanel);
         updateCurrentPlayerLabel();
+        updateCurrentBalanceLabel();
     }
 
     private JButton createStyledButton(String text) {
@@ -80,5 +94,10 @@ public class GameWindow extends JFrame {
     private void updateCurrentPlayerLabel() {
         String currentPlayer = _controller.getCurrentPlayerName();
         currentPlayerLabel.setText("Current Player: " + currentPlayer);
+    }
+
+    private void updateCurrentBalanceLabel() {
+        int currentBalance = _controller.getCurrentPlayerBalance();
+        currentBalanceLabel.setText("Current Balance: $" + currentBalance);
     }
 }
