@@ -22,16 +22,17 @@ public class MonopolyGame {
      * Sets the number of players in the game (from 1 up to 8) and creates them.
      * Resets the current player index to 0.
      */
-    public void setNumberOfPlayers(int count) {
+    public void setNumberOfPlayers(int count, List<String> playerNames) {
         if (count < 1) count = 1;
         if (count > 8) count = 8;
 
         players.clear();
-        for (int i = 1; i <= count; i++) {
-            players.add(new Player("Player " + i));
+        for (int i = 0; i < count; i++) {
+            players.add(new Player(playerNames.get(i))); // Use the provided player names
         }
         currentPlayerIndex = 0;
     }
+
 
     public Player getCurrentPlayer() {
         return players.get(currentPlayerIndex);

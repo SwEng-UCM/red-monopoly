@@ -1,6 +1,7 @@
 package Controller;
 
 import Model.*;
+import java.util.List;
 
 public class Controller {
     private MonopolyGame _game;
@@ -16,8 +17,8 @@ public class Controller {
     /**
      * Sets the number of players in the MonopolyGame model.
      */
-    public void setNumberOfPlayers(int numPlayers) {
-        _game.setNumberOfPlayers(numPlayers);
+    public void setNumberOfPlayers(int numPlayers, List<String> playerNames) {
+        _game.setNumberOfPlayers(numPlayers, playerNames);
     }
 
     /**

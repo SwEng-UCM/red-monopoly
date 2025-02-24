@@ -3,6 +3,8 @@ package View;
 import Controller.Controller;
 import java.awt.*;
 import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainWindow extends JFrame {
     private Controller _controller;
@@ -62,8 +64,37 @@ public class MainWindow extends JFrame {
             if (input != null) {
                 try {
                     int numPlayers = Integer.parseInt(input);
-                    _controller.setNumberOfPlayers(numPlayers);
-                    // Instead of switching cards, open a new Game window
+                    if (numPlayers < 1 || numPlayers > 8) {
+                        JOptionPane.showMessageDialog(this,
+                                "Number of players must be between 1 and 8!",
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    // Prompt for player names
+                    List<String> playerNames = new ArrayList<>();
+                    for (int i = 1; i <= numPlayers; i++) {
+                        String name = JOptionPane.showInputDialog(
+                                this,
+                                "Enter name for Player " + i + ":",
+                                "Player Name",
+                                JOptionPane.QUESTION_MESSAGE
+                        );
+                        if (name == null || name.trim().isEmpty()) {
+                            JOptionPane.showMessageDialog(this,
+                                    "Player name cannot be empty!",
+                                    "Error",
+                                    JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                        playerNames.add(name);
+                    }
+
+                    // Set the number of players and their names
+                    _controller.setNumberOfPlayers(numPlayers, playerNames);
+
+                    // Open the game window
                     GameWindow gameWindow = new GameWindow(_controller, this);
                     this.setVisible(false); // Hide main menu window
                     gameWindow.setVisible(true);
