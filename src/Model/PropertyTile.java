@@ -34,12 +34,12 @@ public class PropertyTile extends Tile {
     public void action(Player player) {
         if (owner == null) {
             // Property is unowned
-            System.out.println(player.getName() + " landed on " + name + ". This property is unowned.");
+            //System.out.println(player.getName() + " landed on " + name + ". This property is unowned.");
 
             // Ask the player if they want to buy the property
             int choice = JOptionPane.showConfirmDialog(
                     null,
-                    "Would you like to buy " + name + " for $" + price + "?",
+                    player.getName() + " landed on " + name + ". This property is unowned. Would you like to buy for $" + price + "?",
                     "Buy Property",
                     JOptionPane.YES_NO_OPTION
             );
@@ -49,10 +49,17 @@ public class PropertyTile extends Tile {
                     // Player has enough money, assign property to them and deduct the price
                     owner = player;
                     player.deductMoney(price);
-                    System.out.println(player.getName() + " bought " + name + " for $" + price);
+                    JOptionPane.showMessageDialog(null,
+                            player.getName() + " bought " + name + " for $" + price,
+                            "Success",
+                            JOptionPane.INFORMATION_MESSAGE);
                 } else {
+                    JOptionPane.showMessageDialog(null,
+                            player.getName() + " does not have enough money to buy " + name + ".",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
                     // Player doesn't have enough money
-                    System.out.println(player.getName() + " does not have enough money to buy " + name + ".");
+
                 }
             } else {
                 // Player chose not to buy the property

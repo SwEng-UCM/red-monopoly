@@ -57,16 +57,16 @@ public class MainWindow extends JFrame {
         playButton.addActionListener(e -> {
             String input = JOptionPane.showInputDialog(
                     this,
-                    "How many players? (1-8)",
+                    "How many players? (2-8)",
                     "Number of Players",
                     JOptionPane.QUESTION_MESSAGE
             );
             if (input != null) {
                 try {
                     int numPlayers = Integer.parseInt(input);
-                    if (numPlayers < 1 || numPlayers > 8) {
+                    if (numPlayers < 2 || numPlayers > 8) {
                         JOptionPane.showMessageDialog(this,
-                                "Number of players must be between 1 and 8!",
+                                "Number of players must be between 2 and 8!",
                                 "Error",
                                 JOptionPane.ERROR_MESSAGE);
                         return;
