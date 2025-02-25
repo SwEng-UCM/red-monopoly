@@ -7,30 +7,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainWindow extends JFrame {
+    protected static String filePath = "resources/click-buttons-ui-menu-sounds-effects-button-8-205394.wav";
     private Controller _controller;
     private CardLayout _cardLayout;
     private JPanel _mainPanel;
-    private MusicPlayer musicPlayer;
+    private MusicPlayer musicPlayer;  // Main menu music player
 
     public MainWindow(Controller controller) {
         _controller = controller;
         musicPlayer = new MusicPlayer();
+        // Start main menu music
         musicPlayer.playMusic("resources/Dark_is_the_Night_-_Soviet_WW2_Song.wav");
         initGUI();
+    }
+
+    public MusicPlayer getMusicPlayer() {
+        return musicPlayer;
     }
 
     private void initGUI() {
         setTitle("[RED MONOPOLY]");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
-        setResizable(false); // Make the main menu window non-resizable
+        setResizable(false); // Non-resizable main menu
         setLocationRelativeTo(null);
 
         _cardLayout = new CardLayout();
         _mainPanel = new JPanel(_cardLayout);
         _mainPanel.add(createMainMenu(), "Main Menu");
         _mainPanel.add(createOptionsMenu(), "Options");
-        // We no longer add the Game panel here because the game uses its own window
 
         add(_mainPanel);
         _cardLayout.show(_mainPanel, "Main Menu");
@@ -55,6 +60,9 @@ public class MainWindow extends JFrame {
 
         JButton playButton = createStyledButton("Play Game");
         playButton.addActionListener(e -> {
+            // Play button sound
+            MusicPlayer.playSoundEffect(filePath);
+
             String input = JOptionPane.showInputDialog(
                     this,
                     "How many players? (2-8)",
@@ -91,12 +99,13 @@ public class MainWindow extends JFrame {
                         playerNames.add(name);
                     }
 
-                    // Set the number of players and their names
                     _controller.setNumberOfPlayers(numPlayers, playerNames);
 
-                    // Open the game window
+                    // Open the game window:
+                    // Stop the main menu music before opening the game.
+                    musicPlayer.stopMusic();
                     GameWindow gameWindow = new GameWindow(_controller, this);
-                    this.setVisible(false); // Hide main menu window
+                    this.setVisible(false);
                     gameWindow.setVisible(true);
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(this,
@@ -108,10 +117,16 @@ public class MainWindow extends JFrame {
         });
 
         JButton optionsButton = createStyledButton("Options");
-        optionsButton.addActionListener(e -> _cardLayout.show(_mainPanel, "Options"));
+        optionsButton.addActionListener(e -> {
+            MusicPlayer.playSoundEffect(filePath);
+            _cardLayout.show(_mainPanel, "Options");
+        });
 
         JButton exitButton = createStyledButton("Exit");
-        exitButton.addActionListener(e -> System.exit(0));
+        exitButton.addActionListener(e -> {
+            MusicPlayer.playSoundEffect(filePath);
+            System.exit(0);
+        });
 
         buttonPanel.add(Box.createVerticalGlue());
         buttonPanel.add(playButton);
@@ -165,11 +180,13 @@ public class MainWindow extends JFrame {
 
         volumePanel.add(volumeLabel);
         volumePanel.add(volumeSlider);
-
         optionsPanel.add(volumePanel, BorderLayout.CENTER);
 
         JButton backButton = createStyledButton("Back to Main Menu");
-        backButton.addActionListener(e -> _cardLayout.show(_mainPanel, "Main Menu"));
+        backButton.addActionListener(e -> {
+            MusicPlayer.playSoundEffect(filePath);
+            _cardLayout.show(_mainPanel, "Main Menu");
+        });
         optionsPanel.add(backButton, BorderLayout.SOUTH);
 
         return optionsPanel;

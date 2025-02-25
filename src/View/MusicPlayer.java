@@ -41,4 +41,17 @@ public class MusicPlayer {
             clip.stop();
         }
     }
+
+    // New helper to play a sound effect once (non-looping)
+    public static void playSoundEffect(String filepath) {
+        try {
+            File audioFile = new File(filepath);
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+            Clip soundClip = AudioSystem.getClip();
+            soundClip.open(audioStream);
+            soundClip.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
