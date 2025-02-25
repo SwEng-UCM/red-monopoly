@@ -29,11 +29,11 @@ public class Player {
 
     public void addMoney(int amount) {
         money += amount;
-        System.out.println(name + " now has $" + money);
+        System.out.println(name + " now has " + money + " ₽");
     }
 
     public void deductMoney(int amount) {
         money -= amount;
-        System.out.println(name + " now has $" + money);
+        System.out.println(name + " now has " + money + " ₽");
     }
 }

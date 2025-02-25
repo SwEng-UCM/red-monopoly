@@ -36,7 +36,7 @@ public class GameWindow extends JFrame {
         currentPlayerLabel.setHorizontalAlignment(SwingConstants.CENTER);
         topPanel.add(currentPlayerLabel);
 
-        currentBalanceLabel = new JLabel("Current Balance: $0");
+        currentBalanceLabel = new JLabel("Current Balance: 0 ₽");
         currentBalanceLabel.setFont(new Font("Arial", Font.BOLD, 18));
         currentBalanceLabel.setForeground(Color.WHITE);
         currentBalanceLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -98,6 +98,6 @@ public class GameWindow extends JFrame {
 
     private void updateCurrentBalanceLabel() {
         int currentBalance = _controller.getCurrentPlayerBalance();
-        currentBalanceLabel.setText("Current Balance: $" + currentBalance);
+        currentBalanceLabel.setText("Current Balance: " + currentBalance + " ₽");
     }
 }

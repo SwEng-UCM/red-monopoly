@@ -55,10 +55,10 @@ public class Controller {
             PropertyTile propertyTile = (PropertyTile) tile;
             if (propertyTile.getOwner() == null) {
                 // Property is unowned
-                message += "This property is unowned. Price: $" + propertyTile.getPrice() + ".\n";
+                message += "This property is unowned. Price: " + propertyTile.getPrice() +" ₽"+ ".\n";
             } else if (propertyTile.getOwner() != current) {
                 // Property is owned by another player
-                message += "This property is owned by " + propertyTile.getOwner().getName() + ". Rent: $" + propertyTile.getRent() + ".\n";
+                message += "This property is owned by " + propertyTile.getOwner().getName() + ". Rent: " + propertyTile.getRent() + " ₽" + ".\n";
             } else {
                 // Property is owned by the current player
                 message += "This property is owned by you.\n";
@@ -66,7 +66,7 @@ public class Controller {
         }
 
         // Add the player's current balance to the message
-        message += "Current balance: $" + current.getMoney() + "\n";
+        message += "Current balance: " + current.getMoney() + " ₽" + "\n";
 
         // Advance to next player's turn
         _game.nextTurn();

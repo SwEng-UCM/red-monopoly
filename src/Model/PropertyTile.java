@@ -39,7 +39,7 @@ public class PropertyTile extends Tile {
             // Ask the player if they want to buy the property
             int choice = JOptionPane.showConfirmDialog(
                     null,
-                    player.getName() + " landed on " + name + ". This property is unowned. Would you like to buy for $" + price + "?",
+                    player.getName() + " landed on " + name + ". This property is unowned. Would you like to buy for " + price + " ₽ ?",
                     "Buy Property",
                     JOptionPane.YES_NO_OPTION
             );
@@ -50,7 +50,7 @@ public class PropertyTile extends Tile {
                     owner = player;
                     player.deductMoney(price);
                     JOptionPane.showMessageDialog(null,
-                            player.getName() + " bought " + name + " for $" + price,
+                            player.getName() + " bought " + name + " for " + price + " ₽",
                             "Success",
                             JOptionPane.INFORMATION_MESSAGE);
                 } else {
@@ -67,7 +67,7 @@ public class PropertyTile extends Tile {
             }
         } else if (owner != player) {
             // Property is owned by another player, pay rent
-            System.out.println(player.getName() + " landed on " + name + " owned by " + owner.getName() + ". Paying rent: $" + rent);
+            System.out.println(player.getName() + " landed on " + name + " owned by " + owner.getName() + ". Paying rent: " + rent + " ₽");
             player.deductMoney(rent); // Deduct rent from the player
             owner.addMoney(rent);     // Add rent to the owner's balance
         } else {
