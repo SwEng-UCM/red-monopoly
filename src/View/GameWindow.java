@@ -3,6 +3,10 @@ package View;
 import Controller.Controller;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+import static View.MainWindow.filePath;
 
 public class GameWindow extends JFrame {
     private Controller _controller;
@@ -10,6 +14,7 @@ public class GameWindow extends JFrame {
     private JLabel currentPlayerLabel;
     private JLabel currentBalanceLabel;
     private JTextArea gameMessagesArea;
+    private MusicPlayer inGameMusic; // In-game music player
 
     public GameWindow(Controller controller, MainWindow mainWindow) {
         _controller = controller;
@@ -17,9 +22,23 @@ public class GameWindow extends JFrame {
         setTitle("Game - [RED MONOPOLY]");
         setSize(800, 600);
         setLocationRelativeTo(null);
-        //setResizable(false);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         initGUI();
+
+        // Start in-game soundtrack
+        inGameMusic = new MusicPlayer();
+        inGameMusic.playMusic("resources/Russia-Theme-Atomic-_Civilization-6-OST_-Kalinka_1.wav");
+        inGameMusic.setVolume(0.7f);
+
+        // When the game window is closed, resume main menu music.
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                inGameMusic.stopMusic();
+                _mainWindow.getMusicPlayer().playMusic("resources/Dark_is_the_Night_-_Soviet_WW2_Song.wav");
+                _mainWindow.setVisible(true);
+            }
+        });
     }
 
     private void initGUI() {
@@ -59,6 +78,7 @@ public class GameWindow extends JFrame {
 
         JButton rollDiceButton = createStyledButton("Roll Dice");
         rollDiceButton.addActionListener(e -> {
+            MusicPlayer.playSoundEffect(filePath);
             String result = _controller.rollDiceAndMove();
             gameMessagesArea.append(result + "\n");
             updateCurrentPlayerLabel();
@@ -68,8 +88,8 @@ public class GameWindow extends JFrame {
 
         JButton backButton = createStyledButton("Back to Main Menu");
         backButton.addActionListener(e -> {
-            dispose();               // Close the game window
-            _mainWindow.setVisible(true); // Show the main menu window again
+            MusicPlayer.playSoundEffect(filePath);
+            dispose(); // This will trigger our window listener to resume main menu music.
         });
         bottomPanel.add(backButton);
 
