@@ -45,6 +45,13 @@ public class MonopolyGame {
         return (dice.nextInt(6) + 1) + (dice.nextInt(6) + 1);
     }
 
+
+    // In MonopolyGame.java
+    public int rollSingleDie() {
+        return dice.nextInt(6) + 1;
+    }
+
+
     /**
      * Moves a player by the specified steps. If passing beyond the board size,
      * it wraps around using modulo. Then triggers the tile action.
