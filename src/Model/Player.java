@@ -23,8 +23,17 @@ public class Player {
         this.position = position;
     }
 
+    public int getMoney() {
+        return money;
+    }
+
     public void addMoney(int amount) {
         money += amount;
-        System.out.println(name + " now has $" + money);
+        System.out.println(name + " now has " + money + " ₽");
+    }
+
+    public void deductMoney(int amount) {
+        money -= amount;
+        System.out.println(name + " now has " + money + " ₽");
     }
 }

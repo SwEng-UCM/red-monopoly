@@ -10,6 +10,6 @@ public class JailTile extends Tile {
     public void action(Player player) {
         // Implement jail tile behavior here
         // This could be just a "visiting" tile if not in jail
-        System.out.println("Player " + player.getName() + " is just visiting Jail: " + name);
+        System.out.println("Player " + player.getName() + " is just visiting Gulag: " + name);
     }
 }
