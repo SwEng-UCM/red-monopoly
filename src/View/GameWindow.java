@@ -1,20 +1,23 @@
 package View;
 
 import Controller.Controller;
+import Model.Player;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-
 import static View.MainWindow.filePath;
 
 public class GameWindow extends JFrame {
     private Controller _controller;
-    private MainWindow _mainWindow; // Reference to the main menu window
+    private MainWindow _mainWindow;
     private JLabel currentPlayerLabel;
     private JLabel currentBalanceLabel;
     private JTextArea gameMessagesArea;
-    private MusicPlayer inGameMusic; // In-game music player
+    private MusicPlayer inGameMusic;
+
+    // New field to hold the player info window
+    private PlayerInfoWindow playerInfoWindow;
 
     public GameWindow(Controller controller, MainWindow mainWindow) {
         _controller = controller;
@@ -25,12 +28,10 @@ public class GameWindow extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         initGUI();
 
-        // Start in-game soundtrack
         inGameMusic = new MusicPlayer();
         inGameMusic.playMusic("resources/Russia-Theme-Atomic-_Civilization-6-OST_-Kalinka_1.wav");
         inGameMusic.setVolume(0.7f);
 
-        // When the game window is closed, resume main menu music.
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {
@@ -45,7 +46,6 @@ public class GameWindow extends JFrame {
         JPanel gamePanel = new JPanel(new BorderLayout());
         gamePanel.setBackground(Color.RED);
 
-        // Top Panel: Current player label and balance
         JPanel topPanel = new JPanel(new GridLayout(2, 1));
         topPanel.setOpaque(false);
 
@@ -63,7 +63,6 @@ public class GameWindow extends JFrame {
 
         gamePanel.add(topPanel, BorderLayout.NORTH);
 
-        // Center: Game messages area
         gameMessagesArea = new JTextArea();
         gameMessagesArea.setEditable(false);
         gameMessagesArea.setBackground(Color.BLACK);
@@ -72,42 +71,72 @@ public class GameWindow extends JFrame {
         JScrollPane scrollPane = new JScrollPane(gameMessagesArea);
         gamePanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Bottom Panel: Buttons
         JPanel bottomPanel = new JPanel();
         bottomPanel.setOpaque(false);
 
-        JButton rollDiceButton = createStyledButton("Roll Dice");
-        rollDiceButton.addActionListener(e -> {
-            MusicPlayer.playSoundEffect(filePath);
-            String result = _controller.rollDiceAndMove();
-            gameMessagesArea.append(result + "\n");
-            updateCurrentPlayerLabel();
-            updateCurrentBalanceLabel();
-        });
+        // Roll Dice Button
+        JButton rollDiceButton = createImageButton(
+                "resources/dicesRolling.png",
+                "Roll the dice to move",
+                e -> {
+                    //MusicPlayer.playSoundEffect(filePath);
+                    String result = _controller.rollDiceAndMove();
+                    gameMessagesArea.append(result + "\n");
+                    updateCurrentPlayerLabel();
+                    updateCurrentBalanceLabel();
+
+                    // Refresh the PlayerInfoWindow if it's open
+                    if (playerInfoWindow != null && playerInfoWindow.isVisible()) {
+                        playerInfoWindow.refreshData();
+                    }
+                }
+        );
         bottomPanel.add(rollDiceButton);
 
-        JButton backButton = createStyledButton("Back to Main Menu");
-        backButton.addActionListener(e -> {
-            MusicPlayer.playSoundEffect(filePath);
-            dispose(); // This will trigger our window listener to resume main menu music.
-        });
+        // Back to Main Menu Button
+        JButton backButton = createImageButton(
+                "resources/goBack.png",
+                "Return to the main menu",
+                e -> {
+                    MusicPlayer.playSoundEffect(filePath);
+                    dispose();
+                }
+        );
         bottomPanel.add(backButton);
 
-        gamePanel.add(bottomPanel, BorderLayout.SOUTH);
+        // Player Info Button
+        JButton playerInfoButton = createImageButton(
+                "resources/playerInfoWindow.png",
+                "Show player status, money, position, and properties",
+                e -> {
+                    MusicPlayer.playSoundEffect(filePath);
+                    if (playerInfoWindow == null || !playerInfoWindow.isDisplayable()) {
+                        playerInfoWindow = new PlayerInfoWindow(_controller);
+                    }
+                    playerInfoWindow.setVisible(true);
+                    // Immediately refresh when opened.
+                    playerInfoWindow.refreshData();
+                }
+        );
+        bottomPanel.add(playerInfoButton);
 
+        gamePanel.add(bottomPanel, BorderLayout.SOUTH);
         add(gamePanel);
         updateCurrentPlayerLabel();
         updateCurrentBalanceLabel();
     }
 
-    private JButton createStyledButton(String text) {
-        JButton button = new JButton(text);
-        button.setFont(new Font("Arial", Font.BOLD, 20));
-        button.setForeground(Color.RED);
-        button.setBackground(Color.WHITE);
+    private JButton createImageButton(String imagePath, String toolTip, java.awt.event.ActionListener listener) {
+        ImageIcon originalIcon = new ImageIcon(imagePath);
+        Image scaledImage = originalIcon.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(scaledImage);
+        JButton button = new JButton(scaledIcon);
+        button.setToolTipText(toolTip);
+        button.setBorder(null);
+        button.setContentAreaFilled(false);
         button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createLineBorder(Color.RED, 2));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.addActionListener(listener);
         return button;
     }
 
