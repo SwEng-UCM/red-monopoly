@@ -38,6 +38,11 @@ public class MonopolyGame {
         return players.get(currentPlayerIndex);
     }
 
+    public List<Player> getPlayers() {
+        return this.players;
+    }
+
+
     /**
      * Rolls two dice (2 x 1-6) and returns the sum
      */

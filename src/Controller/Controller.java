@@ -122,4 +122,9 @@ public class Controller {
     public int getNumberOfPlayers() {
         return _game.getNumberOfPlayers();
     }
+
+    public List<Player> getAllPlayers() {
+        return _game.getPlayers(); // Assuming MonopolyGame has a getPlayers() method
+    }
+
 }

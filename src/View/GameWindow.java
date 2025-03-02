@@ -1,6 +1,8 @@
 package View;
 
 import Controller.Controller;
+import Model.Player;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -72,27 +74,48 @@ public class GameWindow extends JFrame {
         JScrollPane scrollPane = new JScrollPane(gameMessagesArea);
         gamePanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Bottom Panel: Buttons
+        // Bottom Panel: Image Buttons with tooltips
         JPanel bottomPanel = new JPanel();
         bottomPanel.setOpaque(false);
 
-        JButton rollDiceButton = createStyledButton("Roll Dice");
-        rollDiceButton.addActionListener(e -> {
-            MusicPlayer.playSoundEffect(filePath);
-            String result = _controller.rollDiceAndMove();
-            gameMessagesArea.append(result + "\n");
-            updateCurrentPlayerLabel();
-            updateCurrentBalanceLabel();
-        });
+        // Roll Dice Button
+        JButton rollDiceButton = createImageButton(
+                "resources/dicesRolling.png",
+                "Roll the dice to move",
+                e -> {
+                    MusicPlayer.playSoundEffect(filePath);
+                    String result = _controller.rollDiceAndMove();
+                    gameMessagesArea.append(result + "\n");
+                    updateCurrentPlayerLabel();
+                    updateCurrentBalanceLabel();
+                }
+        );
         bottomPanel.add(rollDiceButton);
 
-        JButton backButton = createStyledButton("Back to Main Menu");
-        backButton.addActionListener(e -> {
-            MusicPlayer.playSoundEffect(filePath);
-            dispose(); // This will trigger our window listener to resume main menu music.
-        });
+        // Back to Main Menu Button
+        JButton backButton = createImageButton(
+                "resources/goBack.png",
+                "Return to the main menu",
+                e -> {
+                    MusicPlayer.playSoundEffect(filePath);
+                    dispose(); // This triggers your window listener to resume main menu music.
+                }
+        );
         bottomPanel.add(backButton);
 
+        // Player Info Button
+        JButton playerInfoButton = createImageButton(
+                "resources/playerInfoWindow.png",
+                "Show player status, money, position, and properties",
+                e -> {
+                    MusicPlayer.playSoundEffect(filePath);
+                    PlayerInfoWindow infoWindow = new PlayerInfoWindow(_controller);
+                    infoWindow.setVisible(true);
+                }
+        );
+        bottomPanel.add(playerInfoButton);
+
+        // Add the bottom panel to the game panel at the SOUTH position
         gamePanel.add(bottomPanel, BorderLayout.SOUTH);
 
         add(gamePanel);
@@ -100,14 +123,26 @@ public class GameWindow extends JFrame {
         updateCurrentBalanceLabel();
     }
 
-    private JButton createStyledButton(String text) {
-        JButton button = new JButton(text);
-        button.setFont(new Font("Arial", Font.BOLD, 20));
-        button.setForeground(Color.RED);
-        button.setBackground(Color.WHITE);
+    /**
+     * Helper method to create an image-based button with a tooltip.
+     *
+     * @param imagePath the file path to the image icon
+     * @param toolTip the tooltip text to display on hover
+     * @param listener the ActionListener for the button
+     * @return a configured JButton
+     */
+    private JButton createImageButton(String imagePath, String toolTip, java.awt.event.ActionListener listener) {
+        ImageIcon originalIcon = new ImageIcon(imagePath);
+        // Adjust the size as needed
+        Image scaledImage = originalIcon.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(scaledImage);
+        JButton button = new JButton(scaledIcon);
+        button.setToolTipText(toolTip);
+        button.setBorder(null);
+        button.setContentAreaFilled(false);
         button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createLineBorder(Color.RED, 2));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.addActionListener(listener);
         return button;
     }
 
