@@ -6,6 +6,11 @@ import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
+
 public class MainWindow extends JFrame {
     protected static String filePath = "resources/click-buttons-ui-menu-sounds-effects-button-8-205394.wav";
     private Controller _controller;
@@ -14,6 +19,14 @@ public class MainWindow extends JFrame {
     private MusicPlayer musicPlayer;  // Main menu music player
 
     public MainWindow(Controller controller) {
+
+        try {
+            UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
+
+        } catch (UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
+
         _controller = controller;
         musicPlayer = new MusicPlayer();
         // Start main menu music
