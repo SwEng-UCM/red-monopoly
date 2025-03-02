@@ -1,6 +1,8 @@
 package Controller;
 
 import Model.*;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -152,5 +154,21 @@ public class Controller {
     public List<Player> getAllPlayers() {
         return _game.getPlayers(); // Assuming MonopolyGame has a getPlayers() method
     }
+
+    public List<PropertyTile> getOwnedProperties(Player p) {
+        List<PropertyTile> ownedProperties = new ArrayList<PropertyTile>();
+        List<Tile> tiles = _game.getBoard().getTiles();
+        for (Tile tile : tiles) {
+            if (tile instanceof PropertyTile) {
+                PropertyTile propertyTile = (PropertyTile) tile;
+                if (propertyTile.getOwner() != null && propertyTile.getOwner().equals(p)) {
+                    ownedProperties.add(propertyTile);
+                }
+            }
+        }
+        return ownedProperties;
+    }
+
+
 
 }

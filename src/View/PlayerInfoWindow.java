@@ -5,7 +5,10 @@ import Model.Player;
 import Model.PropertyTile; // if needed for property names
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,14 +32,42 @@ public class PlayerInfoWindow extends JFrame {
         // Create the table and set it in a scroll pane
         DefaultTableModel tableModel = new DefaultTableModel(data, columnNames);
         playerTable = new JTable(tableModel);
+
+        // Set a custom cell renderer to highlight the current player's row
+        playerTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table,
+                                                           Object value,
+                                                           boolean isSelected,
+                                                           boolean hasFocus,
+                                                           int row,
+                                                           int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                String currentPlayerName = controller.getCurrentPlayerName();
+                String rowPlayerName = table.getModel().getValueAt(row, 0).toString();
+                if (rowPlayerName.equals(currentPlayerName)) {
+                    c.setBackground(Color.YELLOW);
+                } else {
+                    c.setBackground(Color.WHITE);
+                }
+                return c;
+            }
+        });
+
         JScrollPane scrollPane = new JScrollPane(playerTable);
+
+        // Adjust column widths if text does not fit
+        adjustColumnWidths(playerTable);
 
         // Add the scroll pane to the center
         add(scrollPane, BorderLayout.CENTER);
 
         // (Optional) Add a "Refresh" button at the bottom to update data on demand
         JButton refreshButton = new JButton("Refresh");
-        refreshButton.addActionListener(e -> refreshPlayerData());
+        refreshButton.addActionListener(e -> {
+            refreshPlayerData();
+            adjustColumnWidths(playerTable); // Update column widths after refresh
+        });
         add(refreshButton, BorderLayout.SOUTH);
     }
 
@@ -53,9 +84,6 @@ public class PlayerInfoWindow extends JFrame {
             data[i][1] = p.getMoney();
             data[i][2] = p.getPosition();
             data[i][3] = p.isInJail() ? "Yes" : "No";
-
-            // If your Player tracks owned properties, adapt accordingly:
-            // E.g., if p.getOwnedProperties() returns List<PropertyTile>
             data[i][4] = getPropertyNamesAsString(p);
         }
 
@@ -87,19 +115,43 @@ public class PlayerInfoWindow extends JFrame {
      * Utility to convert a player's owned properties into a string.
      */
     private String getPropertyNamesAsString(Player p) {
-        // If your Player doesn't track properties, remove this part.
-        // Otherwise, adapt to however you store property data.
-        // Example if you have: List<PropertyTile> getOwnedProperties()
-        /*
-        if (p.getOwnedProperties().isEmpty()) {
+        // Use the controller to get properties owned by p.
+        List<PropertyTile> ownedProps = controller.getOwnedProperties(p);
+        if (ownedProps.isEmpty()) {
             return "None";
         }
-        return p.getOwnedProperties().stream()
-                 .map(PropertyTile::getName)
-                 .collect(Collectors.joining(", "));
-        */
-
-        // If you don't yet have owned properties, just return "N/A" for now
-        return "N/A";
+        return ownedProps.stream()
+                .map(PropertyTile::getName)
+                .collect(Collectors.joining(", "));
     }
+
+    /**
+     * Adjust the column widths to fit content.
+     */
+    private void adjustColumnWidths(JTable table) {
+        for (int col = 0; col < table.getColumnCount(); col++) {
+            TableColumn tableColumn = table.getColumnModel().getColumn(col);
+            int preferredWidth = 50; // minimum width
+            int maxWidth = 300;
+            for (int row = 0; row < table.getRowCount(); row++) {
+                TableCellRenderer cellRenderer = table.getCellRenderer(row, col);
+                Component c = table.prepareRenderer(cellRenderer, row, col);
+                int width = c.getPreferredSize().width + 10;
+                preferredWidth = Math.max(preferredWidth, width);
+                if (preferredWidth >= maxWidth) {
+                    preferredWidth = maxWidth;
+                    break;
+                }
+            }
+            tableColumn.setPreferredWidth(preferredWidth);
+        }
+    }
+
+    public void refreshData() {
+        refreshPlayerData();
+        adjustColumnWidths(playerTable);
+    }
+
+
 }
+

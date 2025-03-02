@@ -38,4 +38,9 @@ public class Board {
     public int getSize(){
         return _tiles.size();
     }
+
+    public List<Tile> getTiles() {
+        return _tiles;
+    }
+
 }
