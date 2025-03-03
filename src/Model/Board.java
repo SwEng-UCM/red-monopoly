@@ -13,10 +13,10 @@ public class Board {
 
     private void initBoard() {
         // Usage example with price added
-        _tiles.add(new PropertyTile("Nizhny Novgorod", 1, 500, 2000)); // Rent: 50, Price: 200
-        _tiles.add(new CommunityChestTile("Community Chest 1", 2));
+        //_tiles.add(new PropertyTile("Nizhny Novgorod", 1, 500, 2000)); // Rent: 50, Price: 200
+       // _tiles.add(new CommunityChestTile("Community Chest 1", 2));
         _tiles.add(new PropertyTile("Magnitogorsk", 3, 100, 300)); // Rent: 100, Price: 300
-        _tiles.add(new TaxTile("Tax 1", 4));
+       // _tiles.add(new TaxTile("Tax 1", 4));
         _tiles.add(new PropertyTile("Norilsk", 5, 150, 400)); // Rent: 150, Price: 400
         _tiles.add(new RailroadTile("Trans-Siberian Railway", 6));
         _tiles.add(new PropertyTile("Property 4", 7, 200, 500)); // Rent: 200, Price: 500
