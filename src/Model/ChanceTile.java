@@ -66,13 +66,13 @@ public class ChanceTile extends Tile {
                 player.addMoney(25);
                 break;
             case 7: // KGB Investigation
-               // player.skipNextTurn();
+               //player.skipNextTurn();
                 break;
             case 8: // Power Outage
                 player.deductMoney(75);
                 break;
             case 9: // Sent to Siberia (Jail)
-               // player.goToJail();
+                //player.goToJail();
                 break;
             case 10: // Infrastructure Project
                 player.deductMoney(150);
