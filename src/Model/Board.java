@@ -5,6 +5,7 @@ import java.util.List;
 
 public class Board {
     private List<Tile> _tiles;
+    private static Board instance;
 
     public Board() {
         _tiles = new ArrayList<>();
@@ -43,4 +44,10 @@ public class Board {
         return _tiles;
     }
 
+    public static Board getInstance() {
+        if (instance == null) {
+            instance = new Board();
+        }
+        return instance;
+    }
 }
