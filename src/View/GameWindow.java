@@ -67,7 +67,7 @@ public class GameWindow extends JFrame {
         gameMessagesArea.setEditable(false);
         gameMessagesArea.setBackground(Color.BLACK);
         gameMessagesArea.setForeground(Color.WHITE);
-        gameMessagesArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        gameMessagesArea.setFont(new Font("Monospaced", Font.PLAIN, 28));
         JScrollPane scrollPane = new JScrollPane(gameMessagesArea);
         gamePanel.add(scrollPane, BorderLayout.CENTER);
 
@@ -128,7 +128,7 @@ public class GameWindow extends JFrame {
 
     private JButton createImageButton(String imagePath, String toolTip, java.awt.event.ActionListener listener) {
         ImageIcon originalIcon = new ImageIcon(imagePath);
-        Image scaledImage = originalIcon.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+        Image scaledImage = originalIcon.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
         ImageIcon scaledIcon = new ImageIcon(scaledImage);
         JButton button = new JButton(scaledIcon);
         button.setToolTipText(toolTip);
