@@ -5,17 +5,23 @@ import java.util.List;
 import java.util.Random;
 
 public class MonopolyGame {
+    private static MonopolyGame instance;
+
     private List<Player> players;
     private Board board;
     private int currentPlayerIndex;
     private Random dice;
 
     public MonopolyGame() {
+        instance = this;
         players = new ArrayList<>();
-        board = new Board();
+        board = new Board(); // See Board stub below
         currentPlayerIndex = 0;
         dice = new Random();
-        // We won't call initPlayers() here anymore, because we will let the user pick the # of players
+    }
+
+    public static MonopolyGame getInstance() {
+        return instance;
     }
 
     /**
@@ -33,7 +39,6 @@ public class MonopolyGame {
         currentPlayerIndex = 0;
     }
 
-
     public Player getCurrentPlayer() {
         return players.get(currentPlayerIndex);
     }
@@ -42,7 +47,6 @@ public class MonopolyGame {
         return this.players;
     }
 
-
     /**
      * Rolls two dice (2 x 1-6) and returns the sum
      */
@@ -50,12 +54,9 @@ public class MonopolyGame {
         return (dice.nextInt(6) + 1) + (dice.nextInt(6) + 1);
     }
 
-
-    // In MonopolyGame.java
     public int rollSingleDie() {
         return dice.nextInt(6) + 1;
     }
-
 
     /**
      * Moves a player by the specified steps. If passing beyond the board size,
@@ -83,7 +84,7 @@ public class MonopolyGame {
     }
 
     /**
-     * Returns the total number of players. Might be useful in the UI.
+     * Returns the total number of players.
      */
     public int getNumberOfPlayers() {
         return players.size();

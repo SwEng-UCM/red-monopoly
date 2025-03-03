@@ -5,6 +5,11 @@ public class Player {
     private int position;
     private int money;
     private boolean inJail;
+    private int jailTurnCount = 0;
+
+    // New fields for turn management
+    private boolean skipTurn = false;
+    private boolean extraTurn = false;
 
     public Player(String name) {
         this.name = name;
@@ -47,8 +52,6 @@ public class Player {
         this.inJail = inJail;
     }
 
-    private int jailTurnCount = 0;
-
     public int getJailTurnCount() {
         return jailTurnCount;
     }
@@ -61,4 +64,41 @@ public class Player {
         jailTurnCount = 0;
     }
 
+    // Methods for skipping a turn
+    public void skipNextTurn() {
+        skipTurn = true;
+        System.out.println(name + " will skip their next turn.");
+    }
+
+    public boolean shouldSkipTurn() {
+        return skipTurn;
+    }
+
+    public void resetSkipTurn() {
+        skipTurn = false;
+    }
+
+    // Methods for extra turn
+    public void setExtraTurn(boolean extraTurn) {
+        this.extraTurn = extraTurn;
+        if(extraTurn){
+            System.out.println(name + " gets an extra turn!");
+        }
+    }
+
+    public boolean hasExtraTurn() {
+        return extraTurn;
+    }
+
+    public void resetExtraTurn() {
+        extraTurn = false;
+    }
+
+    // Example placeholder for going to jail
+    public void goToJail() {
+        setInJail(true);
+        resetJailTurn();
+        System.out.println(name + " has been sent to jail!");
+        // Additional logic for moving the player to the jail tile can be added here.
+    }
 }

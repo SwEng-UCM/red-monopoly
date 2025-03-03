@@ -55,34 +55,61 @@ public class ChanceTile extends Tile {
             case 3: // Loyalty Reward
                 player.addMoney(100);
                 break;
-            case 4: // Housing Relocation (assume game logic determines the nearest unowned property)
-                // Move player to nearest unowned property (to be implemented)
+            case 4: // Housing Relocation - Move to the nearest unowned property.
+                Board board = Board.getInstance();
+                int currentPos = player.getPosition();
+                int boardSize = board.getSize();
+                boolean found = false;
+                for (int i = 1; i < boardSize; i++) {
+                    int newPos = (currentPos + i) % boardSize;
+                    Tile tile = board.getTile(newPos);
+                    if (tile instanceof PropertyTile) {
+                        PropertyTile propertyTile = (PropertyTile) tile;
+                        if (propertyTile.getOwner() == null) {
+                            player.setPosition(newPos);
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                if (!found) {
+                    JOptionPane.showMessageDialog(null,
+                            "No unowned property found. You remain at your current position.",
+                            "Housing Relocation",
+                            JOptionPane.INFORMATION_MESSAGE);
+                }
                 break;
-            case 5: // Agricultural Tax
-                // Each player pays 50 ₽ to this player (requires access to game state)
+            case 5: // Agricultural Harvest - Collect 50 ₽ from each player.
+                MonopolyGame game = MonopolyGame.getInstance();
+                for (Player other : game.getPlayers()) {
+                    if (!other.equals(player)) {
+                        other.deductMoney(50);
+                        player.addMoney(50);
+                    }
+                }
                 break;
-            case 6: // Work Unit Overperformance
+            case 6: // Work Unit Overperformance - Move forward 3 spaces and collect 25 ₽.
                 player.setPosition(player.getPosition() + 3);
                 player.addMoney(25);
                 break;
-            case 7: // KGB Investigation
-               // player.skipNextTurn();
+            case 7: // KGB Investigation - Lose a turn.
+                player.skipNextTurn();
                 break;
             case 8: // Power Outage
                 player.deductMoney(75);
                 break;
-            case 9: // Sent to Siberia (Jail)
-               // player.goToJail();
+            case 9: // Sent to Siberia - Go to Jail.
+                player.goToJail();
                 break;
             case 10: // Infrastructure Project
                 player.deductMoney(150);
                 break;
-            case 11: // Worker Uprising
-                //player.skipNextTurn();
+            case 11: // Worker Uprising - Skip your next turn.
+                player.skipNextTurn();
                 break;
-            case 12: // Bribe Official
+            case 12: // Bribe Official - Pay 50 ₽, then take another turn.
                 player.deductMoney(50);
-                // Implement extra turn logic
+                player.setExtraTurn(true);
                 break;
             case 13: // Propaganda Poster
                 player.addMoney(50);
