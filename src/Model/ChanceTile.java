@@ -92,12 +92,15 @@ public class ChanceTile extends Tile {
                 player.setPosition(player.getPosition() + 3);
                 player.addMoney(25);
                 break;
+
             case 7: // KGB Investigation - Lose a turn.
                 player.skipNextTurn();
+
                 break;
             case 8: // Power Outage
                 player.deductMoney(75);
                 break;
+
             case 9: // Sent to Siberia - Go to Jail.
                 player.goToJail();
                 break;

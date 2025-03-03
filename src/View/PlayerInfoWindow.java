@@ -25,6 +25,7 @@ public class PlayerInfoWindow extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
+
         // Create the table model with column headers
         String[] columnNames = { "Name", "Money (₽)", "Position", "In Gulag?", "Owned Properties" };
         Object[][] data = buildPlayerData();

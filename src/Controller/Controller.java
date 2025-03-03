@@ -69,7 +69,7 @@ public class Controller {
                     message += "After release, you landed on " + tile.getName() + ".\n";
                 } else {
                     if (current.getMoney() >= JAIL_RELEASE_FEE) {
-                        message += "No doubles. You've been in Gulag for 3 turns so you pay a fee of " + JAIL_RELEASE_FEE + " ₽ to get out.\n";
+                        message += "\n" + "No doubles. You've been in Gulag for 3 turns so you pay a fee of " + JAIL_RELEASE_FEE + " ₽ to get out.\n";
                         current.deductMoney(JAIL_RELEASE_FEE);
                         current.setInJail(false);
                         current.resetJailTurn();

@@ -50,13 +50,13 @@ public class GameWindow extends JFrame {
         topPanel.setOpaque(false);
 
         currentPlayerLabel = new JLabel("Current Player: (not set yet)");
-        currentPlayerLabel.setFont(new Font("Arial", Font.BOLD, 48));
+        currentPlayerLabel.setFont(new Font("Arial", Font.BOLD, 24));
         currentPlayerLabel.setForeground(Color.WHITE);
         currentPlayerLabel.setHorizontalAlignment(SwingConstants.CENTER);
         topPanel.add(currentPlayerLabel);
 
         currentBalanceLabel = new JLabel("Current Balance: 0 ₽");
-        currentBalanceLabel.setFont(new Font("Arial", Font.BOLD, 36));
+        currentBalanceLabel.setFont(new Font("Arial", Font.BOLD, 18));
         currentBalanceLabel.setForeground(Color.WHITE);
         currentBalanceLabel.setHorizontalAlignment(SwingConstants.CENTER);
         topPanel.add(currentBalanceLabel);
