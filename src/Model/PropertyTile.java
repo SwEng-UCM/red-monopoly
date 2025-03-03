@@ -1,6 +1,8 @@
 package Model;
 
 import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+import java.awt.*;
 
 public class PropertyTile extends Tile {
     private Player owner;
@@ -35,6 +37,9 @@ public class PropertyTile extends Tile {
         if (owner == null) {
             // Property is unowned
             //System.out.println(player.getName() + " landed on " + name + ". This property is unowned.");
+
+            UIManager.put("OptionPane.messageFont", new Font("Arial", Font.PLAIN, 18)); // Increase font size for messages
+            UIManager.put("OptionPane.buttonFont", new Font("Arial", Font.PLAIN, 16));  // Increase font size for buttons
 
             // Ask the player if they want to buy the property
             int choice = JOptionPane.showConfirmDialog(

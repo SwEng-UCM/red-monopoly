@@ -20,18 +20,21 @@ public class PlayerInfoWindow extends JFrame {
     public PlayerInfoWindow(Controller controller) {
         this.controller = controller;
         setTitle("Player Info");
-        setSize(600, 400);
+        // Double the frame size from 600x400 to 1200x800
+        setSize(1200, 800);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         // Create the table model with column headers
         String[] columnNames = { "Name", "Money (₽)", "Position", "In Gulag?", "Owned Properties" };
-        // Build the initial data from the controller
         Object[][] data = buildPlayerData();
 
-        // Create the table and set it in a scroll pane
         DefaultTableModel tableModel = new DefaultTableModel(data, columnNames);
         playerTable = new JTable(tableModel);
+
+        // Increase table font and row height for larger display
+        playerTable.setFont(new Font("SansSerif", Font.PLAIN, 16));  // Increase font size
+        playerTable.setRowHeight(40); // Double the default row height (assuming 20 was default)
 
         // Set a custom cell renderer to highlight the current player's row
         playerTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
@@ -55,18 +58,14 @@ public class PlayerInfoWindow extends JFrame {
         });
 
         JScrollPane scrollPane = new JScrollPane(playerTable);
-
-        // Adjust column widths if text does not fit
         adjustColumnWidths(playerTable);
-
-        // Add the scroll pane to the center
         add(scrollPane, BorderLayout.CENTER);
 
-        // (Optional) Add a "Refresh" button at the bottom to update data on demand
+        // Refresh button to update data
         JButton refreshButton = new JButton("Refresh");
         refreshButton.addActionListener(e -> {
             refreshPlayerData();
-            adjustColumnWidths(playerTable); // Update column widths after refresh
+            adjustColumnWidths(playerTable);
         });
         add(refreshButton, BorderLayout.SOUTH);
     }
