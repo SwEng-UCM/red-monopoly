@@ -21,7 +21,7 @@ public class PlayerInfoWindow extends JFrame {
         this.controller = controller;
         setTitle("Player Info");
         // Double the frame size from 600x400 to 1200x800
-        setSize(1200, 800);
+        setSize(600, 400);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
