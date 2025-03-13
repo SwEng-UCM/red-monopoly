@@ -170,7 +170,7 @@ public class Controller {
     }
 
 
-    public List<Tile> getBoardTiles() {
-        return _game.getBoard().getTiles();
+        public List<Tile> getBoardTiles() {
+            return _game.getBoard().getTiles();
+        }
     }
-}
