@@ -14,6 +14,7 @@ public class Board {
 
     private void initBoard() {
         // Usage example with price added
+        _tiles.add(new GoTile("Go", 0));
         _tiles.add(new PropertyTile("Nizhny Novgorod", 1, 500, 2000)); // Rent: 50, Price: 200
         //_tiles.add(new CommunityChestTile("Community Chest 1", 2));
         _tiles.add(new PropertyTile("Magnitogorsk", 3, 100, 300)); // Rent: 100, Price: 300
@@ -25,6 +26,7 @@ public class Board {
         _tiles.add(new ChanceTile("Chance", 11));
         _tiles.add(new PropertyTile("Novosibirsk", 9, 250, 600)); // Rent: 250, Price: 600
         _tiles.add(new JailTile("Gulag", 10));
+
         // Add more properties with their respective rent and price values...
     }
 

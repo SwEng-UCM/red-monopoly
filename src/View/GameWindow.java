@@ -13,17 +13,15 @@ public class GameWindow extends JFrame {
     private MainWindow _mainWindow;
     private JLabel currentPlayerLabel;
     private JLabel currentBalanceLabel;
-    private JTextArea gameMessagesArea;
     private MusicPlayer inGameMusic;
-
-    // New field to hold the player info window
+    private BoardPanel boardPanel; // Embedded board panel
     private PlayerInfoWindow playerInfoWindow;
 
     public GameWindow(Controller controller, MainWindow mainWindow) {
         _controller = controller;
         _mainWindow = mainWindow;
         setTitle("Game - [RED MONOPOLY]");
-        setSize(800, 600);
+        setSize(1200, 800); // Increased size to accommodate the board
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         initGUI();
@@ -43,52 +41,37 @@ public class GameWindow extends JFrame {
     }
 
     private void initGUI() {
-        JPanel gamePanel = new JPanel(new BorderLayout());
-        gamePanel.setBackground(Color.RED);
-
+        // Top panel for current player and balance info
         JPanel topPanel = new JPanel(new GridLayout(2, 1));
-        topPanel.setOpaque(false);
-
-        currentPlayerLabel = new JLabel("Current Player: (not set yet)");
+        topPanel.setBackground(Color.RED);
+        currentPlayerLabel = new JLabel("Current Player: (not set yet)", SwingConstants.CENTER);
         currentPlayerLabel.setFont(new Font("Arial", Font.BOLD, 24));
         currentPlayerLabel.setForeground(Color.WHITE);
-        currentPlayerLabel.setHorizontalAlignment(SwingConstants.CENTER);
         topPanel.add(currentPlayerLabel);
 
-        currentBalanceLabel = new JLabel("Current Balance: 0 ₽");
+        currentBalanceLabel = new JLabel("Current Balance: 0 ₽", SwingConstants.CENTER);
         currentBalanceLabel.setFont(new Font("Arial", Font.BOLD, 18));
         currentBalanceLabel.setForeground(Color.WHITE);
-        currentBalanceLabel.setHorizontalAlignment(SwingConstants.CENTER);
         topPanel.add(currentBalanceLabel);
 
-        gamePanel.add(topPanel, BorderLayout.NORTH);
+        // Center: BoardPanel displays the game board
+        boardPanel = new BoardPanel(_controller);
 
-        gameMessagesArea = new JTextArea();
-        gameMessagesArea.setEditable(false);
-        gameMessagesArea.setBackground(Color.BLACK);
-        gameMessagesArea.setForeground(Color.WHITE);
-        gameMessagesArea.setFont(new Font("Monospaced", Font.PLAIN, 28));
-        JScrollPane scrollPane = new JScrollPane(gameMessagesArea);
-        gamePanel.add(scrollPane, BorderLayout.CENTER);
-
+        // Bottom panel for buttons
         JPanel bottomPanel = new JPanel();
-        bottomPanel.setOpaque(false);
+        bottomPanel.setBackground(Color.RED);
 
         // Roll Dice Button
         JButton rollDiceButton = createImageButton(
                 "resources/dicesRolling.png",
                 "Roll the dice to move",
                 e -> {
-                    //MusicPlayer.playSoundEffect(filePath);
                     String result = _controller.rollDiceAndMove();
-                    gameMessagesArea.append(result + "\n");
+                    // Optionally, you might display the result in a popup:
+                    // JOptionPane.showMessageDialog(this, result);
                     updateCurrentPlayerLabel();
                     updateCurrentBalanceLabel();
-
-                    // Refresh the PlayerInfoWindow if it's open
-                    if (playerInfoWindow != null && playerInfoWindow.isVisible()) {
-                        playerInfoWindow.refreshData();
-                    }
+                    boardPanel.refreshBoard();
                 }
         );
         bottomPanel.add(rollDiceButton);
@@ -114,14 +97,19 @@ public class GameWindow extends JFrame {
                         playerInfoWindow = new PlayerInfoWindow(_controller);
                     }
                     playerInfoWindow.setVisible(true);
-                    // Immediately refresh when opened.
                     playerInfoWindow.refreshData();
                 }
         );
         bottomPanel.add(playerInfoButton);
 
-        gamePanel.add(bottomPanel, BorderLayout.SOUTH);
-        add(gamePanel);
+
+
+        // Set layout of GameWindow and add components
+        setLayout(new BorderLayout());
+        add(topPanel, BorderLayout.NORTH);
+        add(boardPanel, BorderLayout.CENTER);
+        add(bottomPanel, BorderLayout.SOUTH);
+
         updateCurrentPlayerLabel();
         updateCurrentBalanceLabel();
     }
