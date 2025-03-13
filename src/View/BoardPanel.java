@@ -13,10 +13,12 @@ public class BoardPanel extends JPanel {
     private JPanel boardPanel;
     private JLabel[][] cellLabels;
     private int gridSize; // Computed grid dimension
+    private Image backgroundImage;
 
     public BoardPanel(Controller controller) {
         this.controller = controller;
         setLayout(new BorderLayout());
+        backgroundImage = new ImageIcon("resources/backgroundBoard.png").getImage();
         initGUI();
     }
 
@@ -25,11 +27,17 @@ public class BoardPanel extends JPanel {
         List<Tile> tiles = controller.getBoardTiles();
         int numTiles = tiles.size();
 
+        // Removed incorrect call:
+        // paintComponent(backgroundImage.getGraphics());
+
         // Compute grid size 'n' such that 4*n - 4 >= numTiles.
         gridSize = (int) Math.ceil((numTiles + 4) / 4.0);
 
         // Create an n x n grid layout.
         boardPanel = new JPanel(new GridLayout(gridSize, gridSize));
+        // Make boardPanel transparent to show the background image.
+        boardPanel.setOpaque(false);
+
         cellLabels = new JLabel[gridSize][gridSize];
 
         for (int row = 0; row < gridSize; row++) {
@@ -53,14 +61,14 @@ public class BoardPanel extends JPanel {
                     }
                     JLabel cellLabel = new JLabel(labelText, SwingConstants.CENTER);
                     cellLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-                    cellLabel.setOpaque(true);
-                    cellLabel.setBackground(Color.LIGHT_GRAY);
+                    // Set the label non-opaque so the background image is visible behind it.
+                    cellLabel.setOpaque(false);
                     cellLabels[row][col] = cellLabel;
                     boardPanel.add(cellLabel);
                 } else {
                     // Interior cells remain empty.
                     JLabel emptyLabel = new JLabel();
-                    emptyLabel.setBackground(Color.WHITE);
+                    emptyLabel.setOpaque(false);
                     cellLabels[row][col] = emptyLabel;
                     boardPanel.add(emptyLabel);
                 }
@@ -121,6 +129,14 @@ public class BoardPanel extends JPanel {
                     cellLabels[row][col].setText(labelText);
                 }
             }
+        }
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
         }
     }
 }
