@@ -5,36 +5,33 @@ import java.util.List;
 import java.util.Random;
 
 public class MonopolyGame {
-    private static MonopolyGame instance;
+    private static class SingletonHelper {
+        private static final MonopolyGame INSTANCE = new MonopolyGame();
+    }
 
     private List<Player> players;
     private Board board;
     private int currentPlayerIndex;
     private Random dice;
 
-    public MonopolyGame() {
-        instance = this;
+    private MonopolyGame() {  // Private constructor prevents external instantiation
         players = new ArrayList<>();
-        board = new Board(); // See Board stub below
+        board = new Board();
         currentPlayerIndex = 0;
         dice = new Random();
     }
 
     public static MonopolyGame getInstance() {
-        return instance;
+        return SingletonHelper.INSTANCE;
     }
 
-    /**
-     * Sets the number of players in the game (from 1 up to 8) and creates them.
-     * Resets the current player index to 0.
-     */
     public void setNumberOfPlayers(int count, List<String> playerNames) {
         if (count < 1) count = 1;
         if (count > 8) count = 8;
 
         players.clear();
         for (int i = 0; i < count; i++) {
-            players.add(new Player(playerNames.get(i))); // Use the provided player names
+            players.add(new Player(playerNames.get(i)));
         }
         currentPlayerIndex = 0;
     }
@@ -47,9 +44,6 @@ public class MonopolyGame {
         return this.players;
     }
 
-    /**
-     * Rolls two dice (2 x 1-6) and returns the sum
-     */
     public int rollDice() {
         return (dice.nextInt(6) + 1) + (dice.nextInt(6) + 1);
     }
@@ -58,23 +52,15 @@ public class MonopolyGame {
         return dice.nextInt(6) + 1;
     }
 
-    /**
-     * Moves a player by the specified steps. If passing beyond the board size,
-     * it wraps around using modulo. Then triggers the tile action.
-     */
     public void movePlayer(Player player, int steps) {
         int boardSize = board.getSize();
         int newPosition = (player.getPosition() + steps) % boardSize;
         player.setPosition(newPosition);
 
-        // Perform the action of the tile just landed on
         Tile tile = board.getTile(newPosition);
         tile.action(player);
     }
 
-    /**
-     * Moves to the next player's turn in a round-robin fashion.
-     */
     public void nextTurn() {
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
     }
@@ -83,9 +69,6 @@ public class MonopolyGame {
         return board;
     }
 
-    /**
-     * Returns the total number of players.
-     */
     public int getNumberOfPlayers() {
         return players.size();
     }
