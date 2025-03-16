@@ -104,6 +104,12 @@
                         message += "This property is owned by you.\n";
                     }
                 }
+
+                if (tile instanceof TaxTile) {
+                    TaxTile taxTile = (TaxTile) tile;
+                    message += "You landed on " + taxTile.getName() + ". Paying tax of " + taxTile.getTaxAmount() + " ₽.\n";
+                    current.deductMoney(taxTile.getTaxAmount());
+                }
             }
 
             message += "Current balance: " + current.getMoney() + " ₽\n";
