@@ -5,15 +5,20 @@ import Model.Tile;
 import Model.Player;
 import javax.swing.*;
 import java.awt.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class BoardPanel extends JPanel {
     private Controller controller;
     private Image backgroundImage;
 
+    // Map to store each tile's JLabel, keyed by its tile index.
+    private Map<Integer, JLabel> tileLabels = new HashMap<>();
+
     // Define preferred sizes:
-    // For example, we use a larger square for corners and smaller rectangles for edge tiles.
+    // Larger square for corners and smaller rectangles for edge tiles.
     private final Dimension cornerSize = new Dimension(120, 120);
     // For horizontal edge tiles (top and bottom), height equals corner height.
     private final Dimension horizontalTileSize = new Dimension(62, 120);
@@ -63,7 +68,6 @@ public class BoardPanel extends JPanel {
         topPanel.add(createTileLabel(tiles.get(30), 30, cornerSize));
 
         // --- Bottom row (from left to right): bottom‑left corner, bottom edge non‑corners, bottom‑right corner ---
-        // Note: For the correct clockwise order the bottom row is reversed relative to the list.
         // Bottom‑left corner: index 10
         bottomPanel.add(createTileLabel(tiles.get(10), 10, cornerSize));
         // Bottom edge non‑corner tiles: indices 9 down to 1 (so that left-to‑right on screen is from bottom‑left to bottom‑right)
@@ -104,6 +108,20 @@ public class BoardPanel extends JPanel {
      * It sets a border, preferred size, and displays the tile name, index, and any players on it.
      */
     private JLabel createTileLabel(Tile tile, int index, Dimension size) {
+        String labelText = generateTileLabelText(tile, index);
+        JLabel label = new JLabel(labelText, SwingConstants.CENTER);
+        label.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        label.setOpaque(false);
+        label.setPreferredSize(size);
+        // Store the label reference for later updates.
+        tileLabels.put(index, label);
+        return label;
+    }
+
+    /**
+     * Generates the HTML text for a tile label.
+     */
+    private String generateTileLabelText(Tile tile, int index) {
         String tileName = tile.getName();
         List<Player> playersOnTile = controller.getAllPlayers().stream()
                 .filter(p -> p.getPosition() == index)
@@ -112,21 +130,24 @@ public class BoardPanel extends JPanel {
                 "<br>Players: " + playersOnTile.stream()
                         .map(Player::getName)
                         .collect(Collectors.joining(", "));
-        String labelText = "<html><center>" + tileName + "<br>(" + index + ")" + playersStr + "</center></html>";
-        JLabel label = new JLabel(labelText, SwingConstants.CENTER);
-        label.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        label.setOpaque(false);
-        label.setPreferredSize(size);
-        return label;
+        return "<html><center>" + tileName + "<br>(" + index + ")" + playersStr + "</center></html>";
     }
 
     /**
-     * Call this method to update the board. (You might want to maintain references to each label
-     * so that you can update their text rather than recreating the panels.)
+     * Refreshes the board display by updating each tile's label with the latest player positions.
+     * This method should be called after every turn.
      */
     public void refreshBoard() {
-        // For brevity, you might consider keeping a Map<Integer, JLabel> of labels keyed by tile index.
-        // Then you can update each label's text based on the current game state.
+        List<Tile> tiles = controller.getBoardTiles();
+        for (Map.Entry<Integer, JLabel> entry : tileLabels.entrySet()) {
+            int index = entry.getKey();
+            // Ensure we have a valid tile index.
+            if (index < tiles.size()) {
+                Tile tile = tiles.get(index);
+                entry.getValue().setText(generateTileLabelText(tile, index));
+            }
+        }
+        repaint();
     }
 
     @Override
