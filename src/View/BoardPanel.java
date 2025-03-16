@@ -10,10 +10,15 @@ import java.util.stream.Collectors;
 
 public class BoardPanel extends JPanel {
     private Controller controller;
-    private JPanel boardPanel;
-    private JLabel[][] cellLabels;
-    private int gridSize; // Computed grid dimension
     private Image backgroundImage;
+
+    // Define preferred sizes:
+    // For example, we use a larger square for corners and smaller rectangles for edge tiles.
+    private final Dimension cornerSize = new Dimension(120, 120);
+    // For horizontal edge tiles (top and bottom), height equals corner height.
+    private final Dimension horizontalTileSize = new Dimension(62, 120);
+    // For vertical edge tiles (left and right), width equals corner width.
+    private final Dimension verticalTileSize = new Dimension(120, 62);
 
     public BoardPanel(Controller controller) {
         this.controller = controller;
@@ -23,113 +28,105 @@ public class BoardPanel extends JPanel {
     }
 
     private void initGUI() {
-        // Retrieve board tiles from the controller.
         List<Tile> tiles = controller.getBoardTiles();
-        int numTiles = tiles.size();
-
-        // Removed incorrect call:
-        // paintComponent(backgroundImage.getGraphics());
-
-        // Compute grid size 'n' such that 4*n - 4 >= numTiles.
-        gridSize = (int) Math.ceil((numTiles + 4) / 4.0);
-
-        // Create an n x n grid layout.
-        boardPanel = new JPanel(new GridLayout(gridSize, gridSize));
-        // Make boardPanel transparent to show the background image.
-        boardPanel.setOpaque(false);
-
-        cellLabels = new JLabel[gridSize][gridSize];
-
-        for (int row = 0; row < gridSize; row++) {
-            for (int col = 0; col < gridSize; col++) {
-                if (isBorderCell(row, col, gridSize)) {
-                    int tileIndex = getTileIndexForCell(row, col, gridSize);
-                    String labelText = "";
-                    if (tileIndex >= 0 && tileIndex < numTiles) {
-                        Tile tile = tiles.get(tileIndex);
-                        String tileName = tile.getName();
-
-                        // Find players on this tile.
-                        List<Player> playersOnTile = controller.getAllPlayers().stream()
-                                .filter(p -> p.getPosition() == tileIndex)
-                                .collect(Collectors.toList());
-                        String playersStr = playersOnTile.isEmpty() ? "" :
-                                "<br>Players: " + playersOnTile.stream()
-                                        .map(Player::getName)
-                                        .collect(Collectors.joining(", "));
-                        labelText = "<html><center>" + tileName + "<br>(" + tileIndex + ")" + playersStr + "</center></html>";
-                    }
-                    JLabel cellLabel = new JLabel(labelText, SwingConstants.CENTER);
-                    cellLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-                    // Set the label non-opaque so the background image is visible behind it.
-                    cellLabel.setOpaque(false);
-                    cellLabels[row][col] = cellLabel;
-                    boardPanel.add(cellLabel);
-                } else {
-                    // Interior cells remain empty.
-                    JLabel emptyLabel = new JLabel();
-                    emptyLabel.setOpaque(false);
-                    cellLabels[row][col] = emptyLabel;
-                    boardPanel.add(emptyLabel);
-                }
-            }
+        if (tiles.size() != 40) {
+            System.err.println("Warning: Expected 40 tiles for a standard board, got " + tiles.size());
         }
 
-        add(boardPanel, BorderLayout.CENTER);
-    }
+        // Create panels for each side.
+        // The top and bottom rows include the corner tiles.
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.X_AXIS));
+        topPanel.setOpaque(false);
 
-    /**
-     * Checks if the cell at (row, col) is on the border of an n x n grid.
-     */
-    private boolean isBorderCell(int row, int col, int n) {
-        return row == 0 || row == n - 1 || col == 0 || col == n - 1;
-    }
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.X_AXIS));
+        bottomPanel.setOpaque(false);
 
-    /**
-     * Maps grid coordinates (row, col) in an n x n grid to the board tile index.
-     * The ordering is clockwise starting from the bottom-right corner.
-     */
-    private int getTileIndexForCell(int row, int col, int n) {
-        if (row == n - 1) { // Bottom row: right-to-left.
-            return (n - 1) - col;
-        } else if (col == 0) { // Left column: bottom-to-top.
-            return (n - 1) + ((n - 1) - row);
-        } else if (row == 0) { // Top row: left-to-right.
-            return (2 * n - 2) + col;
-        } else if (col == n - 1) { // Right column: top-to-bottom.
-            return (3 * n - 3) + row;
+        // The left and right columns contain only the non‑corner tiles.
+        JPanel leftPanel = new JPanel();
+        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+        leftPanel.setOpaque(false);
+
+        JPanel rightPanel = new JPanel();
+        rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
+        rightPanel.setOpaque(false);
+
+        // --- Top row (from left to right): top‑left corner, top edge non‑corners, top‑right corner ---
+        // Top‑left corner: index 20
+        topPanel.add(createTileLabel(tiles.get(20), 20, cornerSize));
+        // Top edge non‑corner tiles: indices 21 to 29 (displayed in natural order)
+        for (int i = 21; i <= 29; i++) {
+            topPanel.add(createTileLabel(tiles.get(i), i, horizontalTileSize));
         }
-        return -1;
+        // Top‑right corner: index 30
+        topPanel.add(createTileLabel(tiles.get(30), 30, cornerSize));
+
+        // --- Bottom row (from left to right): bottom‑left corner, bottom edge non‑corners, bottom‑right corner ---
+        // Note: For the correct clockwise order the bottom row is reversed relative to the list.
+        // Bottom‑left corner: index 10
+        bottomPanel.add(createTileLabel(tiles.get(10), 10, cornerSize));
+        // Bottom edge non‑corner tiles: indices 9 down to 1 (so that left-to‑right on screen is from bottom‑left to bottom‑right)
+        for (int i = 9; i >= 1; i--) {
+            bottomPanel.add(createTileLabel(tiles.get(i), i, horizontalTileSize));
+        }
+        // Bottom‑right corner: index 0
+        bottomPanel.add(createTileLabel(tiles.get(0), 0, cornerSize));
+
+        // --- Left column (vertical; between bottom‑left and top‑left corners) ---
+        // In clockwise order the left side goes from bottom‑left (index 10) to top‑left (index 20) via indices 11..19.
+        // To display top-to‑bottom (top adjacent to top‑left) we reverse these: 19 down to 11.
+        for (int i = 19; i >= 11; i--) {
+            leftPanel.add(createTileLabel(tiles.get(i), i, verticalTileSize));
+        }
+
+        // --- Right column (vertical; between top‑right and bottom‑right corners) ---
+        // Clockwise order on the right side is: top‑right (index 30), then indices 31..39, then bottom‑right (index 0).
+        // We display the non‑corner tiles (indices 31 to 39) in natural order.
+        for (int i = 31; i <= 39; i++) {
+            rightPanel.add(createTileLabel(tiles.get(i), i, verticalTileSize));
+        }
+
+        // Assemble the board layout using BorderLayout.
+        add(topPanel, BorderLayout.NORTH);
+        add(bottomPanel, BorderLayout.SOUTH);
+        add(leftPanel, BorderLayout.WEST);
+        add(rightPanel, BorderLayout.EAST);
+
+        // Center panel (could be used for board art or left blank)
+        JPanel centerPanel = new JPanel();
+        centerPanel.setOpaque(false);
+        add(centerPanel, BorderLayout.CENTER);
     }
 
     /**
-     * Refreshes the board display by updating each border cell with the latest
-     * tile name and any players currently on that tile.
+     * Helper method to create a JLabel for a tile.
+     * It sets a border, preferred size, and displays the tile name, index, and any players on it.
+     */
+    private JLabel createTileLabel(Tile tile, int index, Dimension size) {
+        String tileName = tile.getName();
+        List<Player> playersOnTile = controller.getAllPlayers().stream()
+                .filter(p -> p.getPosition() == index)
+                .collect(Collectors.toList());
+        String playersStr = playersOnTile.isEmpty() ? "" :
+                "<br>Players: " + playersOnTile.stream()
+                        .map(Player::getName)
+                        .collect(Collectors.joining(", "));
+        String labelText = "<html><center>" + tileName + "<br>(" + index + ")" + playersStr + "</center></html>";
+        JLabel label = new JLabel(labelText, SwingConstants.CENTER);
+        label.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        label.setOpaque(false);
+        label.setPreferredSize(size);
+        return label;
+    }
+
+    /**
+     * Call this method to update the board. (You might want to maintain references to each label
+     * so that you can update their text rather than recreating the panels.)
      */
     public void refreshBoard() {
-        List<Tile> tiles = controller.getBoardTiles();
-        int numTiles = tiles.size();
-        for (int row = 0; row < gridSize; row++) {
-            for (int col = 0; col < gridSize; col++) {
-                if (isBorderCell(row, col, gridSize)) {
-                    int tileIndex = getTileIndexForCell(row, col, gridSize);
-                    String labelText = "";
-                    if (tileIndex >= 0 && tileIndex < numTiles) {
-                        Tile tile = tiles.get(tileIndex);
-                        String tileName = tile.getName();
-                        List<Player> playersOnTile = controller.getAllPlayers().stream()
-                                .filter(p -> p.getPosition() == tileIndex)
-                                .collect(Collectors.toList());
-                        String playersStr = playersOnTile.isEmpty() ? "" :
-                                "<br>Players: " + playersOnTile.stream()
-                                        .map(Player::getName)
-                                        .collect(Collectors.joining(", "));
-                        labelText = "<html><center>" + tileName + "<br>(" + tileIndex + ")" + playersStr + "</center></html>";
-                    }
-                    cellLabels[row][col].setText(labelText);
-                }
-            }
-        }
+        // For brevity, you might consider keeping a Map<Integer, JLabel> of labels keyed by tile index.
+        // Then you can update each label's text based on the current game state.
     }
 
     @Override
