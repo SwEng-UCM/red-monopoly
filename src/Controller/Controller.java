@@ -111,6 +111,16 @@ public class Controller {
             Tile tile = _game.getBoard().getTile(current.getPosition());
             message += current.getName() + " rolled a " + die1 + " and a " + die2 + " (total: " + roll + ") and landed on " + tile.getName() + ".\n";
 
+            if (tile instanceof FreeParkingTile){
+                message += "You landed on Free Parking. Nothing happens.\n";
+            }
+
+            if (tile instanceof GoTile) {
+                message += "You passed GO. Collect 200 ₽.\n";
+                current.addMoney(200);
+            }
+
+
             if (tile instanceof GoToJailTile || tile instanceof JailTile) {
                 current.setInJail(true);
                 current.resetJailTurn();
