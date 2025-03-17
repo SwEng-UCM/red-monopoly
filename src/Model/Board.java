@@ -26,6 +26,9 @@ public class Board {
         _tiles.add(new ChanceTile("Chance", 11));
         _tiles.add(new PropertyTile("Novosibirsk", 9, 250, 600)); // Rent: 250, Price: 600
         _tiles.add(new JailTile("Gulag", 10));
+        _tiles.add(new FreeParkingTile("Free Parking", 11));
+        _tiles.add(new RailroadTile("Moscow Metro", 12));
+        _tiles.add(new GoToJailTile("Go to Jail", 12));
 
         // Add more properties with their respective rent and price values...
     }
