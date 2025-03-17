@@ -149,7 +149,7 @@ public class Controller {
         message += "Current balance: " + current.getMoney() + " ₽\n";
 
         // Check and remove any player with negative balance.
-        message += checkPlayerElimination();
+        checkPlayerElimination(); // Modified to display messages in a dialog box
 
         // Only proceed with turn change if game not over.
         if (_game.getPlayers().size() > 1) {
@@ -159,8 +159,7 @@ public class Controller {
         return message;
     }
 
-    private String checkPlayerElimination() {
-        StringBuilder eliminationMessage = new StringBuilder();
+    private void checkPlayerElimination() {
         List<Player> players = _game.getPlayers();
 
         List<String> eliminatedNames = players.stream()
@@ -169,16 +168,16 @@ public class Controller {
                 .collect(Collectors.toList());
 
         if (!eliminatedNames.isEmpty()) {
-            eliminationMessage.append("Eliminated players due to negative balance: ");
-            eliminationMessage.append(String.join(", ", eliminatedNames));
-            eliminationMessage.append("\n");
+            String eliminationMessage = "Eliminated players due to negative balance: " +
+                    String.join(", ", eliminatedNames);
+            JOptionPane.showMessageDialog(null, eliminationMessage); // Display elimination message in a dialog box
             players.removeIf(p -> p.getMoney() < 0);
         }
 
         if (players.size() == 1) {
-            eliminationMessage.append("Game Over! Winner: ").append(players.get(0).getName()).append("\n");
+            String winnerMessage = "Game Over! Winner: " + players.get(0).getName();
+            JOptionPane.showMessageDialog(null, winnerMessage); // Display winner message in a dialog box
         }
-        return eliminationMessage.toString();
     }
 
     public int getNumberOfPlayers() {
