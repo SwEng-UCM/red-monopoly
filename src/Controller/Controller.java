@@ -125,6 +125,9 @@ public class Controller {
             if (tile instanceof GoToJailTile || tile instanceof JailTile) {
                 current.setInJail(true);
                 current.resetJailTurn();
+                if (tile instanceof GoToJailTile){
+                    current.setPosition(10);
+                }
                 message += "You landed on Go To Gulag. You are now in Gulag.\n";
             }
 
