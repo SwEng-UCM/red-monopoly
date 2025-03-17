@@ -1,6 +1,7 @@
 package Controller;
 
 import Model.*;
+import javax.swing.JOptionPane; // Import JOptionPane for displaying messages
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,39 +53,39 @@ public class Controller {
                 int die2 = _game.rollSingleDie();
                 lastDie1 = die1;
                 lastDie2 = die2;
-                message += current.getName() + " is in Gulag (Turn " + (jailTurns + 1) + ") and rolled " + die1 + " and " + die2 + ". ";
+                String jailMessage = current.getName() + " is in Gulag (Turn " + (jailTurns + 1) + ") and rolled " + die1 + " and " + die2 + ". ";
                 if (die1 == die2) {
-                    message += "Doubles! You're released from Gulag.\n";
+                    jailMessage += "Doubles! You're released from Gulag.\n";
                     current.setInJail(false);
                     current.resetJailTurn();
                     int roll = die1 + die2;
                     _game.movePlayer(current, roll);
                     Tile tile = _game.getBoard().getTile(current.getPosition());
-                    message += "After release, you landed on " + tile.getName() + ".\n";
+                    jailMessage += "After release, you landed on " + tile.getName() + ".\n";
                 } else {
-                    message += "No doubles. You remain in Gulag.\n";
+                    jailMessage += "No doubles. You remain in Gulag.\n";
                     current.incrementJailTurn();
                     _game.nextTurn();
-                    message += checkPlayerElimination();
-                    return message;
+                    checkPlayerElimination();
                 }
+                JOptionPane.showMessageDialog(null, jailMessage); // Display jail message in a dialog box
             } else { // Third turn in Gulag
                 int die1 = _game.rollSingleDie();
                 int die2 = _game.rollSingleDie();
                 lastDie1 = die1;
                 lastDie2 = die2;
-                message += current.getName() + " is in Gulag (Turn 3) and rolled " + die1 + " and " + die2 + ". ";
+                String jailMessage = current.getName() + " is in Gulag (Turn 3) and rolled " + die1 + " and " + die2 + ". ";
                 if (die1 == die2) {
-                    message += "Doubles! You're released from Gulag.\n";
+                    jailMessage += "Doubles! You're released from Gulag.\n";
                     current.setInJail(false);
                     current.resetJailTurn();
                     int roll = die1 + die2;
                     _game.movePlayer(current, roll);
                     Tile tile = _game.getBoard().getTile(current.getPosition());
-                    message += "After release, you landed on " + tile.getName() + ".\n";
+                    jailMessage += "After release, you landed on " + tile.getName() + ".\n";
                 } else {
                     if (current.getMoney() >= JAIL_RELEASE_FEE) {
-                        message += "\n" + "No doubles. You've been in Gulag for 3 turns so you pay a fee of " + JAIL_RELEASE_FEE + " ₽ to get out.\n";
+                        jailMessage += "\n" + "No doubles. You've been in Gulag for 3 turns so you pay a fee of " + JAIL_RELEASE_FEE + " ₽ to get out.\n";
                         current.deductMoney(JAIL_RELEASE_FEE);
                         current.setInJail(false);
                         current.resetJailTurn();
@@ -95,11 +96,12 @@ public class Controller {
                         int roll = feeDie1 + feeDie2;
                         _game.movePlayer(current, roll);
                         Tile tile = _game.getBoard().getTile(current.getPosition());
-                        message += current.getName() + " rolled a " + roll + " ([" + feeDie1 + " + " + feeDie2 + "]) and landed on " + tile.getName() + ".\n";
+                        jailMessage += current.getName() + " rolled a " + roll + " ([" + feeDie1 + " + " + feeDie2 + "]) and landed on " + tile.getName() + ".\n";
                     } else {
-                        message += "No doubles and you cannot afford the fee. You remain in Gulag.\n";
+                        jailMessage += "No doubles and you cannot afford the fee. You remain in Gulag.\n";
                     }
                 }
+                JOptionPane.showMessageDialog(null, jailMessage); // Display jail message in a dialog box
             }
         } else { // Normal turn (player not in Gulag)
             int die1 = _game.rollSingleDie();
@@ -119,7 +121,6 @@ public class Controller {
                 message += "You passed GO. Collect 200 ₽.\n";
                 current.addMoney(200);
             }
-
 
             if (tile instanceof GoToJailTile || tile instanceof JailTile) {
                 current.setInJail(true);
