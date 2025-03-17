@@ -96,6 +96,7 @@ public class Player {
 
     // Example placeholder for going to jail
     public void goToJail() {
+
         setInJail(true);
         resetJailTurn();
         System.out.println(name + " has been sent to jail!");
