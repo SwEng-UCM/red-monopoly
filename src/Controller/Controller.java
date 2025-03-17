@@ -9,6 +9,9 @@ import java.util.stream.Collectors;
 public class Controller {
     private MonopolyGame _game;
     private static final int JAIL_RELEASE_FEE = 50; // Fee to pay on the third turn
+    // New fields to store the last rolled dice values.
+    private int lastDie1;
+    private int lastDie2;
 
     public Controller(MonopolyGame game) {
         this._game = game;
@@ -30,6 +33,14 @@ public class Controller {
         return _game.getCurrentPlayer().getMoney();
     }
 
+    /**
+     * Returns the results of the last dice roll as an array of two integers:
+     * index 0 is the value of the first die and index 1 is the value of the second die.
+     */
+    public int[] getLastDiceRoll() {
+        return new int[]{lastDie1, lastDie2};
+    }
+
     public String rollDiceAndMove() {
         Player current = _game.getCurrentPlayer();
         String message = "";
@@ -39,6 +50,8 @@ public class Controller {
             if (jailTurns < 2) { // First and second turns in Gulag: attempt doubles
                 int die1 = _game.rollSingleDie();
                 int die2 = _game.rollSingleDie();
+                lastDie1 = die1;
+                lastDie2 = die2;
                 message += current.getName() + " is in Gulag (Turn " + (jailTurns + 1) + ") and rolled " + die1 + " and " + die2 + ". ";
                 if (die1 == die2) {
                     message += "Doubles! You're released from Gulag.\n";
@@ -58,6 +71,8 @@ public class Controller {
             } else { // Third turn in Gulag
                 int die1 = _game.rollSingleDie();
                 int die2 = _game.rollSingleDie();
+                lastDie1 = die1;
+                lastDie2 = die2;
                 message += current.getName() + " is in Gulag (Turn 3) and rolled " + die1 + " and " + die2 + ". ";
                 if (die1 == die2) {
                     message += "Doubles! You're released from Gulag.\n";
@@ -73,20 +88,38 @@ public class Controller {
                         current.deductMoney(JAIL_RELEASE_FEE);
                         current.setInJail(false);
                         current.resetJailTurn();
-                        int roll = _game.rollDice();
+                        int feeDie1 = _game.rollSingleDie();
+                        int feeDie2 = _game.rollSingleDie();
+                        lastDie1 = feeDie1;
+                        lastDie2 = feeDie2;
+                        int roll = feeDie1 + feeDie2;
                         _game.movePlayer(current, roll);
                         Tile tile = _game.getBoard().getTile(current.getPosition());
-                        message += current.getName() + " rolled a " + roll + " and landed on " + tile.getName() + ".\n";
+                        message += current.getName() + " rolled a " + roll + " ([" + feeDie1 + " + " + feeDie2 + "]) and landed on " + tile.getName() + ".\n";
                     } else {
                         message += "No doubles and you cannot afford the fee. You remain in Gulag.\n";
                     }
                 }
             }
         } else { // Normal turn (player not in Gulag)
-            int roll = _game.rollDice();
+            int die1 = _game.rollSingleDie();
+            int die2 = _game.rollSingleDie();
+            lastDie1 = die1;
+            lastDie2 = die2;
+            int roll = die1 + die2;
             _game.movePlayer(current, roll);
             Tile tile = _game.getBoard().getTile(current.getPosition());
-            message += current.getName() + " rolled a " + roll + " and landed on " + tile.getName() + ".\n";
+            message += current.getName() + " rolled a " + die1 + " and a " + die2 + " (total: " + roll + ") and landed on " + tile.getName() + ".\n";
+
+            if (tile instanceof FreeParkingTile){
+                message += "You landed on Free Parking. Nothing happens.\n";
+            }
+
+            if (tile instanceof GoTile) {
+                message += "You passed GO. Collect 200 ₽.\n";
+                current.addMoney(200);
+            }
+
 
             if (tile instanceof GoToJailTile || tile instanceof JailTile) {
                 current.setInJail(true);
@@ -104,6 +137,12 @@ public class Controller {
                     message += "This property is owned by you.\n";
                 }
             }
+
+            if (tile instanceof TaxTile) {
+                TaxTile taxTile = (TaxTile) tile;
+                message += "You landed on " + taxTile.getName() + ". Paying tax of " + taxTile.getTaxAmount() + " ₽.\n";
+                current.deductMoney(taxTile.getTaxAmount());
+            }
         }
 
         message += "Current balance: " + current.getMoney() + " ₽\n";
@@ -119,12 +158,10 @@ public class Controller {
         return message;
     }
 
-
     private String checkPlayerElimination() {
         StringBuilder eliminationMessage = new StringBuilder();
         List<Player> players = _game.getPlayers();
 
-        // Use streams with Collectors.toList() instead of toList()
         List<String> eliminatedNames = players.stream()
                 .filter(p -> p.getMoney() < 0)
                 .map(Player::getName)
@@ -134,18 +171,14 @@ public class Controller {
             eliminationMessage.append("Eliminated players due to negative balance: ");
             eliminationMessage.append(String.join(", ", eliminatedNames));
             eliminationMessage.append("\n");
-            // Remove eliminated players from the game.
             players.removeIf(p -> p.getMoney() < 0);
         }
 
-        // Check if only one player remains.
         if (players.size() == 1) {
             eliminationMessage.append("Game Over! Winner: ").append(players.get(0).getName()).append("\n");
-            // Optionally, perform any additional game-over logic here.
         }
         return eliminationMessage.toString();
     }
-
 
     public int getNumberOfPlayers() {
         return _game.getNumberOfPlayers();
@@ -169,8 +202,7 @@ public class Controller {
         return ownedProperties;
     }
 
-
-        public List<Tile> getBoardTiles() {
-            return _game.getBoard().getTiles();
-        }
+    public List<Tile> getBoardTiles() {
+        return _game.getBoard().getTiles();
     }
+}

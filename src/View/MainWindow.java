@@ -5,11 +5,9 @@ import java.awt.*;
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
-
 import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-
 
 public class MainWindow extends JFrame {
     protected static String filePath = "resources/click-buttons-ui-menu-sounds-effects-button-8-205394.wav";
@@ -22,7 +20,6 @@ public class MainWindow extends JFrame {
 
         try {
             UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
-
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
@@ -41,8 +38,9 @@ public class MainWindow extends JFrame {
     private void initGUI() {
         setTitle("[RED MONOPOLY]");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 600);
-        setResizable(false); // Non-resizable main menu
+        // Resize to a square frame for the board – adjust as needed.
+        setSize(800, 800);
+        setResizable(false);
         setLocationRelativeTo(null);
 
         _cardLayout = new CardLayout();
@@ -55,27 +53,26 @@ public class MainWindow extends JFrame {
         setVisible(true);
     }
 
+    // (The rest of MainWindow remains largely the same.)
     private JPanel createMainMenu() {
         JLayeredPane layeredPane = new JLayeredPane();
-        layeredPane.setPreferredSize(new Dimension(800, 600));
+        layeredPane.setPreferredSize(new Dimension(800, 800));
 
         JLabel backgroundLabel = new JLabel();
         backgroundLabel.setIcon(new ImageIcon(
                 new ImageIcon("resources/redmonopolyLogo.jpg").getImage()
-                        .getScaledInstance(800, 600, Image.SCALE_SMOOTH)));
-        backgroundLabel.setBounds(0, 0, 800, 600);
+                        .getScaledInstance(800, 800, Image.SCALE_SMOOTH)));
+        backgroundLabel.setBounds(0, 0, 800, 800);
         layeredPane.add(backgroundLabel, Integer.valueOf(0));
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setOpaque(false);
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
-        buttonPanel.setBounds(0, 0, 800, 600);
+        buttonPanel.setBounds(0, 0, 800, 800);
 
         JButton playButton = createStyledButton("Play Game");
         playButton.addActionListener(e -> {
-            // Play button sound
             MusicPlayer.playSoundEffect(filePath);
-
             String input = JOptionPane.showInputDialog(
                     this,
                     "How many players? (2-8)",
@@ -92,8 +89,6 @@ public class MainWindow extends JFrame {
                                 JOptionPane.ERROR_MESSAGE);
                         return;
                     }
-
-                    // Prompt for player names
                     List<String> playerNames = new ArrayList<>();
                     for (int i = 1; i <= numPlayers; i++) {
                         String name = JOptionPane.showInputDialog(
@@ -111,11 +106,8 @@ public class MainWindow extends JFrame {
                         }
                         playerNames.add(name);
                     }
-
                     _controller.setNumberOfPlayers(numPlayers, playerNames);
-
-                    // Open the game window:
-                    // Stop the main menu music before opening the game.
+                    // Stop main menu music and open game window.
                     musicPlayer.stopMusic();
                     GameWindow gameWindow = new GameWindow(_controller, this);
                     this.setVisible(false);
@@ -150,7 +142,6 @@ public class MainWindow extends JFrame {
         buttonPanel.add(Box.createVerticalGlue());
 
         layeredPane.add(buttonPanel, Integer.valueOf(1));
-
         JPanel menuPanel = new JPanel(new BorderLayout());
         menuPanel.add(layeredPane, BorderLayout.CENTER);
         return menuPanel;
