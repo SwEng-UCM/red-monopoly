@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 public class MonopolyGame {
+
     private static class SingletonHelper {
         private static final MonopolyGame INSTANCE = new MonopolyGame();
     }

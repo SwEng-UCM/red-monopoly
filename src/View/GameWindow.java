@@ -14,18 +14,20 @@ public class GameWindow extends JFrame {
     private JLabel currentPlayerLabel;
     private JLabel currentBalanceLabel;
     private MusicPlayer inGameMusic;
-    private BoardPanel boardPanel; // Embedded board panel
+    private BoardPanel boardPanel;
+    private DualDicePanel dualDicePanel;
     private PlayerInfoWindow playerInfoWindow;
 
     public GameWindow(Controller controller, MainWindow mainWindow) {
         _controller = controller;
         _mainWindow = mainWindow;
         setTitle("Game - [RED MONOPOLY]");
-        setSize(1200, 800); // Increased size to accommodate the board
+        setSize(1200, 800);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         initGUI();
 
+        // Start in-game music
         inGameMusic = new MusicPlayer();
         inGameMusic.playMusic("resources/Russia-Theme-Atomic-_Civilization-6-OST_-Kalinka_1.wav");
         inGameMusic.setVolume(0.7f);
@@ -34,6 +36,7 @@ public class GameWindow extends JFrame {
             @Override
             public void windowClosed(WindowEvent e) {
                 inGameMusic.stopMusic();
+                // Resume main menu music
                 _mainWindow.getMusicPlayer().playMusic("resources/Dark_is_the_Night_-_Soviet_WW2_Song.wav");
                 _mainWindow.setVisible(true);
             }
@@ -41,9 +44,10 @@ public class GameWindow extends JFrame {
     }
 
     private void initGUI() {
-        // Top panel for current player and balance info
+        // Top panel for current player & balance
         JPanel topPanel = new JPanel(new GridLayout(2, 1));
         topPanel.setBackground(Color.RED);
+
         currentPlayerLabel = new JLabel("Current Player: (not set yet)", SwingConstants.CENTER);
         currentPlayerLabel.setFont(new Font("Arial", Font.BOLD, 24));
         currentPlayerLabel.setForeground(Color.WHITE);
@@ -54,9 +58,6 @@ public class GameWindow extends JFrame {
         currentBalanceLabel.setForeground(Color.WHITE);
         topPanel.add(currentBalanceLabel);
 
-        // Center: BoardPanel displays the game board
-        boardPanel = new BoardPanel(_controller);
-
         // Bottom panel for buttons
         JPanel bottomPanel = new JPanel();
         bottomPanel.setBackground(Color.RED);
@@ -66,9 +67,15 @@ public class GameWindow extends JFrame {
                 "resources/dicesRolling.png",
                 "Roll the dice to move",
                 e -> {
+                    // Perform the turn logic
                     String result = _controller.rollDiceAndMove();
-                    // Optionally, you might display the result in a popup:
-                    // JOptionPane.showMessageDialog(this, result);
+
+                    // Retrieve the two dice values from the controller
+                    int[] diceValues = _controller.getLastDiceRoll();  // e.g., [die1, die2]
+
+                    // Animate each die in the DualDicePanel
+                    dualDicePanel.startAnimation(diceValues[0], diceValues[1]);
+
                     updateCurrentPlayerLabel();
                     updateCurrentBalanceLabel();
                     boardPanel.refreshBoard();
@@ -102,12 +109,21 @@ public class GameWindow extends JFrame {
         );
         bottomPanel.add(playerInfoButton);
 
+        // Main center panel: Board on the left, dice on the right
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        boardPanel = new BoardPanel(_controller);
+        centerPanel.add(boardPanel, BorderLayout.CENTER);
 
+        // Create & place the DualDicePanel on the right side (EAST).
+        dualDicePanel = new DualDicePanel();
+        // Set a preferred size so it's not too large
+        dualDicePanel.setPreferredSize(new Dimension(200, 200));
+        centerPanel.add(dualDicePanel, BorderLayout.EAST);
 
-        // Set layout of GameWindow and add components
+        // Put it all together
         setLayout(new BorderLayout());
         add(topPanel, BorderLayout.NORTH);
-        add(boardPanel, BorderLayout.CENTER);
+        add(centerPanel, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
 
         updateCurrentPlayerLabel();
