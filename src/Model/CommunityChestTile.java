@@ -5,16 +5,16 @@ import java.util.Random;
 
 public class CommunityChestTile extends Tile {
     private static final String[] COMMUNITY_CARDS = {
-            "User Contribution Bonus: Collect 200 ₽.",
-            "Critical Bug Report: Collect 100 ₽.",
-            "Server Downtime: Pay 50 ₽.",
-            "Feature Release Celebration: Collect 150 ₽.",
-            "Code Refactoring Required: Pay 75 ₽.",
-            "Advance to Community Center: Collect 200 ₽.",
-            "Get Out of Bugzilla Free Card.",
-            "Community Forum Highlights: Collect 50 ₽ from each player.",
-            "Peer Review Delay: Skip your next turn.",
-            "Data Breach: Pay 100 ₽ for damages."
+            "Glorious Contribution to the Motherland: Collect 200 ₽.",
+            "Exposing Saboteurs of Progress: Collect 100 ₽.",
+            "Central Planning Glitch: Pay 50 ₽.",
+            "Celebration of Revolutionary Innovation: Collect 150 ₽.",
+            "Mandatory Technological Reorganization: Pay 75 ₽.",
+            "Advance to Red Square: Collect 200 ₽.",
+            "Get Out of Gulag Free Card.",
+            "Comrade Solidarity Contribution: Collect 50 ₽ from each player.",
+            "Bureaucratic Delay: Skip your next turn.",
+            "Breach of State Security: Pay 100 ₽ for damages."
     };
 
     public CommunityChestTile(String name, int position) {
@@ -37,31 +37,31 @@ public class CommunityChestTile extends Tile {
 
     private void applyCommunityEffect(Player player, int index) {
         switch (index) {
-            case 0: // User Contribution Bonus: Collect 200 ₽.
+            case 0: // Glorious Contribution to the Motherland: Collect 200 ₽.
                 player.addMoney(200);
                 break;
-            case 1: // Critical Bug Report: Collect 100 ₽.
+            case 1: // Exposing Saboteurs of Progress: Collect 100 ₽.
                 player.addMoney(100);
                 break;
-            case 2: // Server Downtime: Pay 50 ₽.
+            case 2: // Central Planning Glitch: Pay 50 ₽.
                 player.deductMoney(50);
                 break;
-            case 3: // Feature Release Celebration: Collect 150 ₽.
+            case 3: // Celebration of Revolutionary Innovation: Collect 150 ₽.
                 player.addMoney(150);
                 break;
-            case 4: // Code Refactoring Required: Pay 75 ₽.
+            case 4: // Mandatory Technological Reorganization: Pay 75 ₽.
                 player.deductMoney(75);
                 break;
-            case 5: // Advance to Community Center: Collect 200 ₽.
-                // Assuming the Community Center is at position 0
+            case 5: // Advance to Red Square: Collect 200 ₽.
+                // Assuming Red Square is at position 0
                 player.setPosition(0);
                 player.addMoney(200);
                 break;
-            case 6: // Get Out of Bugzilla Free Card.
+            case 6: // Get Out of Gulag Free Card.
                 if (player.isInJail())
                     player.setInJail(false);
                 break;
-            case 7: // Community Forum Highlights: Collect 50 ₽ from each player.
+            case 7: // Comrade Solidarity Contribution: Collect 50 ₽ from each player.
                 MonopolyGame game = MonopolyGame.getInstance();
                 for (Player other : game.getPlayers()) {
                     if (!other.equals(player)) {
@@ -70,10 +70,10 @@ public class CommunityChestTile extends Tile {
                     }
                 }
                 break;
-            case 8: // Peer Review Delay: Skip your next turn.
+            case 8: // Bureaucratic Delay: Skip your next turn.
                 player.skipNextTurn();
                 break;
-            case 9: // Data Breach: Pay 100 ₽ for damages.
+            case 9: // Breach of State Security: Pay 100 ₽ for damages.
                 player.deductMoney(100);
                 break;
             default:
