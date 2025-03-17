@@ -1,6 +1,7 @@
 package Controller;
 
 import Model.*;
+import javax.swing.JOptionPane; // Import JOptionPane for displaying messages
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,27 +38,36 @@ public class Controller {
      * Returns the results of the last dice roll as an array of two integers:
      * index 0 is the value of the first die and index 1 is the value of the second die.
      */
-    public int[] getLastDiceRoll() {
-        return new int[]{lastDie1, lastDie2};
+    /**
+     * Rolls the dice without moving the player.
+     * Returns an array of two ints: [die1, die2].
+     */
+    public int[] rollDice() {
+        int die1 = _game.rollSingleDie();
+        int die2 = _game.rollSingleDie();
+        lastDie1 = die1;
+        lastDie2 = die2;
+        return new int[]{die1, die2};
     }
 
-    public String rollDiceAndMove() {
+    /**
+     * Applies the dice result to move the player.
+     * This method uses the dice values passed as an argument.
+     */
+    public String movePlayerAfterDiceRoll(int[] dice) {
         Player current = _game.getCurrentPlayer();
         String message = "";
 
         if (current.isInJail()) {
             int jailTurns = current.getJailTurnCount();
             if (jailTurns < 2) { // First and second turns in Gulag: attempt doubles
-                int die1 = _game.rollSingleDie();
-                int die2 = _game.rollSingleDie();
-                lastDie1 = die1;
-                lastDie2 = die2;
-                message += current.getName() + " is in Gulag (Turn " + (jailTurns + 1) + ") and rolled " + die1 + " and " + die2 + ". ";
-                if (die1 == die2) {
+                message = current.getName() + " is in Gulag (Turn " + (jailTurns + 1) + ") and rolled "
+                        + dice[0] + " and " + dice[1] + ". ";
+                if (dice[0] == dice[1]) {
                     message += "Doubles! You're released from Gulag.\n";
                     current.setInJail(false);
                     current.resetJailTurn();
-                    int roll = die1 + die2;
+                    int roll = dice[0] + dice[1];
                     _game.movePlayer(current, roll);
                     Tile tile = _game.getBoard().getTile(current.getPosition());
                     message += "After release, you landed on " + tile.getName() + ".\n";
@@ -65,29 +75,28 @@ public class Controller {
                     message += "No doubles. You remain in Gulag.\n";
                     current.incrementJailTurn();
                     _game.nextTurn();
-                    message += checkPlayerElimination();
-                    return message;
+                    checkPlayerElimination();
                 }
+                JOptionPane.showMessageDialog(null, message);
             } else { // Third turn in Gulag
-                int die1 = _game.rollSingleDie();
-                int die2 = _game.rollSingleDie();
-                lastDie1 = die1;
-                lastDie2 = die2;
-                message += current.getName() + " is in Gulag (Turn 3) and rolled " + die1 + " and " + die2 + ". ";
-                if (die1 == die2) {
+                message = current.getName() + " is in Gulag (Turn 3) and rolled "
+                        + dice[0] + " and " + dice[1] + ". ";
+                if (dice[0] == dice[1]) {
                     message += "Doubles! You're released from Gulag.\n";
                     current.setInJail(false);
                     current.resetJailTurn();
-                    int roll = die1 + die2;
+                    int roll = dice[0] + dice[1];
                     _game.movePlayer(current, roll);
                     Tile tile = _game.getBoard().getTile(current.getPosition());
                     message += "After release, you landed on " + tile.getName() + ".\n";
                 } else {
                     if (current.getMoney() >= JAIL_RELEASE_FEE) {
-                        message += "\n" + "No doubles. You've been in Gulag for 3 turns so you pay a fee of " + JAIL_RELEASE_FEE + " ₽ to get out.\n";
+                        message += "No doubles. You've been in Gulag for 3 turns so you pay a fee of "
+                                + JAIL_RELEASE_FEE + " ₽ to get out.\n";
                         current.deductMoney(JAIL_RELEASE_FEE);
                         current.setInJail(false);
                         current.resetJailTurn();
+                        // Roll dice again for movement after paying fee.
                         int feeDie1 = _game.rollSingleDie();
                         int feeDie2 = _game.rollSingleDie();
                         lastDie1 = feeDie1;
@@ -95,21 +104,20 @@ public class Controller {
                         int roll = feeDie1 + feeDie2;
                         _game.movePlayer(current, roll);
                         Tile tile = _game.getBoard().getTile(current.getPosition());
-                        message += current.getName() + " rolled a " + roll + " ([" + feeDie1 + " + " + feeDie2 + "]) and landed on " + tile.getName() + ".\n";
+                        message += current.getName() + " rolled a " + roll
+                                + " ([" + feeDie1 + " + " + feeDie2 + "]) and landed on " + tile.getName() + ".\n";
                     } else {
                         message += "No doubles and you cannot afford the fee. You remain in Gulag.\n";
                     }
                 }
+                JOptionPane.showMessageDialog(null, message);
             }
         } else { // Normal turn (player not in Gulag)
-            int die1 = _game.rollSingleDie();
-            int die2 = _game.rollSingleDie();
-            lastDie1 = die1;
-            lastDie2 = die2;
-            int roll = die1 + die2;
+            int roll = dice[0] + dice[1];
             _game.movePlayer(current, roll);
             Tile tile = _game.getBoard().getTile(current.getPosition());
-            message += current.getName() + " rolled a " + die1 + " and a " + die2 + " (total: " + roll + ") and landed on " + tile.getName() + ".\n";
+            message += current.getName() + " rolled a " + dice[0] + " and a " + dice[1]
+                    + " (total: " + roll + ") and landed on " + tile.getName() + ".\n";
 
             if (tile instanceof FreeParkingTile){
                 message += "You landed on Free Parking. Nothing happens.\n";
@@ -120,10 +128,12 @@ public class Controller {
                 current.addMoney(200);
             }
 
-
             if (tile instanceof GoToJailTile || tile instanceof JailTile) {
                 current.setInJail(true);
                 current.resetJailTurn();
+                if (tile instanceof GoToJailTile){
+                    current.setPosition(10);
+                }
                 message += "You landed on Go To Gulag. You are now in Gulag.\n";
             }
 
@@ -132,7 +142,8 @@ public class Controller {
                 if (propertyTile.getOwner() == null) {
                     message += "This property is unowned. Price: " + propertyTile.getPrice() + " ₽.\n";
                 } else if (propertyTile.getOwner() != current) {
-                    message += "This property is owned by " + propertyTile.getOwner().getName() + ". Rent: " + propertyTile.getRent() + " ₽.\n";
+                    message += "This property is owned by " + propertyTile.getOwner().getName()
+                            + ". Rent: " + propertyTile.getRent() + " ₽.\n";
                 } else {
                     message += "This property is owned by you.\n";
                 }
@@ -140,17 +151,16 @@ public class Controller {
 
             if (tile instanceof TaxTile) {
                 TaxTile taxTile = (TaxTile) tile;
-                message += "You landed on " + taxTile.getName() + ". Paying tax of " + taxTile.getTaxAmount() + " ₽.\n";
+                message += "You landed on " + taxTile.getName() + ". Paying tax of "
+                        + taxTile.getTaxAmount() + " ₽.\n";
                 current.deductMoney(taxTile.getTaxAmount());
             }
         }
 
         message += "Current balance: " + current.getMoney() + " ₽\n";
+        checkPlayerElimination();
 
-        // Check and remove any player with negative balance.
-        message += checkPlayerElimination();
-
-        // Only proceed with turn change if game not over.
+        // Proceed with turn change if game not over.
         if (_game.getPlayers().size() > 1) {
             _game.nextTurn();
         }
@@ -158,8 +168,8 @@ public class Controller {
         return message;
     }
 
-    private String checkPlayerElimination() {
-        StringBuilder eliminationMessage = new StringBuilder();
+
+    private void checkPlayerElimination() {
         List<Player> players = _game.getPlayers();
 
         List<String> eliminatedNames = players.stream()
@@ -168,16 +178,16 @@ public class Controller {
                 .collect(Collectors.toList());
 
         if (!eliminatedNames.isEmpty()) {
-            eliminationMessage.append("Eliminated players due to negative balance: ");
-            eliminationMessage.append(String.join(", ", eliminatedNames));
-            eliminationMessage.append("\n");
+            String eliminationMessage = "Eliminated players due to negative balance: " +
+                    String.join(", ", eliminatedNames);
+            JOptionPane.showMessageDialog(null, eliminationMessage); // Display elimination message in a dialog box
             players.removeIf(p -> p.getMoney() < 0);
         }
 
         if (players.size() == 1) {
-            eliminationMessage.append("Game Over! Winner: ").append(players.get(0).getName()).append("\n");
+            String winnerMessage = "Game Over! Winner: " + players.get(0).getName();
+            JOptionPane.showMessageDialog(null, winnerMessage); // Display winner message in a dialog box
         }
-        return eliminationMessage.toString();
     }
 
     public int getNumberOfPlayers() {
