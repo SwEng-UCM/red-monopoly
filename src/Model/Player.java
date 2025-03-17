@@ -14,7 +14,7 @@ public class Player {
     public Player(String name) {
         this.name = name;
         this.position = 0;
-        this.money = 300; // Default starting money
+        this.money = 1500; // Default starting money
         this.inJail = false;
     }
 
