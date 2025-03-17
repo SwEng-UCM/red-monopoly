@@ -1,8 +1,7 @@
 package View;
 
 import Controller.Controller;
-import Model.Tile;
-import Model.Player;
+import Model.*;
 import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
@@ -25,11 +24,26 @@ public class BoardPanel extends JPanel {
     // For vertical edge tiles (left and right), width equals corner width.
     private final Dimension verticalTileSize = new Dimension(120, 62);
 
+    // Map to store player colors (for highlighting)
+    private Map<Player, Color> playerColors = new HashMap<>();
+
     public BoardPanel(Controller controller) {
         this.controller = controller;
         setLayout(new BorderLayout());
         backgroundImage = new ImageIcon("resources/backgroundBoard.png").getImage();
+        initPlayerColors(); // Initialize player colors
         initGUI();
+    }
+
+    /**
+     * Assigns a unique color to each player for highlighting.
+     */
+    private void initPlayerColors() {
+        List<Player> players = controller.getAllPlayers();
+        Color[] colors = {Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.ORANGE, Color.MAGENTA};
+        for (int i = 0; i < players.size(); i++) {
+            playerColors.put(players.get(i), colors[i % colors.length]);
+        }
     }
 
     private void initGUI() {
@@ -111,8 +125,26 @@ public class BoardPanel extends JPanel {
         String labelText = generateTileLabelText(tile, index);
         JLabel label = new JLabel(labelText, SwingConstants.CENTER);
         label.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        label.setOpaque(false);
+        label.setOpaque(true); // Make the label opaque to show the background color
         label.setPreferredSize(size);
+
+        // Set background color based on tile type
+        if (tile instanceof PropertyTile) {
+            label.setBackground(Color.CYAN); // Light blue for property tiles
+        } else if (tile instanceof JailTile) {
+            label.setBackground(Color.RED); // Red for jail tiles
+        } else if (tile instanceof GoTile) {
+            label.setBackground(Color.GREEN); // Green for Go tiles
+        } else if (tile instanceof GoToJailTile) {
+            label.setBackground(Color.ORANGE); // Orange for Go To Jail tiles
+        } else if (tile instanceof TaxTile) {
+            label.setBackground(Color.YELLOW); // Yellow for tax tiles
+        } else if (tile instanceof FreeParkingTile) {
+            label.setBackground(Color.PINK); // Pink for free parking tiles
+        } else {
+            label.setBackground(Color.WHITE); // Default color for other tiles
+        }
+
         // Store the label reference for later updates.
         tileLabels.put(index, label);
         return label;
@@ -120,17 +152,25 @@ public class BoardPanel extends JPanel {
 
     /**
      * Generates the HTML text for a tile label.
+     * Players are highlighted with colored circles.
      */
     private String generateTileLabelText(Tile tile, int index) {
         String tileName = tile.getName();
         List<Player> playersOnTile = controller.getAllPlayers().stream()
                 .filter(p -> p.getPosition() == index)
                 .collect(Collectors.toList());
-        String playersStr = playersOnTile.isEmpty() ? "" :
-                "<br>Players: " + playersOnTile.stream()
-                        .map(Player::getName)
-                        .collect(Collectors.joining(", "));
-        return "<html><center>" + tileName + "<br>(" + index + ")" + playersStr + "</center></html>";
+
+        // Generate player icons (colored circles) for players on this tile
+        StringBuilder playersHtml = new StringBuilder();
+        for (Player player : playersOnTile) {
+            Color playerColor = playerColors.get(player);
+            playersHtml.append(String.format(
+                    "<span style='color: rgb(%d,%d,%d); font-size: 20px;'>&#9679;</span> ", // Unicode for a circle
+                    playerColor.getRed(), playerColor.getGreen(), playerColor.getBlue()
+            ));
+        }
+
+        return "<html><center>" + tileName + "<br>(" + index + ")<br>" + playersHtml.toString() + "</center></html>";
     }
 
     /**
