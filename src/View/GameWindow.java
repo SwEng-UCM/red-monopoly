@@ -67,21 +67,29 @@ public class GameWindow extends JFrame {
                 "resources/dicesRolling.png",
                 "Roll the dice to move",
                 e -> {
-                    // Perform the turn logic
-                    String result = _controller.rollDiceAndMove();
+                    // Roll the dice (without moving yet) and store the values.
+                    int[] diceValues = _controller.rollDice();
 
-                    // Retrieve the two dice values from the controller
-                    int[] diceValues = _controller.getLastDiceRoll();  // e.g., [die1, die2]
-
-                    // Animate each die in the DualDicePanel
+                    // Start the dice animation using the rolled values.
                     dualDicePanel.startAnimation(diceValues[0], diceValues[1]);
 
-                    updateCurrentPlayerLabel();
-                    updateCurrentBalanceLabel();
-                    boardPanel.refreshBoard();
+                    // Create a timer to delay the player movement until after the dice animation.
+                    new Timer(2000, evt -> {
+                        ((Timer) evt.getSource()).stop();
+                        // Now move the player using the previously rolled dice.
+                        String result = _controller.movePlayerAfterDiceRoll(diceValues);
+                        // Optionally, display 'result' in a dialog or log it.
+                        // For example: JOptionPane.showMessageDialog(null, result);
+
+                        // Update UI elements.
+                        updateCurrentPlayerLabel();
+                        updateCurrentBalanceLabel();
+                        boardPanel.refreshBoard();
+                    }).start();
                 }
         );
         bottomPanel.add(rollDiceButton);
+
 
         // Back to Main Menu Button
         JButton backButton = createImageButton(
