@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="red-monopoly:jar2">
+    <output-path>$PROJECT_DIR$/../IdeaProjects/red-monopoly/out/artifacts/red_monopoly_jar2</output-path>
+    <root id="archive" name="red-monopoly.jar">
+      <element id="module-output" name="red-monopoly" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/jgoodies/looks/2.2.2/looks-2.2.2.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
