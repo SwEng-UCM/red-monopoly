@@ -2,7 +2,9 @@ package View;
 
 import Controller.Controller;
 import Model.Player;
-import Model.PropertyTile; // if needed for property names
+import Model.PropertyTile;
+import Model.RailroadTile;
+import Model.Tile;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -10,6 +12,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,40 +22,39 @@ public class PlayerInfoWindow extends JFrame {
 
     public PlayerInfoWindow(Controller controller) {
         this.controller = controller;
-        setTitle("Player Info");
-        // Double the frame size from 600x400 to 1200x800
-        setSize(600, 400);
+        setTitle("Player Info - Properties & Railroads");
+        setSize(800, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-
-        // Create the table model with column headers
-        String[] columnNames = { "Name", "Money (₽)", "Position", "In Gulag?", "Owned Properties" };
+        String[] columnNames = {"Player", "Money (₽)", "Position", "In Gulag?", "Properties", "Railroads"};
         Object[][] data = buildPlayerData();
 
-        DefaultTableModel tableModel = new DefaultTableModel(data, columnNames);
+        DefaultTableModel tableModel = new DefaultTableModel(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
         playerTable = new JTable(tableModel);
+        playerTable.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        playerTable.setRowHeight(40);
 
-        // Increase table font and row height for larger display
-        playerTable.setFont(new Font("SansSerif", Font.PLAIN, 16));  // Increase font size
-        playerTable.setRowHeight(40); // Double the default row height (assuming 20 was default)
-
-        // Set a custom cell renderer to highlight the current player's row
         playerTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
-            public Component getTableCellRendererComponent(JTable table,
-                                                           Object value,
-                                                           boolean isSelected,
-                                                           boolean hasFocus,
-                                                           int row,
-                                                           int column) {
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                           boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 String currentPlayerName = controller.getCurrentPlayerName();
                 String rowPlayerName = table.getModel().getValueAt(row, 0).toString();
+
                 if (rowPlayerName.equals(currentPlayerName)) {
-                    c.setBackground(Color.YELLOW);
+                    c.setBackground(new Color(255, 255, 200));
+                    c.setFont(c.getFont().deriveFont(Font.BOLD));
                 } else {
-                    c.setBackground(Color.WHITE);
+                    c.setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
+                    c.setFont(c.getFont().deriveFont(Font.PLAIN));
                 }
                 return c;
             }
@@ -62,8 +64,7 @@ public class PlayerInfoWindow extends JFrame {
         adjustColumnWidths(playerTable);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Refresh button to update data
-        JButton refreshButton = new JButton("Refresh");
+        JButton refreshButton = new JButton("Refresh Data");
         refreshButton.addActionListener(e -> {
             refreshPlayerData();
             adjustColumnWidths(playerTable);
@@ -71,72 +72,86 @@ public class PlayerInfoWindow extends JFrame {
         add(refreshButton, BorderLayout.SOUTH);
     }
 
-    /**
-     * Builds the 2D array of player data for the JTable.
-     */
     private Object[][] buildPlayerData() {
-        List<Player> players = controller.getAllPlayers(); // Make sure your Controller has this method
-        Object[][] data = new Object[players.size()][5];
+        List<Player> players = controller.getAllPlayers();
+        List<RailroadTile> allRailroads = getAllRailroads();
+        Object[][] data = new Object[players.size()][6];
 
         for (int i = 0; i < players.size(); i++) {
             Player p = players.get(i);
             data[i][0] = p.getName();
-            data[i][1] = p.getMoney();
+            data[i][1] = String.format("%,d ₽", p.getMoney());
             data[i][2] = p.getPosition();
             data[i][3] = p.isInJail() ? "Yes" : "No";
             data[i][4] = getPropertyNamesAsString(p);
+            data[i][5] = getRailroadNamesAsString(p, allRailroads);
         }
 
         return data;
     }
 
-    /**
-     * Refresh the data in the existing table model.
-     */
-    private void refreshPlayerData() {
-        DefaultTableModel model = (DefaultTableModel) playerTable.getModel();
-        // Clear existing rows
-        model.setRowCount(0);
-
-        // Rebuild data and add rows
-        List<Player> players = controller.getAllPlayers();
-        for (Player p : players) {
-            model.addRow(new Object[] {
-                    p.getName(),
-                    p.getMoney(),
-                    p.getPosition(),
-                    p.isInJail() ? "Yes" : "No",
-                    getPropertyNamesAsString(p)
-            });
+    private List<RailroadTile> getAllRailroads() {
+        List<RailroadTile> railroads = new ArrayList<>();
+        for (Tile tile : controller.getBoardTiles()) {
+            if (tile instanceof RailroadTile) {
+                railroads.add((RailroadTile) tile);
+            }
         }
+        return railroads;
     }
 
-    /**
-     * Utility to convert a player's owned properties into a string.
-     */
     private String getPropertyNamesAsString(Player p) {
-        // Use the controller to get properties owned by p.
-        List<PropertyTile> ownedProps = controller.getOwnedProperties(p);
-        if (ownedProps.isEmpty()) {
-            return "None";
+        List<PropertyTile> ownedProps = new ArrayList<>();
+        for (Tile tile : controller.getBoardTiles()) {
+            if (tile instanceof PropertyTile && ((PropertyTile) tile).getOwner() == p) {
+                ownedProps.add((PropertyTile) tile);
+            }
         }
+        if (ownedProps.isEmpty()) return "None";
         return ownedProps.stream()
                 .map(PropertyTile::getName)
                 .collect(Collectors.joining(", "));
     }
 
-    /**
-     * Adjust the column widths to fit content.
-     */
+    private String getRailroadNamesAsString(Player p, List<RailroadTile> allRailroads) {
+        List<String> ownedNames = new ArrayList<>();
+        for (RailroadTile railroad : allRailroads) {
+            if (railroad.getOwner() == p) {
+                ownedNames.add(railroad.getName());
+            }
+        }
+        return ownedNames.isEmpty() ? "None" : String.join(", ", ownedNames);
+    }
+
+    private void refreshPlayerData() {
+        DefaultTableModel model = (DefaultTableModel) playerTable.getModel();
+        model.setRowCount(0);
+
+        List<RailroadTile> allRailroads = getAllRailroads();
+        List<Player> players = controller.getAllPlayers();
+
+        for (Player p : players) {
+            model.addRow(new Object[]{
+                    p.getName(),
+                    String.format("%,d ₽", p.getMoney()),
+                    p.getPosition(),
+                    p.isInJail() ? "Yes" : "No",
+                    getPropertyNamesAsString(p),
+                    getRailroadNamesAsString(p, allRailroads)
+            });
+        }
+    }
+
     private void adjustColumnWidths(JTable table) {
         for (int col = 0; col < table.getColumnCount(); col++) {
             TableColumn tableColumn = table.getColumnModel().getColumn(col);
-            int preferredWidth = 50; // minimum width
+            int preferredWidth = 50;
             int maxWidth = 300;
+
             for (int row = 0; row < table.getRowCount(); row++) {
                 TableCellRenderer cellRenderer = table.getCellRenderer(row, col);
                 Component c = table.prepareRenderer(cellRenderer, row, col);
-                int width = c.getPreferredSize().width + 10;
+                int width = c.getPreferredSize().width + table.getIntercellSpacing().width;
                 preferredWidth = Math.max(preferredWidth, width);
                 if (preferredWidth >= maxWidth) {
                     preferredWidth = maxWidth;
@@ -151,7 +166,4 @@ public class PlayerInfoWindow extends JFrame {
         refreshPlayerData();
         adjustColumnWidths(playerTable);
     }
-
-
 }
-
