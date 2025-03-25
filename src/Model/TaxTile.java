@@ -1,19 +1,20 @@
 package Model;
 
 public class TaxTile extends Tile {
-    private static int TAX_AMOUNT = 100;
-    public TaxTile(String name, int position) {
+    private int taxAmount;
+
+    public TaxTile(String name, int position, int taxAmount) {
         super(name, position);
+        this.taxAmount = taxAmount;
     }
 
     @Override
     public void action(Player player) {
-        // Implement tax tile behavior here (e.g., deduct money)
-        System.out.println("Player " + player.getName() + " must pay tax at " + name);
+        // Deduct money from the player using `this.taxAmount`
+        System.out.println("Player " + player.getName() + " must pay " + taxAmount + " at " + name);
     }
 
-    public static int getTaxAmount() {
-        return TAX_AMOUNT;
+    public int getTaxAmount() {
+        return this.taxAmount;
     }
-
 }
