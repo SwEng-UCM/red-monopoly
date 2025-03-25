@@ -6,16 +6,14 @@ import java.util.Random;
 
 public class MonopolyGame {
 
-    private static class SingletonHelper {
-        private static final MonopolyGame INSTANCE = new MonopolyGame();
-    }
+    private static volatile MonopolyGame INSTANCE; // Volatile ensures visibility across threads
 
     private List<Player> players;
     private Board board;
     private int currentPlayerIndex;
     private Random dice;
 
-    private MonopolyGame() {  // Private constructor prevents external instantiation
+    private MonopolyGame() { 
         players = new ArrayList<>();
         board = new Board();
         currentPlayerIndex = 0;
@@ -23,7 +21,14 @@ public class MonopolyGame {
     }
 
     public static MonopolyGame getInstance() {
-        return SingletonHelper.INSTANCE;
+        if (INSTANCE == null) { 
+            synchronized (MonopolyGame.class) { 
+                if (INSTANCE == null) {
+                    INSTANCE = new MonopolyGame();
+                }
+            }
+        }
+        return INSTANCE;
     }
 
     public void setNumberOfPlayers(int count, List<String> playerNames) {
