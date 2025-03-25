@@ -19,6 +19,19 @@ public class BoardPanel extends JPanel {
     // A map of tileIndex -> JLabel (the visual for that tile)
     private Map<Integer, JLabel> tileLabels = new HashMap<>();
 
+    // Player color management
+    private Map<Player, Color> playerColors = new HashMap<>();
+    private final Color[] PLAYER_COLORS = {
+            new Color(231, 76, 60),    // Red
+            new Color(52, 152, 219),   // Blue
+            new Color(46, 204, 113),   // Green
+            new Color(241, 196, 15),   // Yellow
+            new Color(230, 126, 34),   // Orange
+            new Color(155, 89, 182),   // Purple
+            new Color(26, 188, 156),   // Teal
+            new Color(233, 30, 99)    // Pink
+    };
+
     public BoardPanel(Controller controller) {
         this.controller = controller;
 
@@ -31,7 +44,18 @@ public class BoardPanel extends JPanel {
         // Load your background image
         backgroundImage = new ImageIcon("resources/backgroundBoard.png").getImage();
 
+        initPlayerColors();  // Initialize player colors before tiles
         initTiles();
+    }
+
+    /**
+     * Assigns a unique color to each player for highlighting.
+     */
+    private void initPlayerColors() {
+        List<Player> players = controller.getAllPlayers();
+        for (int i = 0; i < players.size(); i++) {
+            playerColors.put(players.get(i), PLAYER_COLORS[i % PLAYER_COLORS.length]);
+        }
     }
 
     /**
@@ -118,7 +142,7 @@ public class BoardPanel extends JPanel {
 
     /**
      * Returns a (row,col) for the given tile index in "ring" order.
-     * 
+     *
      *  - Indices 0..10 => bottom row, but reversed so 0 is at col=10, 10 is col=0
      *  - Indices 11..19 => left column bottom->top
      *  - Indices 20..30 => top row left->right
@@ -158,7 +182,7 @@ public class BoardPanel extends JPanel {
     }
 
     /**
-     * Build the text for the tile label. 
+     * Build the text for the tile label.
      * If it's a PropertyTile, we insert a colored "header" bar at the top.
      */
     private String generateTileLabelText(Tile tile, int index) {
@@ -183,7 +207,7 @@ public class BoardPanel extends JPanel {
         for (Player p : playersOnTile) {
             Color c = getPlayerColor(p);
             sb.append(String.format(
-                    "<span style='color:rgb(%d,%d,%d); font-size:18px;'>&#9679;</span> ",
+                    "<span style='color:rgb(%d,%d,%d); font-size:25px;'>&#9679;</span> ",
                     c.getRed(), c.getGreen(), c.getBlue()
             ));
         }
@@ -206,12 +230,8 @@ public class BoardPanel extends JPanel {
      * Example color for each player.  You can replace with your own logic.
      */
     private Color getPlayerColor(Player p) {
-        switch (p.getName().toLowerCase()) {
-            case "player1": return Color.RED;
-            case "player2": return Color.BLUE;
-            case "player3": return Color.GREEN;
-            default:        return Color.MAGENTA;
-        }
+        // Return the assigned color or a default if not found
+        return playerColors.getOrDefault(p, Color.GRAY);
     }
 
  /****
@@ -305,7 +325,7 @@ private Color getPropertyHeaderColorByIndex(int index) {
     }
 
     /**
-     * Call this after each turn so tile labels can be updated 
+     * Call this after each turn so tile labels can be updated
      * (for example, to add the current positions of each player).
      */
     public void refreshBoard() {
