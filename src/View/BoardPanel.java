@@ -165,7 +165,7 @@ public class BoardPanel extends JPanel {
         for (Player player : playersOnTile) {
             Color playerColor = playerColors.get(player);
             playersHtml.append(String.format(
-                    "<span style='color: rgb(%d,%d,%d); font-size: 20px;'>&#9679;</span> ", // Unicode for a circle
+                    "<span style='color: rgb(%d,%d,%d); font-size: 40px;'>&#9679;</span> ", // Unicode for a circle
                     playerColor.getRed(), playerColor.getGreen(), playerColor.getBlue()
             ));
         }
