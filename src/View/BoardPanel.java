@@ -186,11 +186,16 @@ public class BoardPanel extends JPanel {
                 .filter(p -> p.getPosition() == index)
                 .collect(Collectors.toList());
 
-        for (Player p : playersOnTile) {
-            // Example: a colored circle
-            Color c = getPlayerColor(p);
-            sb.append(String.format("<span style='color:rgb(%d,%d,%d); font-size:18px;'>&#9679;</span> ",
-                                    c.getRed(), c.getGreen(), c.getBlue()));
+// Remove the conflict markers, keep Helgi’s for-loop
+for (Player p : playersOnTile) {
+    // Example: a colored circle
+    Color c = getPlayerColor(p);
+    sb.append(String.format(
+        "<span style='color:rgb(%d,%d,%d); font-size:18px;'>&#9679;</span> ",
+        c.getRed(), c.getGreen(), c.getBlue()
+    ));
+}
+
         }
 
         sb.append("</div>"); // close body div
