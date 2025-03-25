@@ -162,47 +162,38 @@ public class BoardPanel extends JPanel {
      * If it's a PropertyTile, we insert a colored "header" bar at the top.
      */
     private String generateTileLabelText(Tile tile, int index) {
-        // We build HTML that has a top "header" (possibly colored),
-        // then a body with tile name, index, and any players.
-
         StringBuilder sb = new StringBuilder();
         sb.append("<html>");
 
         if (tile instanceof PropertyTile) {
-            // We'll do a little colored bar at the top
             Color headerColor = getPropertyHeaderColorByIndex(index);
             String colorHex = toHexString(headerColor);
             sb.append("<div style='background-color:")
-              .append(colorHex)
-              .append("; width:100%; height:14px;'></div>");
+                    .append(colorHex)
+                    .append("; width:100%; height:14px;'></div>");
         }
 
-        // Now the body (white background, or default if you like)
         sb.append("<div style='padding:2px; text-align:center;'>");
         sb.append(tile.getName()).append(" (").append(index).append(")<br>");
 
-        // Show any players on this tile
         List<Player> playersOnTile = controller.getAllPlayers().stream()
                 .filter(p -> p.getPosition() == index)
                 .collect(Collectors.toList());
 
-// Remove the conflict markers, keep Helgi’s for-loop
-for (Player p : playersOnTile) {
-    // Example: a colored circle
-    Color c = getPlayerColor(p);
-    sb.append(String.format(
-        "<span style='color:rgb(%d,%d,%d); font-size:18px;'>&#9679;</span> ",
-        c.getRed(), c.getGreen(), c.getBlue()
-    ));
-}
-
+        for (Player p : playersOnTile) {
+            Color c = getPlayerColor(p);
+            sb.append(String.format(
+                    "<span style='color:rgb(%d,%d,%d); font-size:18px;'>&#9679;</span> ",
+                    c.getRed(), c.getGreen(), c.getBlue()
+            ));
         }
 
-        sb.append("</div>"); // close body div
+        // Remove the extra '}' that was here!
+        sb.append("</div>");
         sb.append("</html>");
-
         return sb.toString();
     }
+
 
     /**
      * Convert a Color to #RRGGBB hex string.
