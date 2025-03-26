@@ -20,4 +20,11 @@ public class AIPlayer extends Player {
     public void takeTurn(MonopolyGame game, Controller controller) {
         strategy.playTurn(this, game, controller);
     }
+
+    /**
+     * Called when the dice values are provided externally (for dice animation consistency).
+     */
+    public void takeTurnWithDice(int[] diceValues, MonopolyGame game, Controller controller) {
+        strategy.playTurn(this, game, controller, diceValues);
+    }
 }
