@@ -73,12 +73,38 @@ public class MainWindow extends JFrame {
         JButton playButton = createStyledButton("Play Game");
         playButton.addActionListener(e -> {
             MusicPlayer.playSoundEffect(filePath);
+
+            // First, show a custom dialog with a combo box for AI difficulty selection.
+            JPanel difficultyPanel = new JPanel(new GridLayout(0, 1));
+            difficultyPanel.add(new JLabel("Select AI Difficulty:"));
+            String[] difficulties = {"Easy", "Medium", "Hard"};
+            JComboBox<String> difficultyCombo = new JComboBox<>(difficulties);
+            difficultyPanel.add(difficultyCombo);
+
+            int diffResult = JOptionPane.showConfirmDialog(
+                    this,
+                    difficultyPanel,
+                    "AI Difficulty Selection",
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.QUESTION_MESSAGE
+            );
+
+            if (diffResult != JOptionPane.OK_OPTION) {
+                return; // User canceled the dialog.
+            }
+
+            // Store the chosen difficulty in the controller.
+            String chosenDifficulty = (String) difficultyCombo.getSelectedItem();
+            _controller.setAIDifficulty(chosenDifficulty);
+
+            // Next, prompt for the number of players.
             String input = JOptionPane.showInputDialog(
                     this,
                     "How many players? (2-8)",
                     "Number of Players",
                     JOptionPane.QUESTION_MESSAGE
             );
+
             if (input != null) {
                 try {
                     int numPlayers = Integer.parseInt(input);
@@ -93,7 +119,7 @@ public class MainWindow extends JFrame {
                     for (int i = 1; i <= numPlayers; i++) {
                         String name = JOptionPane.showInputDialog(
                                 this,
-                                "Enter name for Player " + i + ":",
+                                "Enter name for Player " + i + " (enter 'AI' for computer control):",
                                 "Player Name",
                                 JOptionPane.QUESTION_MESSAGE
                         );
@@ -107,7 +133,7 @@ public class MainWindow extends JFrame {
                         playerNames.add(name);
                     }
                     _controller.setNumberOfPlayers(numPlayers, playerNames);
-                    // Stop main menu music and open game window.
+                    // Stop main menu music and open the game window.
                     musicPlayer.stopMusic();
                     GameWindow gameWindow = new GameWindow(_controller, this);
                     this.setVisible(false);
@@ -120,6 +146,7 @@ public class MainWindow extends JFrame {
                 }
             }
         });
+
 
         JButton optionsButton = createStyledButton("Options");
         optionsButton.addActionListener(e -> {

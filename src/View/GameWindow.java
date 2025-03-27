@@ -1,7 +1,10 @@
 package View;
 
 import Controller.Controller;
+import Model.AIPlayer;
 import Model.Player;
+import Model.MonopolyGame;
+import Model.PropertyTile;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -41,6 +44,9 @@ public class GameWindow extends JFrame {
                 _mainWindow.setVisible(true);
             }
         });
+
+        // If the first player is AI, trigger its turn automatically.
+        checkAndTriggerAITurn();
     }
 
     private void initGUI() {
@@ -62,7 +68,7 @@ public class GameWindow extends JFrame {
         JPanel bottomPanel = new JPanel();
         bottomPanel.setBackground(Color.RED);
 
-        // Roll Dice Button
+        // Roll Dice Button for human players.
         JButton rollDiceButton = createImageButton(
                 "resources/dicesRolling.png",
                 "Roll the dice to move",
@@ -79,17 +85,19 @@ public class GameWindow extends JFrame {
                         // Now move the player using the previously rolled dice.
                         String result = _controller.movePlayerAfterDiceRoll(diceValues);
                         // Optionally, display 'result' in a dialog or log it.
-                        // For example: JOptionPane.showMessageDialog(null, result);
+                        // JOptionPane.showMessageDialog(null, result);
 
                         // Update UI elements.
                         updateCurrentPlayerLabel();
                         updateCurrentBalanceLabel();
                         boardPanel.refreshBoard();
+
+                        // Check if the next player is an AI and trigger its turn automatically.
+                        checkAndTriggerAITurn();
                     }).start();
                 }
         );
         bottomPanel.add(rollDiceButton);
-
 
         // Back to Main Menu Button
         JButton backButton = createImageButton(
@@ -124,7 +132,6 @@ public class GameWindow extends JFrame {
 
         // Create & place the DualDicePanel on the right side (EAST).
         dualDicePanel = new DualDicePanel();
-        // Set a preferred size so it's not too large
         dualDicePanel.setPreferredSize(new Dimension(200, 200));
         centerPanel.add(dualDicePanel, BorderLayout.EAST);
 
@@ -136,6 +143,33 @@ public class GameWindow extends JFrame {
 
         updateCurrentPlayerLabel();
         updateCurrentBalanceLabel();
+    }
+
+    // Helper method: checks if the current player is an AI and triggers its turn after a 2-second delay.
+    private void checkAndTriggerAITurn() {
+        Player current = _controller.getCurrentPlayer();
+        if (current instanceof Model.AIPlayer) {
+            // Delay before starting AI turn.
+            new Timer(2000, evt -> {
+                ((Timer) evt.getSource()).stop();
+                // Roll dice externally.
+                int[] diceValues = _controller.rollDice();
+                // Start dice animation (same as for human players).
+                dualDicePanel.startAnimation(diceValues[0], diceValues[1]);
+                // After dice animation delay, process the move.
+                new Timer(2000, evt2 -> {
+                    ((Timer) evt2.getSource()).stop();
+                    // Now let the AI take its turn using the provided dice values.
+                    ((Model.AIPlayer) current).takeTurnWithDice(diceValues, _controller.getMonopolyGame(), _controller);
+                    // Update UI elements.
+                    updateCurrentPlayerLabel();
+                    updateCurrentBalanceLabel();
+                    boardPanel.refreshBoard();
+                    // Check if the next player is also AI.
+                    checkAndTriggerAITurn();
+                }).start();
+            }).start();
+        }
     }
 
     private JButton createImageButton(String imagePath, String toolTip, java.awt.event.ActionListener listener) {

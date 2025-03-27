@@ -13,6 +13,7 @@ public class Controller {
     // New fields to store the last rolled dice values.
     private int lastDie1;
     private int lastDie2;
+    private String aiDifficulty = "Easy";
 
     public Controller(MonopolyGame game) {
         this._game = game;
@@ -22,9 +23,51 @@ public class Controller {
         // Your game loop logic here.
     }
 
-    public void setNumberOfPlayers(int numPlayers, List<String> playerNames) {
-        _game.setNumberOfPlayers(numPlayers, playerNames);
+    public void setAIDifficulty(String difficulty) {
+        aiDifficulty = difficulty;
     }
+
+    public String getAIDifficulty() {
+        return aiDifficulty;
+    }
+
+    public void setNumberOfPlayers(int count, List<String> playerNames) {
+        if (count < 1) count = 1;
+        if (count > 8) count = 8;
+
+        // Clear the existing players.
+        _game.getPlayers().clear();
+        for (int i = 0; i < count; i++) {
+            String name = playerNames.get(i).trim();
+            Player p;
+            // Use a case-insensitive check after trimming.
+            if(name.equalsIgnoreCase("ai")) {
+                // Create an AI player with the selected difficulty.
+                AIStrategy strategy;
+                switch(aiDifficulty.toLowerCase()){
+                    case "easy":
+                        strategy = new Model.EasyAIStrategy();
+                        break;
+                    case "hard":
+                        strategy = new Model.HardAIStrategy();
+                        break;
+                    case "medium":
+                    default:
+                        strategy = new Model.MidAIStrategy();
+                        break;
+                }
+                System.out.println("Creating AI player at index " + i);
+                p = new Model.AIPlayer(name, strategy);
+            } else {
+                System.out.println("Creating Human player '" + name + "' at index " + i);
+                p = new Model.Player(name);
+            }
+            _game.getPlayers().add(p);
+        }
+        // Reset the current player index (make sure your game instance resets correctly).
+        //
+    }
+
 
     public String getCurrentPlayerName() {
         return _game.getCurrentPlayer().getName();
@@ -214,5 +257,13 @@ public class Controller {
 
     public List<Tile> getBoardTiles() {
         return _game.getBoard().getTiles();
+    }
+
+    public MonopolyGame getMonopolyGame() {
+        return _game;
+    }
+
+    public Player getCurrentPlayer(){
+        return _game.getCurrentPlayer();
     }
 }
