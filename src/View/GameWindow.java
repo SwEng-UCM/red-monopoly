@@ -99,16 +99,43 @@ public class GameWindow extends JFrame {
         );
         bottomPanel.add(rollDiceButton);
 
-        // Back to Main Menu Button
-        JButton backButton = createImageButton(
+        // In the bottom panel of GameWindow (inside initGUI())
+        JButton leaveButton = createImageButton(
                 "resources/goBack.png",
-                "Return to the main menu",
+                "Leave Game",
                 e -> {
                     MusicPlayer.playSoundEffect(filePath);
+                    int choice = JOptionPane.showConfirmDialog(
+                            this,
+                            "Do you want to save the game before leaving?",
+                            "Save Game",
+                            JOptionPane.YES_NO_CANCEL_OPTION
+                    );
+                    if (choice == JOptionPane.CANCEL_OPTION) {
+                        return; // Cancel leaving
+                    } else if (choice == JOptionPane.YES_OPTION) {
+                        String saveName = JOptionPane.showInputDialog(
+                                this,
+                                "Enter save game file name (e.g., mySave.json):",
+                                "Save Game",
+                                JOptionPane.QUESTION_MESSAGE
+                        );
+                        if (saveName != null && !saveName.trim().isEmpty()) {
+                            _controller.saveGame(saveName.trim());
+                            JOptionPane.showMessageDialog(this, "Game saved successfully!");
+                        } else {
+                            JOptionPane.showMessageDialog(this, "Invalid file name. Game not saved.");
+                            // Optionally, you can cancel leaving if save failed.
+                            return;
+                        }
+                    }
+                    // After handling save (or if user selected No), dispose the game window.
                     dispose();
                 }
         );
-        bottomPanel.add(backButton);
+        bottomPanel.add(leaveButton);
+
+
 
         // Player Info Button
         JButton playerInfoButton = createImageButton(
