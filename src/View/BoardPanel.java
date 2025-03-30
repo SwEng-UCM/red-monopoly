@@ -4,10 +4,10 @@ import Controller.Controller;
 import Model.*;
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
+
 
 public class BoardPanel extends JPanel {
     private Controller controller;
@@ -40,10 +40,35 @@ public class BoardPanel extends JPanel {
      */
     private void initPlayerColors() {
         List<Player> players = controller.getAllPlayers();
-        Color[] colors = {Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.ORANGE, Color.MAGENTA};
-        for (int i = 0; i < players.size(); i++) {
-            playerColors.put(players.get(i), colors[i % colors.length]);
+        List<Color> availableColors = new ArrayList<>(Arrays.asList(
+                Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW,
+                Color.ORANGE, Color.MAGENTA, Color.CYAN, Color.PINK
+        ));
+
+        for (Player player : players) {
+            Color selectedColor = chooseColor(player, availableColors);
+            if (selectedColor != null) {
+                playerColors.put(player, selectedColor);
+                availableColors.remove(selectedColor); // Remove chosen color
+            }
         }
+    }
+    private Color chooseColor(Player player, List<Color> availableColors) {
+        Color[] colorArray = availableColors.toArray(new Color[0]);
+        String[] colorNames = {"Red", "Blue", "Green", "Yellow", "Orange", "Magenta", "Cyan", "Pink"};
+
+        int choice = JOptionPane.showOptionDialog(
+                null,
+                "Choose a color for " + player.getName(),
+                "Color Selection",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                colorNames,
+                colorNames[0]
+        );
+
+        return choice >= 0 ? colorArray[choice] : null;
     }
 
     private void initGUI() {
