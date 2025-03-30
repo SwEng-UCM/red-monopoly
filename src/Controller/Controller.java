@@ -3,9 +3,17 @@ package Controller;
 import Model.*;
 import javax.swing.JOptionPane; // Import JOptionPane for displaying messages
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import Model.GameState;
+import Model.MonopolyGame;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class Controller {
     private MonopolyGame _game;
@@ -14,6 +22,10 @@ public class Controller {
     private int lastDie1;
     private int lastDie2;
     private String aiDifficulty = "Easy";
+
+
+
+
 
     public Controller(MonopolyGame game) {
         this._game = game;
@@ -266,4 +278,91 @@ public class Controller {
     public Player getCurrentPlayer(){
         return _game.getCurrentPlayer();
     }
+
+    public void saveGame(String filename) {
+        // Ensure the "games" directory exists.
+        File dir = new File("games");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        File file = new File(dir, filename);
+
+        // Register the RuntimeTypeAdapterFactory for Tile.
+        RuntimeTypeAdapterFactory<Tile> tileAdapterFactory = RuntimeTypeAdapterFactory
+                .of(Tile.class, "tileType")
+                .registerSubtype(GoTile.class, "GoTile")
+                .registerSubtype(PropertyTile.class, "PropertyTile")
+                .registerSubtype(ChanceTile.class, "ChanceTile")
+                .registerSubtype(JailTile.class, "JailTile")
+                .registerSubtype(GoToJailTile.class, "GoToJailTile")
+                .registerSubtype(TaxTile.class, "TaxTile")
+                .registerSubtype(CommunityChestTile.class, "CommunityChestTile")
+                .registerSubtype(FreeParkingTile.class, "FreeParkingTile")
+                .registerSubtype(RailroadTile.class, "RailroadTile")
+                .registerSubtype(UtilityTile.class, "UtilityTile");
+
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapterFactory(tileAdapterFactory)
+                .setPrettyPrinting()
+                .create();
+
+        // Create GameState with correct turn index (make sure getCurrentPlayerIndex() is implemented)
+        GameState state = new GameState(
+                _game.getPlayers(),
+                _game.getBoard(),
+                _game.getCurrentPlayerIndex()
+        );
+
+        try (FileWriter writer = new FileWriter(file)) {
+            gson.toJson(state, writer);
+            System.out.println("Game saved to " + file.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void loadGame(String filename) {
+        // Build the file path using the "games" directory.
+        File file = new File("games", filename);
+
+        // Register the same adapter factory for Tile.
+        RuntimeTypeAdapterFactory<Tile> tileAdapterFactory = RuntimeTypeAdapterFactory
+                .of(Tile.class, "tileType")
+                .registerSubtype(GoTile.class, "GoTile")
+                .registerSubtype(PropertyTile.class, "PropertyTile")
+                .registerSubtype(ChanceTile.class, "ChanceTile")
+                .registerSubtype(JailTile.class, "JailTile")
+                .registerSubtype(GoToJailTile.class, "GoToJailTile")
+                .registerSubtype(TaxTile.class, "TaxTile")
+                .registerSubtype(CommunityChestTile.class, "CommunityChestTile")
+                .registerSubtype(FreeParkingTile.class, "FreeParkingTile")
+                .registerSubtype(RailroadTile.class, "RailroadTile")
+                .registerSubtype(UtilityTile.class, "UtilityTile");
+
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapterFactory(tileAdapterFactory)
+                .create();
+
+        try (FileReader reader = new FileReader(file)) {
+            GameState state = gson.fromJson(reader, GameState.class);
+            if (state == null || state.getPlayers() == null || state.getPlayers().isEmpty()) {
+                System.err.println("Loaded game state is empty. Check file: " + file.getAbsolutePath());
+                return;
+            }
+            // Restore game state.
+            _game.getPlayers().clear();
+            _game.getPlayers().addAll(state.getPlayers());
+            // Optionally restore board and current turn index if setters exist:
+            // _game.setBoard(state.getBoard());
+            // _game.setCurrentPlayerIndex(state.getCurrentPlayerIndex());
+            System.out.println("Game loaded from " + file.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+
 }

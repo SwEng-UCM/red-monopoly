@@ -78,4 +78,8 @@ public class MonopolyGame {
     public int getNumberOfPlayers() {
         return players.size();
     }
+
+    public int getCurrentPlayerIndex() {
+        return currentPlayerIndex;
+    }
 }

@@ -147,6 +147,25 @@ public class MainWindow extends JFrame {
             }
         });
 
+        // New Load Game button
+        JButton loadGameButton = createStyledButton("Load Game");
+        loadGameButton.addActionListener(e -> {
+            MusicPlayer.playSoundEffect(filePath);
+            // Use a file chooser with the "games" directory.
+            JFileChooser fileChooser = new JFileChooser("games"); // "games" directory inside your project.
+            int returnVal = fileChooser.showOpenDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                String saveFile = fileChooser.getSelectedFile().getAbsolutePath();
+                _controller.loadGame(saveFile);
+                // Stop main menu music and open the game window with loaded state.
+                musicPlayer.stopMusic();
+                GameWindow gameWindow = new GameWindow(_controller, this);
+                this.setVisible(false);
+                gameWindow.setVisible(true);
+            }
+        });
+        //buttonPanel.add(loadGameButton);
+
 
         JButton optionsButton = createStyledButton("Options");
         optionsButton.addActionListener(e -> {
@@ -160,8 +179,11 @@ public class MainWindow extends JFrame {
             System.exit(0);
         });
 
+        // Add buttons to the panel.
         buttonPanel.add(Box.createVerticalGlue());
         buttonPanel.add(playButton);
+        buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        buttonPanel.add(loadGameButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         buttonPanel.add(optionsButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
@@ -173,6 +195,7 @@ public class MainWindow extends JFrame {
         menuPanel.add(layeredPane, BorderLayout.CENTER);
         return menuPanel;
     }
+
 
     private JButton createStyledButton(String text) {
         JButton button = new JButton(text);
