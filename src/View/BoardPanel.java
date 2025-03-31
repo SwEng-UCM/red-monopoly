@@ -29,7 +29,7 @@ public class BoardPanel extends JPanel {
             new Color(230, 126, 34),   // Orange
             new Color(155, 89, 182),   // Purple
             new Color(26, 188, 156),   // Teal
-            new Color(233, 30, 99)    // Pink
+            new Color(233, 30, 99)     // Pink
     };
 
     public BoardPanel(Controller controller) {
@@ -50,12 +50,40 @@ public class BoardPanel extends JPanel {
 
     /**
      * Assigns a unique color to each player for highlighting.
+     * Uses interactive color selection.
      */
     private void initPlayerColors() {
         List<Player> players = controller.getAllPlayers();
-        for (int i = 0; i < players.size(); i++) {
-            playerColors.put(players.get(i), PLAYER_COLORS[i % PLAYER_COLORS.length]);
+        List<Color> availableColors = new ArrayList<>(Arrays.asList(
+                Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW,
+                Color.ORANGE, Color.MAGENTA, Color.CYAN, Color.PINK
+        ));
+
+        for (Player player : players) {
+            Color selectedColor = chooseColor(player, availableColors);
+            if (selectedColor != null) {
+                playerColors.put(player, selectedColor);
+                availableColors.remove(selectedColor); // Remove chosen color
+            }
         }
+    }
+
+    private Color chooseColor(Player player, List<Color> availableColors) {
+        Color[] colorArray = availableColors.toArray(new Color[0]);
+        String[] colorNames = {"Red", "Blue", "Green", "Yellow", "Orange", "Magenta", "Cyan", "Pink"};
+
+        int choice = JOptionPane.showOptionDialog(
+                null,
+                "Choose a color for " + player.getName(),
+                "Color Selection",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                colorNames,
+                colorNames[0]
+        );
+
+        return choice >= 0 ? colorArray[choice] : null;
     }
 
     /**
@@ -86,9 +114,7 @@ public class BoardPanel extends JPanel {
         label.setOpaque(true);
         label.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
-        // We won't rely on label.setBackground for property color anymore
-        // because we'll do the color strip via HTML.
-        // Let's set property tiles to white, others to LIGHT_GRAY:
+        // Use white for property tiles, light gray otherwise
         if (tile instanceof PropertyTile) {
             label.setBackground(Color.WHITE);
         } else {
@@ -100,7 +126,7 @@ public class BoardPanel extends JPanel {
         label.setHorizontalTextPosition(SwingConstants.CENTER);
         label.setVerticalTextPosition(SwingConstants.BOTTOM);
 
-        // Initial text (tile name + index + color header if property).
+        // Set initial text (tile name + index + color header if property).
         label.setText(generateTileLabelText(tile, index));
 
         return label;
@@ -117,7 +143,7 @@ public class BoardPanel extends JPanel {
         // Figure out how big each "cell" in an 11×11 ring is
         int w = getWidth();
         int h = getHeight();
-        int cellW = w / 11;   // integer division
+        int cellW = w / 11;
         int cellH = h / 11;
 
         // Position each tile
@@ -132,58 +158,41 @@ public class BoardPanel extends JPanel {
             int x = col * cellW;
             int y = row * cellH;
 
-            // If col=10, we might want x = w - cellW (to avoid leftover px)
-            // If row=10, we might want y = h - cellH
-            // But simplest is just col * cellW, row * cellH.
-
             label.setBounds(x, y, cellW, cellH);
         }
     }
 
     /**
-     * Returns a (row,col) for the given tile index in "ring" order.
+     * Returns a (row, col) for the given tile index in "ring" order.
+     *  - Indices 0..10 => bottom row (reversed: 0 is at col=10, 10 is col=0)
+     *  - Indices 11..19 => left column (bottom to top)
+     *  - Indices 20..30 => top row (left to right)
+     *  - Indices 31..39 => right column (top to bottom)
      *
-     *  - Indices 0..10 => bottom row, but reversed so 0 is at col=10, 10 is col=0
-     *  - Indices 11..19 => left column bottom->top
-     *  - Indices 20..30 => top row left->right
-     *  - Indices 31..39 => right column top->bottom
-     *
-     * We'll return as Point(row, col).
+     * Returned as a Point(row, col).
      */
     private Point getTileRowCol(int index) {
         if (index >= 0 && index <= 10) {
-            // Bottom row (reverse): row=10, col=10 - index
             int col = 10 - index;
             return new Point(10, col);
-
         } else if (index >= 11 && index <= 19) {
-            // Left column bottom->top
-            // col=0, row from 9..1
-            int offset = index - 11;      // 0..8
-            int row = 9 - offset;         // 9..1
+            int offset = index - 11;
+            int row = 9 - offset;
             return new Point(row, 0);
-
         } else if (index >= 20 && index <= 30) {
-            // Top row left->right
-            // row=0, col=0..10
-            int offset = index - 20;      // 0..10
+            int offset = index - 20;
             return new Point(0, offset);
-
         } else if (index >= 31 && index <= 39) {
-            // Right column top->bottom
-            // col=10, row=1..9
-            int offset = index - 31;      // 0..8
-            int row = 1 + offset;         // 1..9
+            int offset = index - 31;
+            int row = 1 + offset;
             return new Point(row, 10);
         }
-
-        // Fallback if something outside 0..39
         return new Point(0, 0);
     }
 
     /**
      * Build the text for the tile label.
-     * If it's a PropertyTile, we insert a colored "header" bar at the top.
+     * If it's a PropertyTile, a colored "header" bar is inserted at the top.
      */
     private String generateTileLabelText(Tile tile, int index) {
         StringBuilder sb = new StringBuilder();
@@ -193,8 +202,8 @@ public class BoardPanel extends JPanel {
             Color headerColor = getPropertyHeaderColorByIndex(index);
             String colorHex = toHexString(headerColor);
             sb.append("<div style='background-color:")
-                    .append(colorHex)
-                    .append("; width:100%; height:14px;'></div>");
+              .append(colorHex)
+              .append("; width:100%; height:14px;'></div>");
         }
 
         sb.append("<div style='padding:2px; text-align:center;'>");
@@ -212,88 +221,58 @@ public class BoardPanel extends JPanel {
             ));
         }
 
-        // Remove the extra '}' that was here!
         sb.append("</div>");
         sb.append("</html>");
         return sb.toString();
     }
 
-
     /**
-     * Convert a Color to #RRGGBB hex string.
+     * Convert a Color to a #RRGGBB hex string.
      */
     private String toHexString(Color c) {
         return String.format("#%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
     }
 
     /**
-     * Example color for each player.  You can replace with your own logic.
+     * Returns a Color for the header strip of each property tile.
+     */
+    private Color getPropertyHeaderColorByIndex(int index) {
+        if (index == 1 || index == 3) {
+            return new Color(0x7B3F00);
+        }
+        if (index == 6 || index == 8 || index == 9) {
+            return new Color(0x5085A5);
+        }
+        if (index == 11 || index == 13 || index == 14) {
+            return new Color(0xC94C62);
+        }
+        if (index == 16 || index == 18 || index == 19) {
+            return new Color(0xC7771E);
+        }
+        if (index == 21 || index == 23 || index == 24) {
+            return new Color(0xA40000);
+        }
+        if (index == 26 || index == 27 || index == 29) {
+            return new Color(0xFFD700);
+        }
+        if (index == 31 || index == 32 || index == 34) {
+            return new Color(0x3C7D3C);
+        }
+        if (index == 37 || index == 39) {
+            return new Color(0x14213D);
+        }
+        return new Color(200, 200, 200);
+    }
+
+    /**
+     * Returns a Color for the given player.
      */
     private Color getPlayerColor(Player p) {
-        // Return the assigned color or a default if not found
         return playerColors.getOrDefault(p, Color.GRAY);
     }
 
- /****
- * Returns a Color for the "header strip" of each property tile,
- * using a custom Soviet-inspired palette.
- */
-private Color getPropertyHeaderColorByIndex(int index) {
-    // Brown group (2 properties)
-    if (index == 1 || index == 3) {
-        // A dark russet/brown
-        return new Color(0x7B3F00);
-    }
-
-    // Light Blue group (3 properties)
-    if (index == 6 || index == 8 || index == 9) {
-        // Muted Soviet teal/blue
-        return new Color(0x5085A5);
-    }
-
-    // Pink group (3 properties)
-    if (index == 11 || index == 13 || index == 14) {
-        // A warm pink/red
-        return new Color(0xC94C62);
-    }
-
-    // Orange group (3 properties)
-    if (index == 16 || index == 18 || index == 19) {
-        // Earthy Soviet orange
-        return new Color(0xC7771E);
-    }
-
-    // Red group (3 properties)
-    if (index == 21 || index == 23 || index == 24) {
-        // Deep Soviet red
-        return new Color(0xA40000);
-    }
-
-    // Yellow group (3 properties)
-    if (index == 26 || index == 27 || index == 29) {
-        // A bold golden hue
-        return new Color(0xFFD700);
-    }
-
-    // Green group (3 properties)
-    if (index == 31 || index == 32 || index == 34) {
-        // Dark, military-style green
-        return new Color(0x3C7D3C);
-    }
-
-    // Dark Blue group (2 properties)
-    if (index == 37 || index == 39) {
-        // Deep navy / midnight blue
-        return new Color(0x14213D);
-    }
-
-    // Fallback / default for anything else
-    return new Color(200, 200, 200);
-}
-
-
     /**
-     * Decide which icon to use based on tile type.
+     * Determines which icon to use based on the tile type.
      */
     private Icon getTileIcon(Tile tile) {
         if (tile instanceof PropertyTile) {
@@ -314,7 +293,7 @@ private Color getPropertyHeaderColorByIndex(int index) {
     }
 
     /**
-     * Paint the background image stretched to fill this panel.
+     * Paints the background image stretched to fill this panel.
      */
     @Override
     protected void paintComponent(Graphics g) {
@@ -325,8 +304,7 @@ private Color getPropertyHeaderColorByIndex(int index) {
     }
 
     /**
-     * Call this after each turn so tile labels can be updated
-     * (for example, to add the current positions of each player).
+     * Refreshes the board by updating the tile labels (e.g., showing current player positions).
      */
     public void refreshBoard() {
         List<Tile> tiles = controller.getBoardTiles();
