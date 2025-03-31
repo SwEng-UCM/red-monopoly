@@ -1,18 +1,27 @@
 package Controller;
 
 import Model.*;
-import javax.swing.JOptionPane; // Import JOptionPane for displaying messages
-
+import Model.GameState;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 import java.util.stream.Collectors;
+import javax.swing.JOptionPane;
 
 public class Controller {
     private MonopolyGame _game;
     private static final int JAIL_RELEASE_FEE = 50; // Fee to pay on the third turn
-    // New fields to store the last rolled dice values.
     private int lastDie1;
     private int lastDie2;
+    private String aiDifficulty = "Easy";
+    private Stack<Command> commandHistory = new Stack<>();
 
     public Controller(MonopolyGame game) {
         this._game = game;
@@ -22,8 +31,48 @@ public class Controller {
         // Your game loop logic here.
     }
 
-    public void setNumberOfPlayers(int numPlayers, List<String> playerNames) {
-        _game.setNumberOfPlayers(numPlayers, playerNames);
+    // --- AI Difficulty and Player Setup ---
+    public void setAIDifficulty(String difficulty) {
+        aiDifficulty = difficulty;
+    }
+
+    public String getAIDifficulty() {
+        return aiDifficulty;
+    }
+
+    public void setNumberOfPlayers(int count, List<String> playerNames) {
+        if (count < 1) count = 1;
+        if (count > 8) count = 8;
+
+        _game.getPlayers().clear();
+        for (int i = 0; i < count; i++) {
+            String name = playerNames.get(i).trim();
+            Player p;
+            if(name.equalsIgnoreCase("ai")) {
+                // Create an AI player with the selected difficulty.
+                AIStrategy strategy;
+                switch(aiDifficulty.toLowerCase()){
+                    case "easy":
+                        strategy = new Model.EasyAIStrategy();
+                        break;
+                    case "hard":
+                        strategy = new Model.HardAIStrategy();
+                        break;
+                    case "medium":
+                    default:
+                        strategy = new Model.MidAIStrategy();
+                        break;
+                }
+                System.out.println("Creating AI player at index " + i);
+                p = new Model.AIPlayer(name, strategy);
+            } else {
+                System.out.println("Creating Human player '" + name + "' at index " + i);
+                p = new Model.Player(name);
+            }
+            _game.getPlayers().add(p);
+        }
+        // Reset turn index if needed (ensure your MonopolyGame supports this)
+        // For example: _game.setCurrentPlayerIndex(0);
     }
 
     public String getCurrentPlayerName() {
@@ -34,14 +83,7 @@ public class Controller {
         return _game.getCurrentPlayer().getMoney();
     }
 
-    /**
-     * Returns the results of the last dice roll as an array of two integers:
-     * index 0 is the value of the first die and index 1 is the value of the second die.
-     */
-    /**
-     * Rolls the dice without moving the player.
-     * Returns an array of two ints: [die1, die2].
-     */
+    // --- Dice Rolling and Movement ---
     public int[] rollDice() {
         int die1 = _game.rollSingleDie();
         int die2 = _game.rollSingleDie();
@@ -50,17 +92,13 @@ public class Controller {
         return new int[]{die1, die2};
     }
 
-    /**
-     * Applies the dice result to move the player.
-     * This method uses the dice values passed as an argument.
-     */
     public String movePlayerAfterDiceRoll(int[] dice) {
         Player current = _game.getCurrentPlayer();
         String message = "";
 
         if (current.isInJail()) {
             int jailTurns = current.getJailTurnCount();
-            if (jailTurns < 2) { // First and second turns in Gulag: attempt doubles
+            if (jailTurns < 2) { // Attempt doubles
                 message = current.getName() + " is in Gulag (Turn " + (jailTurns + 1) + ") and rolled "
                         + dice[0] + " and " + dice[1] + ". ";
                 if (dice[0] == dice[1]) {
@@ -96,7 +134,6 @@ public class Controller {
                         current.deductMoney(JAIL_RELEASE_FEE);
                         current.setInJail(false);
                         current.resetJailTurn();
-                        // Roll dice again for movement after paying fee.
                         int feeDie1 = _game.rollSingleDie();
                         int feeDie2 = _game.rollSingleDie();
                         lastDie1 = feeDie1;
@@ -112,7 +149,7 @@ public class Controller {
                 }
                 JOptionPane.showMessageDialog(null, message);
             }
-        } else { // Normal turn (player not in Gulag)
+        } else { // Normal turn
             int roll = dice[0] + dice[1];
             _game.movePlayer(current, roll);
             Tile tile = _game.getBoard().getTile(current.getPosition());
@@ -160,7 +197,6 @@ public class Controller {
         message += "Current balance: " + current.getMoney() + " ₽\n";
         checkPlayerElimination();
 
-        // Proceed with turn change if game not over.
         if (_game.getPlayers().size() > 1) {
             _game.nextTurn();
         }
@@ -168,51 +204,148 @@ public class Controller {
         return message;
     }
 
-
     private void checkPlayerElimination() {
         List<Player> players = _game.getPlayers();
-
         List<String> eliminatedNames = players.stream()
                 .filter(p -> p.getMoney() < 0)
                 .map(Player::getName)
                 .collect(Collectors.toList());
-
         if (!eliminatedNames.isEmpty()) {
             String eliminationMessage = "Eliminated players due to negative balance: " +
                     String.join(", ", eliminatedNames);
-            JOptionPane.showMessageDialog(null, eliminationMessage); // Display elimination message in a dialog box
+            JOptionPane.showMessageDialog(null, eliminationMessage);
             players.removeIf(p -> p.getMoney() < 0);
         }
-
         if (players.size() == 1) {
             String winnerMessage = "Game Over! Winner: " + players.get(0).getName();
-            JOptionPane.showMessageDialog(null, winnerMessage); // Display winner message in a dialog box
+            JOptionPane.showMessageDialog(null, winnerMessage);
         }
     }
 
-    public int getNumberOfPlayers() {
-        return _game.getNumberOfPlayers();
+    // --- Command Pattern Support ---
+    public void executeCommand(Command command) {
+        command.execute();
+        commandHistory.push(command);
     }
 
-    public List<Player> getAllPlayers() {
-        return _game.getPlayers(); // Assuming MonopolyGame has a getPlayers() method
+    public void undoLastCommand() {
+        if (!commandHistory.isEmpty()) {
+            Command command = commandHistory.pop();
+            command.undo();
+        } else {
+            System.out.println("No commands to undo.");
+        }
     }
 
-    public List<PropertyTile> getOwnedProperties(Player p) {
-        List<PropertyTile> ownedProperties = new ArrayList<PropertyTile>();
-        List<Tile> tiles = _game.getBoard().getTiles();
-        for (Tile tile : tiles) {
-            if (tile instanceof PropertyTile) {
-                PropertyTile propertyTile = (PropertyTile) tile;
-                if (propertyTile.getOwner() != null && propertyTile.getOwner().equals(p)) {
-                    ownedProperties.add(propertyTile);
-                }
+    public void movePlayerWithCommand(int[] dice) {
+        MoveCommand command = new MoveCommand(_game, _game.getCurrentPlayer(), dice);
+        executeCommand(command);
+    }
+
+    public Stack<Command> getCommandHistory() {
+        return commandHistory;
+    }
+
+    // --- Save/Load using Gson and RuntimeTypeAdapterFactory for Tile ---
+    public void saveGame(String filename) {
+        File dir = new File("games");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        File file = new File(dir, filename);
+
+        RuntimeTypeAdapterFactory<Tile> tileAdapterFactory = RuntimeTypeAdapterFactory
+                .of(Tile.class, "tileType")
+                .registerSubtype(GoTile.class, "GoTile")
+                .registerSubtype(PropertyTile.class, "PropertyTile")
+                .registerSubtype(ChanceTile.class, "ChanceTile")
+                .registerSubtype(JailTile.class, "JailTile")
+                .registerSubtype(GoToJailTile.class, "GoToJailTile")
+                .registerSubtype(TaxTile.class, "TaxTile")
+                .registerSubtype(CommunityChestTile.class, "CommunityChestTile")
+                .registerSubtype(FreeParkingTile.class, "FreeParkingTile")
+                .registerSubtype(RailroadTile.class, "RailroadTile")
+                .registerSubtype(UtilityTile.class, "UtilityTile");
+
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapterFactory(tileAdapterFactory)
+                .setPrettyPrinting()
+                .create();
+
+        // Use the current player index from _game (ensure getCurrentPlayerIndex() is defined)
+        GameState state = new GameState(
+                _game.getPlayers(),
+                _game.getBoard(),
+                _game.getCurrentPlayerIndex()
+        );
+        try (FileWriter writer = new FileWriter(file)) {
+            gson.toJson(state, writer);
+            System.out.println("Game saved to " + file.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void loadGame(String filename) {
+        // Attempt to open the file using the provided filename.
+        File file = new File(filename);
+        // If the file does not exist, assume it's a relative name and look in "games" folder.
+        if (!file.exists()) {
+            file = new File("games", filename);
+        }
+
+        RuntimeTypeAdapterFactory<Tile> tileAdapterFactory = RuntimeTypeAdapterFactory
+                .of(Tile.class, "tileType")
+                .registerSubtype(GoTile.class, "GoTile")
+                .registerSubtype(PropertyTile.class, "PropertyTile")
+                .registerSubtype(ChanceTile.class, "ChanceTile")
+                .registerSubtype(JailTile.class, "JailTile")
+                .registerSubtype(GoToJailTile.class, "GoToJailTile")
+                .registerSubtype(TaxTile.class, "TaxTile")
+                .registerSubtype(CommunityChestTile.class, "CommunityChestTile")
+                .registerSubtype(FreeParkingTile.class, "FreeParkingTile")
+                .registerSubtype(RailroadTile.class, "RailroadTile")
+                .registerSubtype(UtilityTile.class, "UtilityTile");
+
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapterFactory(tileAdapterFactory)
+                .create();
+
+        try (FileReader reader = new FileReader(file)) {
+            GameState state = gson.fromJson(reader, GameState.class);
+            if (state == null || state.getPlayers() == null || state.getPlayers().isEmpty()) {
+                System.err.println("Loaded game state is empty. Check file: " + file.getAbsolutePath());
+                return;
             }
+            _game.getPlayers().clear();
+            _game.getPlayers().addAll(state.getPlayers());
+            // Optionally restore board and current turn index:
+            // _game.setBoard(state.getBoard());
+            // _game.setCurrentPlayerIndex(state.getCurrentPlayerIndex());
+            System.out.println("Game loaded from " + file.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return ownedProperties;
+    }
+
+    public MonopolyGame getMonopolyGame() {
+        return _game;
+    }
+
+    public Player getCurrentPlayer(){
+        return _game.getCurrentPlayer();
     }
 
     public List<Tile> getBoardTiles() {
         return _game.getBoard().getTiles();
     }
+
+
+    public List<Player> getAllPlayers() {
+        return _game.getPlayers();
+    }
+
+
+
 }
+

@@ -73,12 +73,38 @@ public class MainWindow extends JFrame {
         JButton playButton = createStyledButton("Play Game");
         playButton.addActionListener(e -> {
             MusicPlayer.playSoundEffect(filePath);
+
+            // First, show a custom dialog with a combo box for AI difficulty selection.
+            JPanel difficultyPanel = new JPanel(new GridLayout(0, 1));
+            difficultyPanel.add(new JLabel("Select AI Difficulty:"));
+            String[] difficulties = {"Easy", "Medium", "Hard"};
+            JComboBox<String> difficultyCombo = new JComboBox<>(difficulties);
+            difficultyPanel.add(difficultyCombo);
+
+            int diffResult = JOptionPane.showConfirmDialog(
+                    this,
+                    difficultyPanel,
+                    "AI Difficulty Selection",
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.QUESTION_MESSAGE
+            );
+
+            if (diffResult != JOptionPane.OK_OPTION) {
+                return; // User canceled the dialog.
+            }
+
+            // Store the chosen difficulty in the controller.
+            String chosenDifficulty = (String) difficultyCombo.getSelectedItem();
+            _controller.setAIDifficulty(chosenDifficulty);
+
+            // Next, prompt for the number of players.
             String input = JOptionPane.showInputDialog(
                     this,
                     "How many players? (2-8)",
                     "Number of Players",
                     JOptionPane.QUESTION_MESSAGE
             );
+
             if (input != null) {
                 try {
                     int numPlayers = Integer.parseInt(input);
@@ -93,7 +119,7 @@ public class MainWindow extends JFrame {
                     for (int i = 1; i <= numPlayers; i++) {
                         String name = JOptionPane.showInputDialog(
                                 this,
-                                "Enter name for Player " + i + ":",
+                                "Enter name for Player " + i + " (enter 'AI' for computer control):",
                                 "Player Name",
                                 JOptionPane.QUESTION_MESSAGE
                         );
@@ -107,7 +133,7 @@ public class MainWindow extends JFrame {
                         playerNames.add(name);
                     }
                     _controller.setNumberOfPlayers(numPlayers, playerNames);
-                    // Stop main menu music and open game window.
+                    // Stop main menu music and open the game window.
                     musicPlayer.stopMusic();
                     GameWindow gameWindow = new GameWindow(_controller, this);
                     this.setVisible(false);
@@ -121,6 +147,26 @@ public class MainWindow extends JFrame {
             }
         });
 
+        // New Load Game button
+        JButton loadGameButton = createStyledButton("Load Game");
+        loadGameButton.addActionListener(e -> {
+            MusicPlayer.playSoundEffect(filePath);
+            // Use a file chooser with the "games" directory.
+            JFileChooser fileChooser = new JFileChooser("games"); // "games" directory inside your project.
+            int returnVal = fileChooser.showOpenDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                String saveFile = fileChooser.getSelectedFile().getAbsolutePath();
+                _controller.loadGame(saveFile);
+                // Stop main menu music and open the game window with loaded state.
+                musicPlayer.stopMusic();
+                GameWindow gameWindow = new GameWindow(_controller, this);
+                this.setVisible(false);
+                gameWindow.setVisible(true);
+            }
+        });
+        //buttonPanel.add(loadGameButton);
+
+
         JButton optionsButton = createStyledButton("Options");
         optionsButton.addActionListener(e -> {
             MusicPlayer.playSoundEffect(filePath);
@@ -133,8 +179,11 @@ public class MainWindow extends JFrame {
             System.exit(0);
         });
 
+        // Add buttons to the panel.
         buttonPanel.add(Box.createVerticalGlue());
         buttonPanel.add(playButton);
+        buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        buttonPanel.add(loadGameButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         buttonPanel.add(optionsButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
@@ -146,6 +195,7 @@ public class MainWindow extends JFrame {
         menuPanel.add(layeredPane, BorderLayout.CENTER);
         return menuPanel;
     }
+
 
     private JButton createStyledButton(String text) {
         JButton button = new JButton(text);

@@ -1,7 +1,10 @@
 package View;
 
 import Controller.Controller;
+import Model.AIPlayer;
 import Model.Player;
+import Model.MonopolyGame;
+import Model.PropertyTile;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -36,73 +39,87 @@ public class GameWindow extends JFrame {
             @Override
             public void windowClosed(WindowEvent e) {
                 inGameMusic.stopMusic();
-                // Resume main menu music
+                // Resume main menu music and show main window.
                 _mainWindow.getMusicPlayer().playMusic("resources/Dark_is_the_Night_-_Soviet_WW2_Song.wav");
                 _mainWindow.setVisible(true);
             }
         });
+
+        // If the first player is AI, trigger its turn automatically.
+        checkAndTriggerAITurn();
     }
 
     private void initGUI() {
-        // Top panel for current player & balance
+        // Top panel for current player & balance.
         JPanel topPanel = new JPanel(new GridLayout(2, 1));
         topPanel.setBackground(Color.RED);
-
         currentPlayerLabel = new JLabel("Current Player: (not set yet)", SwingConstants.CENTER);
         currentPlayerLabel.setFont(new Font("Arial", Font.BOLD, 24));
         currentPlayerLabel.setForeground(Color.WHITE);
         topPanel.add(currentPlayerLabel);
-
         currentBalanceLabel = new JLabel("Current Balance: 0 ₽", SwingConstants.CENTER);
         currentBalanceLabel.setFont(new Font("Arial", Font.BOLD, 18));
         currentBalanceLabel.setForeground(Color.WHITE);
         topPanel.add(currentBalanceLabel);
 
-        // Bottom panel for buttons
+        // Bottom panel for buttons.
         JPanel bottomPanel = new JPanel();
         bottomPanel.setBackground(Color.RED);
 
-        // Roll Dice Button
+        // Roll Dice button for human players.
         JButton rollDiceButton = createImageButton(
                 "resources/dicesRolling.png",
                 "Roll the dice to move",
                 e -> {
-                    // Roll the dice (without moving yet) and store the values.
                     int[] diceValues = _controller.rollDice();
-
-                    // Start the dice animation using the rolled values.
                     dualDicePanel.startAnimation(diceValues[0], diceValues[1]);
-
-                    // Create a timer to delay the player movement until after the dice animation.
                     new Timer(2000, evt -> {
                         ((Timer) evt.getSource()).stop();
-                        // Now move the player using the previously rolled dice.
                         String result = _controller.movePlayerAfterDiceRoll(diceValues);
-                        // Optionally, display 'result' in a dialog or log it.
-                        // For example: JOptionPane.showMessageDialog(null, result);
-
-                        // Update UI elements.
                         updateCurrentPlayerLabel();
                         updateCurrentBalanceLabel();
                         boardPanel.refreshBoard();
+                        checkAndTriggerAITurn();
                     }).start();
                 }
         );
         bottomPanel.add(rollDiceButton);
 
-
-        // Back to Main Menu Button
-        JButton backButton = createImageButton(
+        // Leave Game button with save prompt.
+        JButton leaveButton = createImageButton(
                 "resources/goBack.png",
-                "Return to the main menu",
+                "Leave Game",
                 e -> {
                     MusicPlayer.playSoundEffect(filePath);
+                    int choice = JOptionPane.showConfirmDialog(
+                            this,
+                            "Do you want to save the game before leaving?",
+                            "Save Game",
+                            JOptionPane.YES_NO_CANCEL_OPTION
+                    );
+                    if (choice == JOptionPane.CANCEL_OPTION) {
+                        return;
+                    } else if (choice == JOptionPane.YES_OPTION) {
+                        String saveName = JOptionPane.showInputDialog(
+                                this,
+                                "Enter save game file name (e.g., mySave.json):",
+                                "Save Game",
+                                JOptionPane.QUESTION_MESSAGE
+                        );
+                        if (saveName != null && !saveName.trim().isEmpty()) {
+                            _controller.saveGame(saveName.trim());
+                            JOptionPane.showMessageDialog(this, "Game saved successfully!");
+                        } else {
+                            JOptionPane.showMessageDialog(this, "Invalid file name. Game not saved.");
+                            return;
+                        }
+                    }
                     dispose();
                 }
         );
-        bottomPanel.add(backButton);
+        bottomPanel.add(leaveButton);
 
-        // Player Info Button
+        // Player Info button.
         JButton playerInfoButton = createImageButton(
                 "resources/playerInfoWindow.png",
                 "Show player status, money, position, and properties",
@@ -117,25 +134,55 @@ public class GameWindow extends JFrame {
         );
         bottomPanel.add(playerInfoButton);
 
-        // Main center panel: Board on the left, dice on the right
+        // Undo button.
+        JButton undoButton = createImageButton(
+                "resources/undo.png", // use undo.png as the icon
+                "Undo Last Action",
+                e -> {
+                    _controller.undoLastCommand();
+                    updateCurrentPlayerLabel();
+                    updateCurrentBalanceLabel();
+                    boardPanel.refreshBoard();
+                }
+        );
+        bottomPanel.add(undoButton);
+
+
+        // Center panel with board and dice.
         JPanel centerPanel = new JPanel(new BorderLayout());
         boardPanel = new BoardPanel(_controller);
         centerPanel.add(boardPanel, BorderLayout.CENTER);
-
-        // Create & place the DualDicePanel on the right side (EAST).
         dualDicePanel = new DualDicePanel();
-        // Set a preferred size so it's not too large
         dualDicePanel.setPreferredSize(new Dimension(200, 200));
         centerPanel.add(dualDicePanel, BorderLayout.EAST);
 
-        // Put it all together
+        // Assemble everything.
         setLayout(new BorderLayout());
         add(topPanel, BorderLayout.NORTH);
         add(centerPanel, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
-
         updateCurrentPlayerLabel();
         updateCurrentBalanceLabel();
+    }
+
+    // Checks if the current player is AI and triggers its turn after a delay.
+    private void checkAndTriggerAITurn() {
+        Player current = _controller.getCurrentPlayer();
+        if (current instanceof Model.AIPlayer) {
+            new Timer(2000, evt -> {
+                ((Timer) evt.getSource()).stop();
+                int[] diceValues = _controller.rollDice();
+                dualDicePanel.startAnimation(diceValues[0], diceValues[1]);
+                new Timer(2000, evt2 -> {
+                    ((Timer) evt2.getSource()).stop();
+                    ((Model.AIPlayer) current).takeTurnWithDice(diceValues, _controller.getMonopolyGame(), _controller);
+                    updateCurrentPlayerLabel();
+                    updateCurrentBalanceLabel();
+                    boardPanel.refreshBoard();
+                    checkAndTriggerAITurn();
+                }).start();
+            }).start();
+        }
     }
 
     private JButton createImageButton(String imagePath, String toolTip, java.awt.event.ActionListener listener) {

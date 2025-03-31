@@ -2,41 +2,55 @@ package View;
 
 import Controller.Controller;
 import Model.*;
-import javax.swing.*;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.swing.*;
 
-
+/**
+ * A single JPanel that lays out all 40 Monopoly tiles around the edges,
+ * dynamically scaling to fill the entire window.
+ */
 public class BoardPanel extends JPanel {
     private Controller controller;
     private Image backgroundImage;
 
-    // Map to store each tile's JLabel, keyed by its tile index.
+    // A map of tileIndex -> JLabel (the visual for that tile)
     private Map<Integer, JLabel> tileLabels = new HashMap<>();
 
-    // Define preferred sizes:
-    // Larger square for corners and smaller rectangles for edge tiles.
-    private final Dimension cornerSize = new Dimension(120, 120);
-    // For horizontal edge tiles (top and bottom), height equals corner height.
-    private final Dimension horizontalTileSize = new Dimension(62, 120);
-    // For vertical edge tiles (left and right), width equals corner width.
-    private final Dimension verticalTileSize = new Dimension(120, 62);
-
-    // Map to store player colors (for highlighting)
+    // Player color management
     private Map<Player, Color> playerColors = new HashMap<>();
+    private final Color[] PLAYER_COLORS = {
+            new Color(231, 76, 60),    // Red
+            new Color(52, 152, 219),   // Blue
+            new Color(46, 204, 113),   // Green
+            new Color(241, 196, 15),   // Yellow
+            new Color(230, 126, 34),   // Orange
+            new Color(155, 89, 182),   // Purple
+            new Color(26, 188, 156),   // Teal
+            new Color(233, 30, 99)     // Pink
+    };
 
     public BoardPanel(Controller controller) {
         this.controller = controller;
-        setLayout(new BorderLayout());
+
+        // We do our own manual sizing of components, so turn off automatic layout
+        setLayout(null);
+
+        // Optional: a default size if the parent doesn't set one
+        setPreferredSize(new Dimension(1000, 1000));
+
+        // Load your background image
         backgroundImage = new ImageIcon("resources/backgroundBoard.png").getImage();
-        initPlayerColors(); // Initialize player colors
-        initGUI();
+
+        initPlayerColors();  // Initialize player colors before tiles
+        initTiles();
     }
 
     /**
      * Assigns a unique color to each player for highlighting.
+     * Uses interactive color selection.
      */
     private void initPlayerColors() {
         List<Player> players = controller.getAllPlayers();
@@ -53,6 +67,7 @@ public class BoardPanel extends JPanel {
             }
         }
     }
+
     private Color chooseColor(Player player, List<Color> availableColors) {
         Color[] colorArray = availableColors.toArray(new Color[0]);
         String[] colorNames = {"Red", "Blue", "Green", "Yellow", "Orange", "Magenta", "Cyan", "Pink"};
@@ -71,155 +86,235 @@ public class BoardPanel extends JPanel {
         return choice >= 0 ? colorArray[choice] : null;
     }
 
-    private void initGUI() {
+    /**
+     * Creates JLabels for all tiles (0..39) and adds them to this panel.
+     */
+    private void initTiles() {
         List<Tile> tiles = controller.getBoardTiles();
         if (tiles.size() != 40) {
-            System.err.println("Warning: Expected 40 tiles for a standard board, got " + tiles.size());
+            System.err.println("Warning: Expected 40 tiles, got " + tiles.size());
         }
 
-        // Create panels for each side.
-        // The top and bottom rows include the corner tiles.
-        JPanel topPanel = new JPanel();
-        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.X_AXIS));
-        topPanel.setOpaque(false);
-
-        JPanel bottomPanel = new JPanel();
-        bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.X_AXIS));
-        bottomPanel.setOpaque(false);
-
-        // The left and right columns contain only the non‑corner tiles.
-        JPanel leftPanel = new JPanel();
-        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
-        leftPanel.setOpaque(false);
-
-        JPanel rightPanel = new JPanel();
-        rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
-        rightPanel.setOpaque(false);
-
-        // --- Top row (from left to right): top‑left corner, top edge non‑corners, top‑right corner ---
-        // Top‑left corner: index 20
-        topPanel.add(createTileLabel(tiles.get(20), 20, cornerSize));
-        // Top edge non‑corner tiles: indices 21 to 29 (displayed in natural order)
-        for (int i = 21; i <= 29; i++) {
-            topPanel.add(createTileLabel(tiles.get(i), i, horizontalTileSize));
+        for (int i = 0; i < tiles.size(); i++) {
+            Tile tile = tiles.get(i);
+            JLabel tileLabel = createTileLabel(tile, i);
+            tileLabels.put(i, tileLabel);
+            // Add the label to this panel. We'll position/size it in doLayout().
+            add(tileLabel);
         }
-        // Top‑right corner: index 30
-        topPanel.add(createTileLabel(tiles.get(30), 30, cornerSize));
-
-        // --- Bottom row (from left to right): bottom‑left corner, bottom edge non‑corners, bottom‑right corner ---
-        // Bottom‑left corner: index 10
-        bottomPanel.add(createTileLabel(tiles.get(10), 10, cornerSize));
-        // Bottom edge non‑corner tiles: indices 9 down to 1 (so that left-to‑right on screen is from bottom‑left to bottom‑right)
-        for (int i = 9; i >= 1; i--) {
-            bottomPanel.add(createTileLabel(tiles.get(i), i, horizontalTileSize));
-        }
-        // Bottom‑right corner: index 0
-        bottomPanel.add(createTileLabel(tiles.get(0), 0, cornerSize));
-
-        // --- Left column (vertical; between bottom‑left and top‑left corners) ---
-        // In clockwise order the left side goes from bottom‑left (index 10) to top‑left (index 20) via indices 11..19.
-        // To display top-to‑bottom (top adjacent to top‑left) we reverse these: 19 down to 11.
-        for (int i = 19; i >= 11; i--) {
-            leftPanel.add(createTileLabel(tiles.get(i), i, verticalTileSize));
-        }
-
-        // --- Right column (vertical; between top‑right and bottom‑right corners) ---
-        // Clockwise order on the right side is: top‑right (index 30), then indices 31..39, then bottom‑right (index 0).
-        // We display the non‑corner tiles (indices 31 to 39) in natural order.
-        for (int i = 31; i <= 39; i++) {
-            rightPanel.add(createTileLabel(tiles.get(i), i, verticalTileSize));
-        }
-
-        // Assemble the board layout using BorderLayout.
-        add(topPanel, BorderLayout.NORTH);
-        add(bottomPanel, BorderLayout.SOUTH);
-        add(leftPanel, BorderLayout.WEST);
-        add(rightPanel, BorderLayout.EAST);
-
-        // Center panel (could be used for board art or left blank)
-        JPanel centerPanel = new JPanel();
-        centerPanel.setOpaque(false);
-        add(centerPanel, BorderLayout.CENTER);
     }
 
     /**
-     * Helper method to create a JLabel for a tile.
-     * It sets a border, preferred size, and displays the tile name, index, and any players on it.
+     * Creates a JLabel for a specific tile index.
      */
-    private JLabel createTileLabel(Tile tile, int index, Dimension size) {
-        String labelText = generateTileLabelText(tile, index);
-        JLabel label = new JLabel(labelText, SwingConstants.CENTER);
-        label.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        label.setOpaque(true); // Make the label opaque to show the background color
-        label.setPreferredSize(size);
+    private JLabel createTileLabel(Tile tile, int index) {
+        JLabel label = new JLabel("", SwingConstants.CENTER);
 
-        // Set background color based on tile type
+        // Make it opaque so we can see its background
+        label.setOpaque(true);
+        label.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+        // Use white for property tiles, light gray otherwise
         if (tile instanceof PropertyTile) {
-            label.setBackground(Color.CYAN); // Light blue for property tiles
-        } else if (tile instanceof JailTile) {
-            label.setBackground(Color.RED); // Red for jail tiles
-        } else if (tile instanceof GoTile) {
-            label.setBackground(Color.GREEN); // Green for Go tiles
-        } else if (tile instanceof GoToJailTile) {
-            label.setBackground(Color.ORANGE); // Orange for Go To Jail tiles
-        } else if (tile instanceof TaxTile) {
-            label.setBackground(Color.YELLOW); // Yellow for tax tiles
-        } else if (tile instanceof FreeParkingTile) {
-            label.setBackground(Color.PINK); // Pink for free parking tiles
+            label.setBackground(Color.WHITE);
         } else {
-            label.setBackground(Color.WHITE); // Default color for other tiles
+            label.setBackground(Color.LIGHT_GRAY);
         }
 
-        // Store the label reference for later updates.
-        tileLabels.put(index, label);
+        // Set icon for the tile (optional)
+        label.setIcon(getTileIcon(tile));
+        label.setHorizontalTextPosition(SwingConstants.CENTER);
+        label.setVerticalTextPosition(SwingConstants.BOTTOM);
+
+        // Set initial text (tile name + index + color header if property).
+        label.setText(generateTileLabelText(tile, index));
+
         return label;
     }
 
     /**
-     * Generates the HTML text for a tile label.
-     * Players are highlighted with colored circles.
+     * Lays out the tile labels so they form a ring around the edges,
+     * automatically scaling to fill the entire panel.
+     */
+    @Override
+    public void doLayout() {
+        super.doLayout();
+
+        // Figure out how big each "cell" in an 11×11 ring is
+        int w = getWidth();
+        int h = getHeight();
+        int cellW = w / 11;
+        int cellH = h / 11;
+
+        // Position each tile
+        for (int i = 0; i < 40; i++) {
+            JLabel label = tileLabels.get(i);
+            if (label == null) continue;
+
+            Point rc = getTileRowCol(i); // row, col
+            int row = rc.x;
+            int col = rc.y;
+
+            int x = col * cellW;
+            int y = row * cellH;
+
+            label.setBounds(x, y, cellW, cellH);
+        }
+    }
+
+    /**
+     * Returns a (row, col) for the given tile index in "ring" order.
+     *  - Indices 0..10 => bottom row (reversed: 0 is at col=10, 10 is col=0)
+     *  - Indices 11..19 => left column (bottom to top)
+     *  - Indices 20..30 => top row (left to right)
+     *  - Indices 31..39 => right column (top to bottom)
+     *
+     * Returned as a Point(row, col).
+     */
+    private Point getTileRowCol(int index) {
+        if (index >= 0 && index <= 10) {
+            int col = 10 - index;
+            return new Point(10, col);
+        } else if (index >= 11 && index <= 19) {
+            int offset = index - 11;
+            int row = 9 - offset;
+            return new Point(row, 0);
+        } else if (index >= 20 && index <= 30) {
+            int offset = index - 20;
+            return new Point(0, offset);
+        } else if (index >= 31 && index <= 39) {
+            int offset = index - 31;
+            int row = 1 + offset;
+            return new Point(row, 10);
+        }
+        return new Point(0, 0);
+    }
+
+    /**
+     * Build the text for the tile label.
+     * If it's a PropertyTile, a colored "header" bar is inserted at the top.
      */
     private String generateTileLabelText(Tile tile, int index) {
-        String tileName = tile.getName();
+        StringBuilder sb = new StringBuilder();
+        sb.append("<html>");
+
+        if (tile instanceof PropertyTile) {
+            Color headerColor = getPropertyHeaderColorByIndex(index);
+            String colorHex = toHexString(headerColor);
+            sb.append("<div style='background-color:")
+              .append(colorHex)
+              .append("; width:100%; height:14px;'></div>");
+        }
+
+        sb.append("<div style='padding:2px; text-align:center;'>");
+        sb.append(tile.getName()).append(" (").append(index).append(")<br>");
+
         List<Player> playersOnTile = controller.getAllPlayers().stream()
                 .filter(p -> p.getPosition() == index)
                 .collect(Collectors.toList());
 
-        // Generate player icons (colored circles) for players on this tile
-        StringBuilder playersHtml = new StringBuilder();
-        for (Player player : playersOnTile) {
-            Color playerColor = playerColors.get(player);
-            playersHtml.append(String.format(
-                    "<span style='color: rgb(%d,%d,%d); font-size: 20px;'>&#9679;</span> ", // Unicode for a circle
-                    playerColor.getRed(), playerColor.getGreen(), playerColor.getBlue()
+        for (Player p : playersOnTile) {
+            Color c = getPlayerColor(p);
+            sb.append(String.format(
+                    "<span style='color:rgb(%d,%d,%d); font-size:25px;'>&#9679;</span> ",
+                    c.getRed(), c.getGreen(), c.getBlue()
             ));
         }
 
-        return "<html><center>" + tileName + "<br>(" + index + ")<br>" + playersHtml.toString() + "</center></html>";
+        sb.append("</div>");
+        sb.append("</html>");
+        return sb.toString();
     }
 
     /**
-     * Refreshes the board display by updating each tile's label with the latest player positions.
-     * This method should be called after every turn.
+     * Convert a Color to a #RRGGBB hex string.
      */
-    public void refreshBoard() {
-        List<Tile> tiles = controller.getBoardTiles();
-        for (Map.Entry<Integer, JLabel> entry : tileLabels.entrySet()) {
-            int index = entry.getKey();
-            // Ensure we have a valid tile index.
-            if (index < tiles.size()) {
-                Tile tile = tiles.get(index);
-                entry.getValue().setText(generateTileLabelText(tile, index));
-            }
-        }
-        repaint();
+    private String toHexString(Color c) {
+        return String.format("#%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
     }
 
+    /**
+     * Returns a Color for the header strip of each property tile.
+     */
+    private Color getPropertyHeaderColorByIndex(int index) {
+        if (index == 1 || index == 3) {
+            return new Color(0x7B3F00);
+        }
+        if (index == 6 || index == 8 || index == 9) {
+            return new Color(0x5085A5);
+        }
+        if (index == 11 || index == 13 || index == 14) {
+            return new Color(0xC94C62);
+        }
+        if (index == 16 || index == 18 || index == 19) {
+            return new Color(0xC7771E);
+        }
+        if (index == 21 || index == 23 || index == 24) {
+            return new Color(0xA40000);
+        }
+        if (index == 26 || index == 27 || index == 29) {
+            return new Color(0xFFD700);
+        }
+        if (index == 31 || index == 32 || index == 34) {
+            return new Color(0x3C7D3C);
+        }
+        if (index == 37 || index == 39) {
+            return new Color(0x14213D);
+        }
+        return new Color(200, 200, 200);
+    }
+
+    /**
+     * Returns a Color for the given player.
+     */
+    private Color getPlayerColor(Player p) {
+        return playerColors.getOrDefault(p, Color.GRAY);
+    }
+
+    /**
+     * Determines which icon to use based on the tile type.
+     */
+    private Icon getTileIcon(Tile tile) {
+        if (tile instanceof PropertyTile) {
+            return new ImageIcon("resources/icons/property.png");
+        } else if (tile instanceof JailTile) {
+            return new ImageIcon("resources/icons/jail.png");
+        } else if (tile instanceof GoTile) {
+            return new ImageIcon("resources/icons/go.png");
+        } else if (tile instanceof TaxTile) {
+            return new ImageIcon("resources/icons/tax.png");
+        } else if (tile instanceof ChanceTile) {
+            return new ImageIcon("resources/icons/chance.png");
+        } else if (tile instanceof CommunityChestTile) {
+            return new ImageIcon("resources/icons/community_chest.png");
+        } else {
+            return new ImageIcon("resources/icons/default.png");
+        }
+    }
+
+    /**
+     * Paints the background image stretched to fill this panel.
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (backgroundImage != null) {
             g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
         }
+    }
+
+    /**
+     * Refreshes the board by updating the tile labels (e.g., showing current player positions).
+     */
+    public void refreshBoard() {
+        List<Tile> tiles = controller.getBoardTiles();
+        for (int i = 0; i < tiles.size(); i++) {
+            Tile tile = tiles.get(i);
+            JLabel label = tileLabels.get(i);
+            if (label != null) {
+                label.setText(generateTileLabelText(tile, i));
+            }
+        }
+        repaint();
     }
 }
