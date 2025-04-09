@@ -149,7 +149,7 @@ public class GameWindow extends JFrame {
 
         // Center panel with boardView + dice.
         boardView = new BoardView(_controller);
-
+        boardView.getBoardPanel().setManualTileImage(0, new ImageIcon("resources/tiles/0.png").getImage());
         boardView.getBoardPanel().setManualTileImage(1, new ImageIcon("resources/tiles/1.png").getImage());
         boardView.getBoardPanel().setManualTileImage(2, new ImageIcon("resources/tiles/2.png").getImage());
         boardView.getBoardPanel().setManualTileImage(3, new ImageIcon("resources/tiles/3.png").getImage());
@@ -157,6 +157,17 @@ public class GameWindow extends JFrame {
         boardView.getBoardPanel().setManualTileImage(5, new ImageIcon("resources/tiles/5.png").getImage());
         boardView.getBoardPanel().setManualTileImage(6, new ImageIcon("resources/tiles/6.png").getImage());
         boardView.getBoardPanel().setManualTileImage(7, new ImageIcon("resources/tiles/7.png").getImage());
+
+        //do 10,20,30
+        boardView.getBoardPanel().setManualTileImage(10, new ImageIcon("resources/tiles/10.png").getImage());
+
+
+
+        boardView.getBoardPanel().setManualTileImage(20, new ImageIcon("resources/tiles/20.png").getImage());
+
+
+
+        boardView.getBoardPanel().setManualTileImage(30, new ImageIcon("resources/tiles/30.png").getImage());
 
 
         dualDicePanel = new DualDicePanel();

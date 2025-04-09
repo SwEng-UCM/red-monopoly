@@ -17,7 +17,7 @@ public class BoardPanel extends JPanel {
     private Image propertyUpDownImage;
     private Image propertyLeftRightImage;
 
-    // For manual images for bottom row tiles (positions 1 to 9).
+    // A map to hold manual override images for any tile index (0-39).
     private Map<Integer, Image> manualTileImages = new HashMap<>();
 
     // Flag to use image design rather than the default HTML cell design.
@@ -52,8 +52,7 @@ public class BoardPanel extends JPanel {
         propertyUpDownImage = new ImageIcon("resources/property_norilsk.png").getImage();
         propertyLeftRightImage = new ImageIcon("resources/property_norilsk_left.png").getImage();
 
-
-        initPlayerColors();  // Initialize player colors if you want to overlay tokens later.
+        initPlayerColors();
         initTiles();
     }
 
@@ -80,11 +79,12 @@ public class BoardPanel extends JPanel {
             tileLabels.put(i, tileLabel);
             add(tileLabel);
         }
-
     }
 
     /**
      * Creates a JLabel for a tile.
+     * If useImageDesign is true, it will later be assigned an Icon in doLayout,
+     * and we attach a mouse listener for hover-zoom.
      */
     private JLabel createTileLabel(int index) {
         JLabel label = new JLabel("", SwingConstants.CENTER);
@@ -96,16 +96,14 @@ public class BoardPanel extends JPanel {
             label.setBackground(tile instanceof PropertyTile ? Color.WHITE : Color.LIGHT_GRAY);
             label.setText(generateTileLabelText(tile, index));
         } else {
-            // When using image design, the label gets its icon set in doLayout.
-            // Attach the mouse listener so that when the icon is set, the zoom works.
-            label.addMouseListener(new TileZoomMouseListener(label, 2.0)); // 2x zoom
+            // Add the zoom mouse listener so when the mouse hovers, a zoomed image appears.
+            label.addMouseListener(new TileZoomMouseListener(label, 2.0)); // 2x zoom; adjust as needed
         }
         return label;
     }
 
-
     /**
-     * Returns the JLabel for the given tile index (so the overlay panel can see its position).
+     * Returns the JLabel for the given tile index.
      */
     public JLabel getTileLabel(int tileIndex) {
         return tileLabels.get(tileIndex);
@@ -119,14 +117,13 @@ public class BoardPanel extends JPanel {
     }
 
     /**
-     * Sets a manual image for a bottom row tile (indices 1 to 9).
-     * Use this method to assign your custom design images.
+     * Sets a manual image for any tile index (0 to 39).
      */
     public void setManualTileImage(int tileIndex, Image image) {
-        if (tileIndex >= 1 && tileIndex <= 9) {
+        if (tileIndex >= 0 && tileIndex < 40) {
             manualTileImages.put(tileIndex, image);
         } else {
-            System.err.println("Tile index " + tileIndex + " is out of range for manual tile images.");
+            throw new IllegalArgumentException("Tile index " + tileIndex + " is out of range.");
         }
     }
 
@@ -194,22 +191,26 @@ public class BoardPanel extends JPanel {
         return new Rectangle(0, 0, 0, 0);
     }
 
+    /**
+     * Returns the tile’s image icon.
+     * If a manual image has been provided for this tile index, that image is used.
+     * Otherwise, fallback to default images according to tile position.
+     */
     private ImageIcon getTileImageIcon(int index, int w, int h) {
-        // Corners always use the corner image.
+        if (manualTileImages.containsKey(index)) {
+            Image image = manualTileImages.get(index);
+            Image scaled = image.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+            return new ImageIcon(scaled);
+        }
+        // Corners: indices 0, 10, 20, 30.
         if (index == 0 || index == 10 || index == 20 || index == 30) {
             Image scaled = cornerImage.getScaledInstance(w, h, Image.SCALE_SMOOTH);
             return new ImageIcon(scaled);
         }
         // Bottom row: indices 1 to 9.
         if (index >= 1 && index <= 9) {
-            if (manualTileImages.containsKey(index)) {
-                Image image = manualTileImages.get(index);
-                Image scaled = image.getScaledInstance(w, h, Image.SCALE_SMOOTH);
-                return new ImageIcon(scaled);
-            } else {
-                Image scaled = propertyUpDownImage.getScaledInstance(w, h, Image.SCALE_SMOOTH);
-                return new ImageIcon(scaled);
-            }
+            Image scaled = propertyUpDownImage.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+            return new ImageIcon(scaled);
         }
         // Top row: indices 21 to 29.
         if (index >= 21 && index <= 29) {
