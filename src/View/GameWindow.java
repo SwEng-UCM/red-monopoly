@@ -157,6 +157,8 @@ public class GameWindow extends JFrame {
         boardView.getBoardPanel().setManualTileImage(5, new ImageIcon("resources/tiles/5.png").getImage());
         boardView.getBoardPanel().setManualTileImage(6, new ImageIcon("resources/tiles/6.png").getImage());
         boardView.getBoardPanel().setManualTileImage(7, new ImageIcon("resources/tiles/7.png").getImage());
+        boardView.getBoardPanel().setManualTileImage(8, new ImageIcon("resources/tiles/8.png").getImage());
+        boardView.getBoardPanel().setManualTileImage(9, new ImageIcon("resources/tiles/9.png").getImage());
 
         //do 10,20,30
         boardView.getBoardPanel().setManualTileImage(10, new ImageIcon("resources/tiles/10.png").getImage());
