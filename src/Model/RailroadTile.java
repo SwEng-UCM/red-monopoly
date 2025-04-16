@@ -47,64 +47,100 @@ public class RailroadTile extends Tile {
 
     @Override
     public void action(Player player) {
-        if (owner == null) {
-            // Offer to buy
-            UIManager.put("OptionPane.messageFont", new Font("Arial", Font.PLAIN, 18));
-            UIManager.put("OptionPane.buttonFont", new Font("Arial", Font.PLAIN, 16));
 
-            int choice = JOptionPane.showConfirmDialog(
-                null,
-                player.getName() + " landed on " + getName() + " Railroad. Buy for " + price + " ₽?",
-                "Buy Railroad",
-                JOptionPane.YES_NO_OPTION
-            );
-
-            if (choice == JOptionPane.YES_OPTION) {
-                if (player.getMoney() >= price) {
-                    owner = player;
-                    player.deductMoney(price);
+        if (player instanceof AIPlayer) {
+            AIPlayer ai = (AIPlayer) player;
+            if (((AIStrategy) ai.getStrategy()).shouldBuyTile(ai, this)) {
+                if (ai.getMoney() >= price) {
+                    owner = ai;
+                    ai.deductMoney(price);
+                    // Show message for AI purchase
                     JOptionPane.showMessageDialog(
-                        null,
-                        player.getName() + " bought " + getName() + " for " + price + " ₽",
-                        "Success",
-                        JOptionPane.INFORMATION_MESSAGE
+                            null,
+                            ai.getName() + " bought " + getName() + " for " + price + " ₽",
+                            "AI Purchase",
+                            JOptionPane.INFORMATION_MESSAGE
                     );
                 } else {
+                    // Show message for AI unable to afford the property
                     JOptionPane.showMessageDialog(
-                        null,
-                        player.getName() + " doesn't have enough money to buy " + getName() + ".",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE
+                            null,
+                            ai.getName() + " couldn't afford " + getName() + ".",
+                            "AI Error",
+                            JOptionPane.ERROR_MESSAGE
                     );
                 }
             } else {
+                // Show message for AI decision not to buy
                 JOptionPane.showMessageDialog(
-                    null,
-                    player.getName() + " chose not to buy " + getName() + ".",
-                    "Decision",
-                    JOptionPane.INFORMATION_MESSAGE
+                        null,
+                        ai.getName() + " chose not to buy " + getName() + ".",
+                        "AI Decision",
+                        JOptionPane.INFORMATION_MESSAGE
                 );
             }
-        }
-        else if (owner != player) {
-            // Pay rent
-            int rent = calculateRent();
-            player.deductMoney(rent);
-            owner.addMoney(rent);
-            JOptionPane.showMessageDialog(
-                null,
-                player.getName() + " paid " + rent + " ₽ rent to " + owner.getName() + " for " + getName(),
-                "Rent Paid",
-                JOptionPane.INFORMATION_MESSAGE
-            );
         } else {
-            // Landed on own property
-            JOptionPane.showMessageDialog(
-                null,
-                player.getName() + " landed on their own railroad: " + getName(),
-                "Your Property",
-                JOptionPane.INFORMATION_MESSAGE
-            );
+            // original JOptionPane logic for normal player
+
+            if (owner == null) {
+                // Offer to buy
+                UIManager.put("OptionPane.messageFont", new Font("Arial", Font.PLAIN, 18));
+                UIManager.put("OptionPane.buttonFont", new Font("Arial", Font.PLAIN, 16));
+
+                int choice = JOptionPane.showConfirmDialog(
+                        null,
+                        player.getName() + " landed on " + getName() + " Railroad. Buy for " + price + " ₽?",
+                        "Buy Railroad",
+                        JOptionPane.YES_NO_OPTION
+                );
+
+                if (choice == JOptionPane.YES_OPTION) {
+                    if (player.getMoney() >= price) {
+                        owner = player;
+                        player.deductMoney(price);
+                        JOptionPane.showMessageDialog(
+                                null,
+                                player.getName() + " bought " + getName() + " for " + price + " ₽",
+                                "Success",
+                                JOptionPane.INFORMATION_MESSAGE
+                        );
+                    } else {
+                        JOptionPane.showMessageDialog(
+                                null,
+                                player.getName() + " doesn't have enough money to buy " + getName() + ".",
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(
+                            null,
+                            player.getName() + " chose not to buy " + getName() + ".",
+                            "Decision",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
+                }
+            }
+            else if (owner != player) {
+                // Pay rent
+                int rent = calculateRent();
+                player.deductMoney(rent);
+                owner.addMoney(rent);
+                JOptionPane.showMessageDialog(
+                        null,
+                        player.getName() + " paid " + rent + " ₽ rent to " + owner.getName() + " for " + getName(),
+                        "Rent Paid",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+            } else {
+                // Landed on own property
+                JOptionPane.showMessageDialog(
+                        null,
+                        player.getName() + " landed on their own railroad: " + getName(),
+                        "Your Property",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+            }
         }
     }
 }
