@@ -27,4 +27,7 @@ public class AIPlayer extends Player {
     public void takeTurnWithDice(int[] diceValues, MonopolyGame game, Controller controller) {
         strategy.playTurn(this, game, controller, diceValues);
     }
+    public AIStrategy getStrategy() {
+        return strategy;
+    }
 }

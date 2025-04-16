@@ -22,4 +22,20 @@ public class HardAIStrategy implements AIStrategy {
 
 
     }
+
+    @Override
+    public boolean shouldBuyTile(AIPlayer aiPlayer, Tile tile) {
+        int price = 0, rent = 0;
+        if (tile instanceof PropertyTile) {
+            price = ((PropertyTile) tile).getPrice();
+            rent = ((PropertyTile) tile).getRent();
+        } else if (tile instanceof RailroadTile) {
+            price = ((RailroadTile) tile).getPrice();
+            rent = ((RailroadTile) tile).getRent();
+        }
+
+        double roi = (double) rent / price; // simple return-on-investment check
+        return aiPlayer.getMoney() > price && roi > 0.05; // buy only if ROI > 5%
+    }
+
 }
