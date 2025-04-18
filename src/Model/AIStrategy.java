@@ -19,4 +19,6 @@ public interface AIStrategy {
         // Default: ignore diceValues and call the original method.
         playTurn(aiPlayer, game, controller);
     }
+    boolean shouldBuyTile(AIPlayer aiPlayer, Tile tile);
+
 }

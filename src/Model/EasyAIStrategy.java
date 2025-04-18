@@ -17,4 +17,12 @@ public class EasyAIStrategy implements AIStrategy {
         int[] diceValues = controller.rollDice();
         playTurn(aiPlayer, game, controller, diceValues);
     }
+
+    @Override
+    public boolean shouldBuyTile(AIPlayer aiPlayer, Tile tile) {
+        int price = (tile instanceof PropertyTile) ? ((PropertyTile) tile).getPrice() :
+                (tile instanceof RailroadTile) ? ((RailroadTile) tile).getPrice() : 0;
+        return aiPlayer.getMoney() >= price;
+    }
+
 }

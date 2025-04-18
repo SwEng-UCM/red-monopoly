@@ -16,5 +16,14 @@ public class MidAIStrategy implements AIStrategy {
         // then decide to purchase.
         // (Implement actual buying logic as needed in your game.)
         // if(propertyIsUnowned && aiPlayer.getMoney() > propertyPrice * threshold) { buyProperty(); }
+
+
     }
+    @Override
+    public boolean shouldBuyTile(AIPlayer aiPlayer, Tile tile) {
+        int price = (tile instanceof PropertyTile) ? ((PropertyTile) tile).getPrice() :
+                (tile instanceof RailroadTile) ? ((RailroadTile) tile).getPrice() : 0;
+        return aiPlayer.getMoney() >= price * 1.2; // keep some buffer
+    }
+
 }
