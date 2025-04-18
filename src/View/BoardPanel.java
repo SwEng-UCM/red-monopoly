@@ -17,6 +17,9 @@ public class BoardPanel extends JPanel {
     private Image propertyUpDownImage;
     private Image propertyLeftRightImage;
 
+    private Image backgroundImage = new ImageIcon("resources/background_board.png").getImage();
+
+
     // A map to hold manual override images for any tile index (0-39).
     private Map<Integer, Image> manualTileImages = new HashMap<>();
 
@@ -254,6 +257,10 @@ public class BoardPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        // Optionally, draw a background fill or image if needed.
+        if (backgroundImage != null) {
+            // Scale background to fill the panel
+            g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+        }
     }
+
 }
