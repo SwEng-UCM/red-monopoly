@@ -34,7 +34,11 @@ public class Board {
     
         // Jail
         _tiles.add(new JailTile("Gulag", 10));
-    
+
+
+        //TURNED LEFTside
+
+
         // Pink
         _tiles.add(new PropertyTile("Vladivostok", 11, 10, 140));
         _tiles.add(new UtilityTile("Electric Company", 12, 150));
@@ -52,7 +56,10 @@ public class Board {
     
         // Free Parking
         _tiles.add(new FreeParkingTile("Free Parking", 20));
-    
+
+
+        //TURNED DOWNSIDE
+
         // Red
         _tiles.add(new PropertyTile("Perm", 21, 18, 220));
         _tiles.add(new ChanceTile("Chance", 22));
@@ -70,6 +77,10 @@ public class Board {
     
         // Go To Jail
         _tiles.add(new GoToJailTile("Go to Gulag", 30));
+
+
+        //TURNED RIGHTSIDE
+
     
         // Green
         _tiles.add(new PropertyTile("Nizhny Novgorod", 31, 26, 300));
