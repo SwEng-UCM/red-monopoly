@@ -3,6 +3,8 @@ package View;
 import Controller.Controller;
 import Model.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.List;
@@ -12,56 +14,52 @@ import javax.swing.*;
 public class BoardPanel extends JPanel {
     private Controller controller;
 
-    // Images for tiles – can be swapped out easily.
     private Image cornerImage;
     private Image propertyUpDownImage;
     private Image propertyLeftRightImage;
 
     private Image backgroundImage = new ImageIcon("resources/background_board.png").getImage();
 
-
-    // A map to hold manual override images for any tile index (0-39).
     private Map<Integer, Image> manualTileImages = new HashMap<>();
 
-    // Flag to use image design rather than the default HTML cell design.
     protected boolean useImageDesign = true;
 
-    // A map of tileIndex -> JLabel (the visual for that tile).
     protected Map<Integer, JLabel> tileLabels = new HashMap<>();
 
-    // Player color management (for overlay tokens, etc.)
     protected Map<Player, Color> playerColors = new HashMap<>();
     private final Color[] PLAYER_COLORS = {
-            new Color(231, 76, 60),    // Red
-            new Color(52, 152, 219),   // Blue
-            new Color(46, 204, 113),   // Green
-            new Color(241, 196, 15),   // Yellow
-            new Color(230, 126, 34),   // Orange
-            new Color(155, 89, 182),   // Purple
-            new Color(26, 188, 156),   // Teal
-            new Color(233, 30, 99)     // Pink
+            new Color(231, 76, 60),
+            new Color(52, 152, 219),
+            new Color(46, 204, 113),
+            new Color(241, 196, 15),
+            new Color(230, 126, 34),
+            new Color(155, 89, 182),
+            new Color(26, 188, 156),
+            new Color(233, 30, 99)
     };
 
-    // The board’s “design” dimensions. (A 40-tile board is typically ~728×728.)
     public static final int DESIGN_SIZE = 728;
+    private final JWindow zoomWindow = new JWindow();
+    private final JLabel zoomLabel = new JLabel();
 
     public BoardPanel(Controller controller) {
         this.controller = controller;
         setLayout(null);
         setPreferredSize(new Dimension(DESIGN_SIZE, DESIGN_SIZE));
 
-        // Load default images.
         cornerImage = new ImageIcon("resources/GULAG.png").getImage();
         propertyUpDownImage = new ImageIcon("resources/property_norilsk.png").getImage();
         propertyLeftRightImage = new ImageIcon("resources/property_norilsk_left.png").getImage();
+
+        zoomWindow.getContentPane().add(zoomLabel);
+        zoomWindow.setAlwaysOnTop(true);
+        zoomWindow.setBackground(new Color(0, 0, 0, 0));
+        zoomWindow.setType(Window.Type.POPUP);
 
         initPlayerColors();
         initTiles();
     }
 
-    /**
-     * Assigns a unique color to each player for highlighting.
-     */
     private void initPlayerColors() {
         List<Player> players = controller.getAllPlayers();
         for (int i = 0; i < players.size(); i++) {
@@ -69,9 +67,6 @@ public class BoardPanel extends JPanel {
         }
     }
 
-    /**
-     * Creates JLabels for all tiles (0..39) and adds them to this panel.
-     */
     private void initTiles() {
         List<Tile> tiles = controller.getBoardTiles();
         if (tiles.size() != 40) {
@@ -84,11 +79,6 @@ public class BoardPanel extends JPanel {
         }
     }
 
-    /**
-     * Creates a JLabel for a tile.
-     * If useImageDesign is true, it will later be assigned an Icon in doLayout,
-     * and we attach a mouse listener for hover-zoom.
-     */
     private JLabel createTileLabel(int index) {
         JLabel label = new JLabel("", SwingConstants.CENTER);
         label.setOpaque(true);
@@ -99,29 +89,56 @@ public class BoardPanel extends JPanel {
             label.setBackground(tile instanceof PropertyTile ? Color.WHITE : Color.LIGHT_GRAY);
             label.setText(generateTileLabelText(tile, index));
         } else {
-            // Add the zoom mouse listener so when the mouse hovers, a zoomed image appears.
-            label.addMouseListener(new TileZoomMouseListener(label, 2.0)); // 2x zoom; adjust as needed
+            label.addMouseListener(new MouseAdapter() {
+                private final double ZOOM_FACTOR = 2.0;
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    int w = label.getWidth();
+                    int h = label.getHeight();
+
+                    Image image = manualTileImages.get(index);
+                    if (image == null) image = getRawTileImage(index);
+
+                    int zoomW = (int) (w * ZOOM_FACTOR);
+                    int zoomH = (int) (h * ZOOM_FACTOR);
+                    ImageIcon zoomedIcon = new ImageIcon(image.getScaledInstance(zoomW, zoomH, Image.SCALE_SMOOTH));
+
+                    zoomLabel.setIcon(zoomedIcon);
+                    zoomWindow.setSize(zoomW, zoomH);
+
+                    Point loc = label.getLocationOnScreen();
+                    zoomWindow.setLocation(loc.x + w / 2, loc.y + h / 2);
+                    zoomWindow.setVisible(true);
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    zoomWindow.setVisible(false);
+                }
+            });
         }
         return label;
     }
 
-    /**
-     * Returns the JLabel for the given tile index.
-     */
+    private Image getRawTileImage(int index) {
+        if (manualTileImages.containsKey(index)) return manualTileImages.get(index);
+        if (index == 0 || index == 10 || index == 20 || index == 30) return cornerImage;
+        if (index >= 1 && index <= 9) return propertyUpDownImage;
+        if (index >= 11 && index <= 19) return propertyLeftRightImage;
+        if (index >= 21 && index <= 29) return propertyUpDownImage;
+        if (index >= 31 && index <= 39) return propertyLeftRightImage;
+        return propertyUpDownImage;
+    }
+
     public JLabel getTileLabel(int tileIndex) {
         return tileLabels.get(tileIndex);
     }
 
-    /**
-     * Returns the assigned color for the given player's token.
-     */
     public Color getPlayerColor(Player player) {
         return playerColors.getOrDefault(player, Color.BLACK);
     }
 
-    /**
-     * Sets a manual image for any tile index (0 to 39).
-     */
     public void setManualTileImage(int tileIndex, Image image) {
         if (tileIndex >= 0 && tileIndex < 40) {
             manualTileImages.put(tileIndex, image);
@@ -130,9 +147,6 @@ public class BoardPanel extends JPanel {
         }
     }
 
-    /**
-     * Override doLayout to position tiles using fixed design dimensions and scale to fit the panel.
-     */
     @Override
     public void doLayout() {
         super.doLayout();
@@ -163,30 +177,22 @@ public class BoardPanel extends JPanel {
     }
 
     private Rectangle getDesignBoundsForTile(int index) {
-        if (index >= 0 && index <= 10) { // Bottom row.
-            if (index == 0) {
-                return new Rectangle(DESIGN_SIZE - 112, DESIGN_SIZE - 112, 112, 112);
-            } else if (index == 10) {
-                return new Rectangle(0, DESIGN_SIZE - 112, 112, 112);
-            } else {
-                int x = (DESIGN_SIZE - 112) - (index * 56);
-                return new Rectangle(x, DESIGN_SIZE - 112, 56, 112);
-            }
-        } else if (index >= 11 && index <= 19) { // Left column.
+        if (index >= 0 && index <= 10) {
+            if (index == 0) return new Rectangle(DESIGN_SIZE - 112, DESIGN_SIZE - 112, 112, 112);
+            if (index == 10) return new Rectangle(0, DESIGN_SIZE - 112, 112, 112);
+            int x = (DESIGN_SIZE - 112) - (index * 56);
+            return new Rectangle(x, DESIGN_SIZE - 112, 56, 112);
+        } else if (index >= 11 && index <= 19) {
             int offset = index - 10;
             int y = DESIGN_SIZE - 112 - (offset * 56);
             return new Rectangle(0, y, 112, 56);
-        } else if (index >= 20 && index <= 30) { // Top row.
-            if (index == 20) {
-                return new Rectangle(0, 0, 112, 112);
-            } else if (index == 30) {
-                return new Rectangle(DESIGN_SIZE - 112, 0, 112, 112);
-            } else {
-                int offset = index - 20;
-                int x = 112 + (offset - 1) * 56;
-                return new Rectangle(x, 0, 56, 112);
-            }
-        } else if (index >= 31 && index <= 39) { // Right column.
+        } else if (index >= 20 && index <= 30) {
+            if (index == 20) return new Rectangle(0, 0, 112, 112);
+            if (index == 30) return new Rectangle(DESIGN_SIZE - 112, 0, 112, 112);
+            int offset = index - 20;
+            int x = 112 + (offset - 1) * 56;
+            return new Rectangle(x, 0, 56, 112);
+        } else if (index >= 31 && index <= 39) {
             int offset = index - 30;
             int y = 112 + (offset - 1) * 56;
             return new Rectangle(DESIGN_SIZE - 112, y, 112, 56);
@@ -194,42 +200,24 @@ public class BoardPanel extends JPanel {
         return new Rectangle(0, 0, 0, 0);
     }
 
-    /**
-     * Returns the tile’s image icon.
-     * If a manual image has been provided for this tile index, that image is used.
-     * Otherwise, fallback to default images according to tile position.
-     */
     private ImageIcon getTileImageIcon(int index, int w, int h) {
+        Image image;
         if (manualTileImages.containsKey(index)) {
-            Image image = manualTileImages.get(index);
-            Image scaled = image.getScaledInstance(w, h, Image.SCALE_SMOOTH);
-            return new ImageIcon(scaled);
-        }
-        // Corners: indices 0, 10, 20, 30.
-        if (index == 0 || index == 10 || index == 20 || index == 30) {
-            Image scaled = cornerImage.getScaledInstance(w, h, Image.SCALE_SMOOTH);
-            return new ImageIcon(scaled);
-        }
-        // Bottom row: indices 1 to 9.
-        if (index >= 1 && index <= 9) {
-            Image scaled = propertyUpDownImage.getScaledInstance(w, h, Image.SCALE_SMOOTH);
-            return new ImageIcon(scaled);
-        }
-        // Top row: indices 21 to 29.
-        if (index >= 21 && index <= 29) {
+            image = manualTileImages.get(index);
+        } else if (index == 0 || index == 10 || index == 20 || index == 30) {
+            image = cornerImage;
+        } else if (index >= 1 && index <= 9) {
+            image = propertyUpDownImage;
+        } else if (index >= 21 && index <= 29) {
             return getRotatedImageIcon(propertyUpDownImage, Math.PI, w, h);
-        }
-        // Left column: indices 11 to 19.
-        if (index >= 11 && index <= 19) {
-            Image scaled = propertyLeftRightImage.getScaledInstance(w, h, Image.SCALE_SMOOTH);
-            return new ImageIcon(scaled);
-        }
-        // Right column: indices 31 to 39.
-        if (index >= 31 && index <= 39) {
+        } else if (index >= 11 && index <= 19) {
+            image = propertyLeftRightImage;
+        } else if (index >= 31 && index <= 39) {
             return getRotatedImageIcon(propertyLeftRightImage, Math.PI, w, h);
+        } else {
+            image = propertyUpDownImage;
         }
-        // Fallback.
-        Image scaled = propertyUpDownImage.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+        Image scaled = image.getScaledInstance(w, h, Image.SCALE_SMOOTH);
         return new ImageIcon(scaled);
     }
 
@@ -258,9 +246,7 @@ public class BoardPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (backgroundImage != null) {
-            // Scale background to fill the panel
             g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
         }
     }
-
 }
