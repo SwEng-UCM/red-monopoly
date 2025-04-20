@@ -14,12 +14,14 @@ import javax.swing.*;
 public class BoardPanel extends JPanel {
     private Controller controller;
 
+    // Images for tiles – can be swapped out easily.
     private Image cornerImage;
     private Image propertyUpDownImage;
     private Image propertyLeftRightImage;
 
     private Image backgroundImage = new ImageIcon("resources/background_board.png").getImage();
 
+    // A map to hold manual override images for any tile index (0-39).
     private Map<Integer, Image> manualTileImages = new HashMap<>();
 
     protected boolean useImageDesign = true;
@@ -47,6 +49,7 @@ public class BoardPanel extends JPanel {
         setLayout(null);
         setPreferredSize(new Dimension(DESIGN_SIZE, DESIGN_SIZE));
 
+        // Load default images.
         cornerImage = new ImageIcon("resources/GULAG.png").getImage();
         propertyUpDownImage = new ImageIcon("resources/property_norilsk.png").getImage();
         propertyLeftRightImage = new ImageIcon("resources/property_norilsk_left.png").getImage();
