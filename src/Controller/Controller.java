@@ -209,30 +209,38 @@ public class Controller {
             for (Player player : _game.getPlayers()) {
                 // Fix PropertyTile references
                 List<PropertyTile> linkedProps = new ArrayList<>();
-                for (PropertyTile p : player.getOwnedProperties()) {
-                    for (Tile tile : _game.getBoard().getTiles()) {
-                        if (tile instanceof PropertyTile && tile.getName().equals(p.getName())) {
-                            PropertyTile boardTile = (PropertyTile) tile;
-                            boardTile.setOwner(player);
-                            linkedProps.add(boardTile);
-                            break;
+                List<PropertyTile> playerProps = player.getOwnedProperties();
+                if (playerProps != null) {
+                    for (PropertyTile p : playerProps) {
+                        for (Tile tile : _game.getBoard().getTiles()) {
+                            if (tile instanceof PropertyTile && tile.getName().equals(p.getName())) {
+                                PropertyTile boardTile = (PropertyTile) tile;
+                                boardTile.setOwner(player);
+                                linkedProps.add(boardTile);
+                                break;
+                            }
                         }
                     }
                 }
+
                 player.setOwnedProperties(linkedProps);
 
                 // Fix RailroadTile references
                 List<RailroadTile> linkedRails = new ArrayList<>();
-                for (RailroadTile r : player.getOwnedRailroads()) {
-                    for (Tile tile : _game.getBoard().getTiles()) {
-                        if (tile instanceof RailroadTile && tile.getName().equals(r.getName())) {
-                            RailroadTile boardTile = (RailroadTile) tile;
-                            boardTile.setOwner(player);
-                            linkedRails.add(boardTile);
-                            break;
+                List<RailroadTile> playerRails = player.getOwnedRailroads();
+                if (playerRails != null) {
+                    for (RailroadTile r : playerRails) {
+                        for (Tile tile : _game.getBoard().getTiles()) {
+                            if (tile instanceof RailroadTile && tile.getName().equals(r.getName())) {
+                                RailroadTile boardTile = (RailroadTile) tile;
+                                boardTile.setOwner(player);
+                                linkedRails.add(boardTile);
+                                break;
+                            }
                         }
                     }
                 }
+
                 player.setOwnedRailroads(linkedRails);
             }
 
