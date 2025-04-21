@@ -1,11 +1,17 @@
 package Model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Player {
     private String name;
     private int position;
     private int money;
     private boolean inJail;
     private int jailTurnCount = 0;
+
+    private List<PropertyTile> ownedProperties = new ArrayList<>();
+    private List<RailroadTile> ownedRailroads = new ArrayList<>();
 
     // New fields for turn management
     private boolean skipTurn = false;
@@ -102,4 +108,31 @@ public class Player {
         System.out.println(name + " has been sent to jail!");
         // Additional logic for moving the player to the jail tile can be added here.
     }
+
+    // Property ownership
+    public List<PropertyTile> getOwnedProperties() {
+        return ownedProperties;
+    }
+
+    public void addProperty(PropertyTile property) {
+        ownedProperties.add(property);
+    }
+
+    public void setOwnedProperties(List<PropertyTile> properties) {
+        this.ownedProperties = properties;
+    }
+
+    // Railroad ownership
+    public List<RailroadTile> getOwnedRailroads() {
+        return ownedRailroads;
+    }
+
+    public void addRailroad(RailroadTile railroad) {
+        ownedRailroads.add(railroad);
+    }
+
+    public void setOwnedRailroads(List<RailroadTile> railroads) {
+        this.ownedRailroads = railroads;
+    }
+
 }
