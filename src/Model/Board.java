@@ -127,4 +127,8 @@ public class Board {
         }
         return instance;
     }
+
+    public void setTiles(List<Tile> tiles) {
+        this._tiles = tiles;
+    }
 }

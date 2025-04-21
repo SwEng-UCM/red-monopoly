@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
@@ -197,16 +198,65 @@ public class Controller {
                 System.err.println("Loaded game state is empty. Check file: " + file.getAbsolutePath());
                 return;
             }
+
+            // Restore core game state
             _game.getPlayers().clear();
             _game.getPlayers().addAll(state.getPlayers());
-            // Optionally restore board and current turn index:
-            // _game.setBoard(state.getBoard());
-            // _game.setCurrentPlayerIndex(state.getCurrentPlayerIndex());
+            _game.getBoard().setTiles(state.getBoard().getTiles());
+            _game.setCurrentPlayerIndex(state.getCurrentPlayerIndex());
+
+            // Fix ownership references on tiles and players
+            for (Player player : _game.getPlayers()) {
+                // Fix PropertyTile references
+                List<PropertyTile> linkedProps = new ArrayList<>();
+                for (PropertyTile p : player.getOwnedProperties()) {
+                    for (Tile tile : _game.getBoard().getTiles()) {
+                        if (tile instanceof PropertyTile && tile.getName().equals(p.getName())) {
+                            PropertyTile boardTile = (PropertyTile) tile;
+                            boardTile.setOwner(player);
+                            linkedProps.add(boardTile);
+                            break;
+                        }
+                    }
+                }
+                player.setOwnedProperties(linkedProps);
+
+                // Fix RailroadTile references
+                List<RailroadTile> linkedRails = new ArrayList<>();
+                for (RailroadTile r : player.getOwnedRailroads()) {
+                    for (Tile tile : _game.getBoard().getTiles()) {
+                        if (tile instanceof RailroadTile && tile.getName().equals(r.getName())) {
+                            RailroadTile boardTile = (RailroadTile) tile;
+                            boardTile.setOwner(player);
+                            linkedRails.add(boardTile);
+                            break;
+                        }
+                    }
+                }
+                player.setOwnedRailroads(linkedRails);
+            }
+
             System.out.println("Game loaded from " + file.getAbsolutePath());
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        //debug
+        for (Player player : _game.getPlayers()) {
+            System.out.println(player.getName() + " owns:");
+            for (PropertyTile prop : player.getOwnedProperties()) {
+                System.out.println("  - Property: " + prop.getName());
+            }
+            for (RailroadTile rail : player.getOwnedRailroads()) {
+                System.out.println("  - Railroad: " + rail.getName());
+            }
+        }
+
+
     }
+
+
 
     public MonopolyGame getMonopolyGame() {
         return _game;
