@@ -1,26 +1,72 @@
 {
   "players": [
     {
-      "name": "hiii",
-      "position": 13,
-      "money": 1160,
+      "name": "me",
+      "position": 2,
+      "money": 745,
       "inJail": false,
       "jailTurnCount": 0,
-      "ownedProperties": [],
+      "ownedProperties": [
+        {
+          "rent": 10,
+          "price": 140,
+          "name": "Vladivostok",
+          "position": 11,
+          "tileType": "PropertyTile"
+        },
+        {
+          "rent": 20,
+          "price": 240,
+          "name": "Omsk",
+          "position": 24,
+          "tileType": "PropertyTile"
+        },
+        {
+          "rent": 26,
+          "price": 300,
+          "name": "Yekaterinburg",
+          "position": 32,
+          "tileType": "PropertyTile"
+        }
+      ],
       "ownedRailroads": [],
       "skipTurn": false,
-      "extraTurn": false
+      "extraTurn": false,
+      "type": "Human"
     },
     {
-      "name": "wahsup",
-      "position": 10,
-      "money": 1500,
-      "inJail": true,
+      "name": "AI",
+      "position": 27,
+      "money": 1340,
+      "inJail": false,
       "jailTurnCount": 0,
-      "ownedProperties": [],
+      "ownedProperties": [
+        {
+          "rent": 6,
+          "price": 100,
+          "name": "Magnitogorsk",
+          "position": 6,
+          "tileType": "PropertyTile"
+        },
+        {
+          "rent": 16,
+          "price": 200,
+          "name": "Saratov",
+          "position": 19,
+          "tileType": "PropertyTile"
+        },
+        {
+          "rent": 22,
+          "price": 260,
+          "name": "Chelyabinsk",
+          "position": 27,
+          "tileType": "PropertyTile"
+        }
+      ],
       "ownedRailroads": [],
       "skipTurn": false,
-      "extraTurn": false
+      "extraTurn": false,
+      "type": "Human"
     }
   ],
   "board": {
@@ -107,17 +153,6 @@
         "tileType": "UtilityTile"
       },
       {
-        "owner": {
-          "name": "hiii",
-          "position": 13,
-          "money": 1160,
-          "inJail": false,
-          "jailTurnCount": 0,
-          "ownedProperties": [],
-          "ownedRailroads": [],
-          "skipTurn": false,
-          "extraTurn": false
-        },
         "rent": 10,
         "price": 140,
         "name": "Khabarovsk",

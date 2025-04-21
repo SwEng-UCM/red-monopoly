@@ -1,33 +1,68 @@
 package Model;
 import Controller.Controller;
 
+
 public class AIPlayer extends Player {
-    private AIStrategy strategy;
+    {
+        this.type = "AI";
+    }
+
+
+    private transient AIStrategy strategy; // <-- won't be serialized
+    private String difficulty = "Easy";    // <-- helper for restoring strategy
 
     public AIPlayer(String name, AIStrategy strategy) {
         super(name);
         this.strategy = strategy;
+        this.type = "AI";
+        setDifficultyFromStrategy(strategy);
     }
 
     public void setStrategy(AIStrategy strategy) {
         this.strategy = strategy;
-        System.out.println(getName() + " AI strategy set to " + strategy.getClass().getSimpleName());
+        setDifficultyFromStrategy(strategy);
     }
 
-    /**
-     * Called when it is the AI player's turn.
-     */
+    public AIStrategy getStrategy() {
+        return strategy;
+    }
+
+    public String getDifficulty() {
+        return difficulty;
+    }
+
+    public void setDifficulty(String difficulty) {
+        this.difficulty = difficulty;
+    }
+
+    private void setDifficultyFromStrategy(AIStrategy strategy) {
+        if (strategy instanceof EasyAIStrategy) difficulty = "Easy";
+        else if (strategy instanceof MidAIStrategy) difficulty = "Medium";
+        else if (strategy instanceof HardAIStrategy) difficulty = "Hard";
+        else difficulty = "Easy";
+    }
+
+    public void restoreStrategyFromDifficulty() {
+        switch (difficulty.toLowerCase()) {
+            case "hard" -> strategy = new HardAIStrategy();
+            case "medium" -> strategy = new MidAIStrategy();
+            case "easy" -> strategy = new EasyAIStrategy();
+            default -> strategy = new EasyAIStrategy();
+        }
+    }
+
     public void takeTurn(MonopolyGame game, Controller controller) {
         strategy.playTurn(this, game, controller);
     }
 
-    /**
-     * Called when the dice values are provided externally (for dice animation consistency).
-     */
     public void takeTurnWithDice(int[] diceValues, MonopolyGame game, Controller controller) {
         strategy.playTurn(this, game, controller, diceValues);
     }
-    public AIStrategy getStrategy() {
-        return strategy;
+
+    @Override
+    @com.google.gson.annotations.SerializedName("type")
+    public String getType() {
+        return "AI";
     }
+
 }

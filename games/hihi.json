@@ -1,34 +1,36 @@
 {
   "players": [
     {
-      "name": "jj",
-      "position": 13,
-      "money": 1310,
+      "name": "AI",
+      "position": 9,
+      "money": 1380,
       "inJail": false,
       "jailTurnCount": 0,
       "ownedProperties": [
         {
-          "rent": 10,
-          "price": 140,
-          "name": "Khabarovsk",
-          "position": 13,
+          "rent": 8,
+          "price": 120,
+          "name": "Tomsk",
+          "position": 9,
           "tileType": "PropertyTile"
         }
       ],
       "ownedRailroads": [],
       "skipTurn": false,
-      "extraTurn": false
+      "extraTurn": false,
+      "type": "Human"
     },
     {
-      "name": "king",
-      "position": 22,
-      "money": 1600,
-      "inJail": true,
+      "name": "me",
+      "position": 7,
+      "money": 1500,
+      "inJail": false,
       "jailTurnCount": 0,
       "ownedProperties": [],
       "ownedRailroads": [],
-      "skipTurn": false,
-      "extraTurn": false
+      "skipTurn": true,
+      "extraTurn": false,
+      "type": "Human"
     }
   ],
   "board": {
@@ -291,5 +293,5 @@
       }
     ]
   },
-  "currentPlayerIndex": 1
+  "currentPlayerIndex": 0
 }
