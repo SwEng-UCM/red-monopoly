@@ -17,6 +17,8 @@ public class Player {
     private boolean skipTurn = false;
     private boolean extraTurn = false;
 
+    protected String type;
+
     public Player(String name) {
         this.name = name;
         this.position = 0;
@@ -133,6 +135,11 @@ public class Player {
 
     public void setOwnedRailroads(List<RailroadTile> railroads) {
         this.ownedRailroads = railroads;
+    }
+
+    @com.google.gson.annotations.SerializedName("type")
+    public String getType() {
+        return "Human";
     }
 
 }

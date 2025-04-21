@@ -1,23 +1,52 @@
 {
   "players": [
     {
-      "name": "hi",
-      "position": 7,
-      "money": 1450,
+      "difficulty": "Easy",
+      "name": "AI",
+      "position": 14,
+      "money": 1240,
       "inJail": false,
       "jailTurnCount": 0,
+      "ownedProperties": [
+        {
+          "rent": 6,
+          "price": 100,
+          "name": "Magnitogorsk",
+          "position": 6,
+          "tileType": "PropertyTile"
+        },
+        {
+          "rent": 12,
+          "price": 160,
+          "name": "Irkutsk",
+          "position": 14,
+          "tileType": "PropertyTile"
+        }
+      ],
+      "ownedRailroads": [],
       "skipTurn": false,
-      "extraTurn": true
+      "extraTurn": false,
+      "type": "AI"
     },
     {
-      "strategy": {},
-      "name": "AI",
-      "position": 5,
-      "money": 1440,
+      "name": "hiii",
+      "position": 9,
+      "money": 1180,
       "inJail": false,
       "jailTurnCount": 0,
+      "ownedProperties": [
+        {
+          "rent": 8,
+          "price": 120,
+          "name": "Tomsk",
+          "position": 9,
+          "tileType": "PropertyTile"
+        }
+      ],
+      "ownedRailroads": [],
       "skipTurn": false,
-      "extraTurn": false
+      "extraTurn": false,
+      "type": "Human"
     }
   ],
   "board": {
@@ -40,16 +69,6 @@
         "tileType": "CommunityChestTile"
       },
       {
-        "owner": {
-          "strategy": {},
-          "name": "AI",
-          "position": 5,
-          "money": 1440,
-          "inJail": false,
-          "jailTurnCount": 0,
-          "skipTurn": false,
-          "extraTurn": false
-        },
         "rent": 4,
         "price": 60,
         "name": "Yakutsk",
@@ -290,5 +309,5 @@
       }
     ]
   },
-  "currentPlayerIndex": 0
+  "currentPlayerIndex": 1
 }

@@ -133,9 +133,8 @@ public class Controller {
     // --- Save/Load using Gson and RuntimeTypeAdapterFactory for Tile ---
     public void saveGame(String filename) {
         File dir = new File("games");
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
+        if (!dir.exists()) dir.mkdirs();
+
         File file = new File(dir, filename);
 
         RuntimeTypeAdapterFactory<Tile> tileAdapterFactory = RuntimeTypeAdapterFactory
@@ -151,8 +150,14 @@ public class Controller {
                 .registerSubtype(RailroadTile.class, "RailroadTile")
                 .registerSubtype(UtilityTile.class, "UtilityTile");
 
+        RuntimeTypeAdapterFactory<Player> playerAdapterFactory = RuntimeTypeAdapterFactory
+                .of(Player.class, "type")
+                .registerSubtype(Player.class, "Human")
+                .registerSubtype(AIPlayer.class, "AI");
+
         Gson gson = new GsonBuilder()
                 .registerTypeAdapterFactory(tileAdapterFactory)
+                .registerTypeAdapterFactory(playerAdapterFactory)
                 .setPrettyPrinting()
                 .create();
 
@@ -161,6 +166,7 @@ public class Controller {
                 _game.getBoard(),
                 _game.getCurrentPlayerIndex()
         );
+
         try (FileWriter writer = new FileWriter(file)) {
             gson.toJson(state, writer);
             System.out.println("Game saved to " + file.getAbsolutePath());
@@ -168,6 +174,7 @@ public class Controller {
             e.printStackTrace();
         }
     }
+
 
     public void loadGame(String filename) {
         File file = new File(filename);
@@ -188,8 +195,15 @@ public class Controller {
                 .registerSubtype(RailroadTile.class, "RailroadTile")
                 .registerSubtype(UtilityTile.class, "UtilityTile");
 
+
+        RuntimeTypeAdapterFactory<Player> playerAdapterFactory = RuntimeTypeAdapterFactory
+                .of(Player.class, "type")
+                .registerSubtype(Player.class, "Human")
+                .registerSubtype(AIPlayer.class, "AI");
+
         Gson gson = new GsonBuilder()
                 .registerTypeAdapterFactory(tileAdapterFactory)
+                .registerTypeAdapterFactory(playerAdapterFactory)
                 .create();
 
         try (FileReader reader = new FileReader(file)) {
@@ -242,9 +256,14 @@ public class Controller {
                 }
 
                 player.setOwnedRailroads(linkedRails);
+                if (player instanceof AIPlayer ai) {
+                    ai.restoreStrategyFromDifficulty();
+                }
+
             }
 
             System.out.println("Game loaded from " + file.getAbsolutePath());
+
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -260,6 +279,8 @@ public class Controller {
                 System.out.println("  - Railroad: " + rail.getName());
             }
         }
+
+
 
 
     }
@@ -280,5 +301,9 @@ public class Controller {
 
     public List<Player> getAllPlayers() {
         return _game.getPlayers();
+    }
+
+    public void endTurn() {
+         _game.nextTurn();
     }
 }
