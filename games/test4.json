@@ -1,0 +1,313 @@
+{
+  "players": [
+    {
+      "strategy": {},
+      "name": "AI",
+      "position": 9,
+      "money": 1180,
+      "inJail": false,
+      "jailTurnCount": 0,
+      "skipTurn": false,
+      "extraTurn": false
+    },
+    {
+      "name": "Zheng",
+      "position": 3,
+      "money": 1440,
+      "inJail": false,
+      "jailTurnCount": 0,
+      "skipTurn": false,
+      "extraTurn": false
+    }
+  ],
+  "board": {
+    "_tiles": [
+      {
+        "name": "Go (+200₽)",
+        "position": 0,
+        "tileType": "GoTile"
+      },
+      {
+        "rent": 2,
+        "price": 60,
+        "name": "Norilsk",
+        "position": 1,
+        "tileType": "PropertyTile"
+      },
+      {
+        "name": "Community Chest",
+        "position": 2,
+        "tileType": "CommunityChestTile"
+      },
+      {
+        "owner": {
+          "name": "Zheng",
+          "position": 3,
+          "money": 1440,
+          "inJail": false,
+          "jailTurnCount": 0,
+          "skipTurn": false,
+          "extraTurn": false
+        },
+        "rent": 4,
+        "price": 60,
+        "name": "Yakutsk",
+        "position": 3,
+        "tileType": "PropertyTile"
+      },
+      {
+        "taxAmount": 200,
+        "name": "Income Tax",
+        "position": 4,
+        "tileType": "TaxTile"
+      },
+      {
+        "owner": {
+          "strategy": {},
+          "name": "AI",
+          "position": 9,
+          "money": 1180,
+          "inJail": false,
+          "jailTurnCount": 0,
+          "skipTurn": false,
+          "extraTurn": false
+        },
+        "price": 200,
+        "rent": 25,
+        "name": "Trans-Siberian Railway",
+        "position": 5,
+        "tileType": "RailroadTile"
+      },
+      {
+        "rent": 6,
+        "price": 100,
+        "name": "Magnitogorsk",
+        "position": 6,
+        "tileType": "PropertyTile"
+      },
+      {
+        "name": "Chance",
+        "position": 7,
+        "tileType": "ChanceTile"
+      },
+      {
+        "rent": 6,
+        "price": 100,
+        "name": "Orenburg",
+        "position": 8,
+        "tileType": "PropertyTile"
+      },
+      {
+        "owner": {
+          "strategy": {},
+          "name": "AI",
+          "position": 9,
+          "money": 1180,
+          "inJail": false,
+          "jailTurnCount": 0,
+          "skipTurn": false,
+          "extraTurn": false
+        },
+        "rent": 8,
+        "price": 120,
+        "name": "Tomsk",
+        "position": 9,
+        "tileType": "PropertyTile"
+      },
+      {
+        "name": "Gulag",
+        "position": 10,
+        "tileType": "JailTile"
+      },
+      {
+        "rent": 10,
+        "price": 140,
+        "name": "Vladivostok",
+        "position": 11,
+        "tileType": "PropertyTile"
+      },
+      {
+        "price": 150,
+        "name": "Electric Company",
+        "position": 12,
+        "tileType": "UtilityTile"
+      },
+      {
+        "rent": 10,
+        "price": 140,
+        "name": "Khabarovsk",
+        "position": 13,
+        "tileType": "PropertyTile"
+      },
+      {
+        "rent": 12,
+        "price": 160,
+        "name": "Irkutsk",
+        "position": 14,
+        "tileType": "PropertyTile"
+      },
+      {
+        "price": 200,
+        "rent": 25,
+        "name": "Baikal-Amur Mainline",
+        "position": 15,
+        "tileType": "RailroadTile"
+      },
+      {
+        "rent": 14,
+        "price": 180,
+        "name": "Barnaul",
+        "position": 16,
+        "tileType": "PropertyTile"
+      },
+      {
+        "name": "Community Chest",
+        "position": 17,
+        "tileType": "CommunityChestTile"
+      },
+      {
+        "rent": 14,
+        "price": 180,
+        "name": "Tyumen",
+        "position": 18,
+        "tileType": "PropertyTile"
+      },
+      {
+        "rent": 16,
+        "price": 200,
+        "name": "Saratov",
+        "position": 19,
+        "tileType": "PropertyTile"
+      },
+      {
+        "name": "Free Parking",
+        "position": 20,
+        "tileType": "FreeParkingTile"
+      },
+      {
+        "rent": 18,
+        "price": 220,
+        "name": "Perm",
+        "position": 21,
+        "tileType": "PropertyTile"
+      },
+      {
+        "name": "Chance",
+        "position": 22,
+        "tileType": "ChanceTile"
+      },
+      {
+        "rent": 18,
+        "price": 220,
+        "name": "Krasnoyarsk",
+        "position": 23,
+        "tileType": "PropertyTile"
+      },
+      {
+        "rent": 20,
+        "price": 240,
+        "name": "Omsk",
+        "position": 24,
+        "tileType": "PropertyTile"
+      },
+      {
+        "price": 200,
+        "rent": 25,
+        "name": "Circum-Baikal Railway",
+        "position": 25,
+        "tileType": "RailroadTile"
+      },
+      {
+        "rent": 22,
+        "price": 260,
+        "name": "Samara",
+        "position": 26,
+        "tileType": "PropertyTile"
+      },
+      {
+        "rent": 22,
+        "price": 260,
+        "name": "Chelyabinsk",
+        "position": 27,
+        "tileType": "PropertyTile"
+      },
+      {
+        "price": 150,
+        "name": "Water Works",
+        "position": 28,
+        "tileType": "UtilityTile"
+      },
+      {
+        "rent": 24,
+        "price": 280,
+        "name": "Kazan",
+        "position": 29,
+        "tileType": "PropertyTile"
+      },
+      {
+        "name": "Go to Gulag",
+        "position": 30,
+        "tileType": "GoToJailTile"
+      },
+      {
+        "rent": 26,
+        "price": 300,
+        "name": "Nizhny Novgorod",
+        "position": 31,
+        "tileType": "PropertyTile"
+      },
+      {
+        "rent": 26,
+        "price": 300,
+        "name": "Yekaterinburg",
+        "position": 32,
+        "tileType": "PropertyTile"
+      },
+      {
+        "name": "Community Chest",
+        "position": 33,
+        "tileType": "CommunityChestTile"
+      },
+      {
+        "rent": 28,
+        "price": 320,
+        "name": "Novosibirsk",
+        "position": 34,
+        "tileType": "PropertyTile"
+      },
+      {
+        "price": 200,
+        "rent": 25,
+        "name": "Ural Railway",
+        "position": 35,
+        "tileType": "RailroadTile"
+      },
+      {
+        "name": "Chance",
+        "position": 36,
+        "tileType": "ChanceTile"
+      },
+      {
+        "rent": 35,
+        "price": 350,
+        "name": "Minsk",
+        "position": 37,
+        "tileType": "PropertyTile"
+      },
+      {
+        "taxAmount": 100,
+        "name": "Luxury Tax",
+        "position": 38,
+        "tileType": "TaxTile"
+      },
+      {
+        "rent": 50,
+        "price": 400,
+        "name": "Moscow",
+        "position": 39,
+        "tileType": "PropertyTile"
+      }
+    ]
+  },
+  "currentPlayerIndex": 1
+}
