@@ -210,21 +210,45 @@ public class MainWindow extends JFrame {
                 }
 
                 List<String> playerNames = new ArrayList<>();
-                for (int i = 1; i <= numPlayers; i++) {
-                    String name = JOptionPane.showInputDialog(
-                            this, "Enter name for Player " + i + " (enter 'AI' for computer control):",
-                            "Player Name", JOptionPane.QUESTION_MESSAGE);
+                List<String> playerAvatars = new ArrayList<>();
 
-                    if (name == null || name.trim().isEmpty()) {
+                for (int i = 1; i <= numPlayers; i++) {
+                    JPanel panel = new JPanel(new GridLayout(0, 1));
+                    JTextField nameField = new JTextField();
+                    panel.add(new JLabel("Enter name for Player " + i + " (type 'AI' for AI player):"));
+                    panel.add(nameField);
+
+                    int result = JOptionPane.showConfirmDialog(this, panel,
+                            "Player " + i + " Setup", JOptionPane.OK_CANCEL_OPTION);
+
+                    if (result != JOptionPane.OK_OPTION) {
+                        return; // User cancelled
+                    }
+
+                    String name = nameField.getText().trim();
+                    if (name.isEmpty()) {
                         JOptionPane.showMessageDialog(this,
                                 "Player name cannot be empty!",
                                 "Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
+
+                    // After name input, open Avatar Selection Window
+                    AvatarSelectionWindow avatarWindow = new AvatarSelectionWindow(this);
+                    String avatarPath = avatarWindow.getSelectedAvatarPath();
+                    if (avatarPath == null) {
+                        JOptionPane.showMessageDialog(this,
+                                "You must select an avatar!",
+                                "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
                     playerNames.add(name);
+                    playerAvatars.add(avatarPath);
                 }
 
-                _controller.setNumberOfPlayers(numPlayers, playerNames);
+
+                _controller.setNumberOfPlayers(numPlayers, playerNames, playerAvatars);
                 musicPlayer.stopMusic();
                 GameWindow gameWindow = new GameWindow(_controller, this);
                 this.setVisible(false);

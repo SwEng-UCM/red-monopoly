@@ -25,13 +25,17 @@ public class TokenOverlayPanel extends JPanel {
     private void loadPlayerIcons() {
         List<Player> players = controller.getAllPlayers();
         for (int i = 0; i < players.size(); i++) {
-            String imagePath = "resources/players/player" + (i + 1) + ".png";
-            ImageIcon icon = new ImageIcon(imagePath);
-            // Resize if needed (e.g., 24x24)
+            Player player = players.get(i);
+            String avatarPath = player.getAvatarPath(); // <<< USE the player's real avatar path
+            if (avatarPath == null) {
+                avatarPath = "resources/players/player1.png"; // fallback default
+            }
+            ImageIcon icon = new ImageIcon(avatarPath);
             Image scaledIcon = icon.getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH);
             playerIcons.put(i, scaledIcon);
         }
     }
+
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -48,7 +52,6 @@ public class TokenOverlayPanel extends JPanel {
 
             Rectangle tileBounds = tileLabel.getBounds();
 
-            // Top-right corner offset
             int iconSize = 60;
             int x = tileBounds.x + tileBounds.width - iconSize - 4;
             int y = tileBounds.y + 4;
@@ -59,4 +62,5 @@ public class TokenOverlayPanel extends JPanel {
             }
         }
     }
+
 }

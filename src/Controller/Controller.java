@@ -30,10 +30,6 @@ public class Controller {
         this.turnHandler = new TurnHandler(game);
     }
 
-    public void run_game(){
-        // Your game loop logic here.
-    }
-
     // --- AI Difficulty and Player Setup ---
     public void setAIDifficulty(String difficulty) {
         aiDifficulty = difficulty;
@@ -43,16 +39,17 @@ public class Controller {
         return aiDifficulty;
     }
 
-    public void setNumberOfPlayers(int count, List<String> playerNames) {
+    public void setNumberOfPlayers(int count, List<String> playerNames, List<String> playerAvatars) {
+
         if (count < 1) count = 1;
         if (count > 8) count = 8;
 
         _game.getPlayers().clear();
+
         for (int i = 0; i < count; i++) {
             String name = playerNames.get(i).trim();
             Player p;
             if(name.equalsIgnoreCase("ai")) {
-                // Create an AI player with the selected difficulty.
                 AIStrategy strategy;
                 switch(aiDifficulty.toLowerCase()){
                     case "easy":
@@ -72,10 +69,12 @@ public class Controller {
                 System.out.println("Creating Human player '" + name + "' at index " + i);
                 p = new Model.Player(name);
             }
+
+            // Set avatar from selection
+            p.setAvatarPath(playerAvatars.get(i));
+
             _game.getPlayers().add(p);
         }
-        // Reset turn index if needed. For example:
-        // _game.setCurrentPlayerIndex(0);
     }
 
     public String getCurrentPlayerName() {
@@ -103,8 +102,12 @@ public class Controller {
      * @return a message describing the outcome of the turn.
      */
     public String movePlayerAfterDiceRoll(int[] dice) {
+        MoveCommand command = new MoveCommand(_game, _game.getCurrentPlayer(), dice);
+        executeCommand(command);
+
         return turnHandler.processTurn(_game.getCurrentPlayer(), dice);
     }
+
 
     // --- Command Pattern Support ---
     public void executeCommand(Command command) {

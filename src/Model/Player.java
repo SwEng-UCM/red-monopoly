@@ -10,6 +10,8 @@ public class Player {
     private boolean inJail;
     private int jailTurnCount = 0;
 
+    private String avatarPath;
+
     private List<PropertyTile> ownedProperties = new ArrayList<>();
     private List<RailroadTile> ownedRailroads = new ArrayList<>();
 
@@ -142,4 +144,19 @@ public class Player {
         return "Human";
     }
 
+    public void setMoney(int oldMoney) {
+        this.money = oldMoney;
+    }
+
+    public void setJailTurnCount(int oldJailTurns) {
+        this.jailTurnCount = oldJailTurns;
+    }
+
+    public String getAvatarPath() {
+        return avatarPath;
+         }
+
+ public void setAvatarPath(String avatarPath) {
+               this.avatarPath = avatarPath;
+    }
 }

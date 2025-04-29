@@ -2,8 +2,8 @@
   <library name="google.code.gson" type="repository">
     <properties maven-id="com.google.code.gson:gson:LATEST" />
     <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/com/google/code/gson/gson/2.13.0/gson-2.13.0.jar!/" />
-      <root url="jar://$MAVEN_REPOSITORY$/com/google/errorprone/error_prone_annotations/2.37.0/error_prone_annotations-2.37.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/google/code/gson/gson/2.13.1/gson-2.13.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/google/errorprone/error_prone_annotations/2.38.0/error_prone_annotations-2.38.0.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
