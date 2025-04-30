@@ -3,6 +3,7 @@ package View;
 import Controller.Controller;
 import java.awt.*;
 import javax.swing.*;
+import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.List;
 import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
@@ -26,7 +27,11 @@ public class MainWindow extends JFrame {
         _controller = controller;
         musicPlayer = new MusicPlayer();
         musicPlayer.playMusic("resources/Dark_is_the_Night_-_Soviet_WW2_Song.wav");
+
+
+
         initGUI();
+
     }
 
     public MusicPlayer getMusicPlayer() {
@@ -142,40 +147,101 @@ public class MainWindow extends JFrame {
 
     private JPanel createOptionsMenu() {
         JPanel optionsPanel = new JPanel();
-        optionsPanel.setLayout(new BorderLayout());
-        optionsPanel.setBackground(Color.RED);
+        optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
+        optionsPanel.setBackground(new Color(30, 0, 0)); // Deep red-brown for background
+        optionsPanel.setBorder(BorderFactory.createEmptyBorder(40, 60, 40, 60));
 
-        JLabel optionsLabel = new JLabel("Options Menu", JLabel.CENTER);
-        optionsLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        optionsLabel.setForeground(Color.WHITE);
-        optionsPanel.add(optionsLabel, BorderLayout.NORTH);
-
-        JPanel volumePanel = new JPanel();
+        // Volume Panel
+        JPanel volumePanel = new JPanel(new BorderLayout());
         volumePanel.setOpaque(false);
-        JLabel volumeLabel = new JLabel("Volume:");
+        JLabel volumeLabel = new JLabel("Music Volume:");
         volumeLabel.setFont(new Font("Arial", Font.PLAIN, 18));
         volumeLabel.setForeground(Color.WHITE);
 
-        JSlider volumeSlider = new JSlider(0, 100, 75);
+        JSlider volumeSlider = new JSlider(0, 100, (int) (musicPlayer.getVolume() * 100));
+        volumeSlider.setOpaque(false);
         volumeSlider.addChangeListener(e -> {
-            int value = volumeSlider.getValue();
-            float volume = value / 100f;
+            float volume = volumeSlider.getValue() / 100f;
             musicPlayer.setVolume(volume);
         });
 
-        volumePanel.add(volumeLabel);
-        volumePanel.add(volumeSlider);
-        optionsPanel.add(volumePanel, BorderLayout.CENTER);
+        volumePanel.add(volumeLabel, BorderLayout.WEST);
+        volumePanel.add(volumeSlider, BorderLayout.CENTER);
+        volumePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+
+        // Background Music Checkbox
+        JCheckBox disableMusicBox = new JCheckBox("Disable Background Music");
+        disableMusicBox.setOpaque(false);
+        disableMusicBox.setForeground(Color.WHITE);
+        disableMusicBox.setFont(new Font("Arial", Font.PLAIN, 16));
+        disableMusicBox.setAlignmentX(Component.CENTER_ALIGNMENT);
+        disableMusicBox.setSelected(false);
+
+        disableMusicBox.addItemListener(e -> {
+            if (disableMusicBox.isSelected()) {
+                musicPlayer.stopMusic();
+            } else {
+                musicPlayer.playMusic("resources/Dark_is_the_Night_-_Soviet_WW2_Song.wav");
+                musicPlayer.setVolume(volumeSlider.getValue() / 100f); // retain volume level
+            }
+        });
+
+
+        // AI Turn Speed Slider
+        JLabel aiLabel = new JLabel("AI Turn Speed:");
+        aiLabel.setForeground(Color.WHITE);
+        aiLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+        aiLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JSlider aiSpeedSlider = new JSlider(500, 2000, 1000);
+        aiSpeedSlider.setOpaque(false);
+        aiSpeedSlider.setMajorTickSpacing(500);
+        aiSpeedSlider.setPaintTicks(true);
+        aiSpeedSlider.setPaintLabels(true);
+        aiSpeedSlider.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // TODO: Connect this value to your AI logic
+        aiSpeedSlider.addChangeListener(e -> {
+            int delay = aiSpeedSlider.getValue();
+            System.out.println("Set AI turn delay to " + delay + " ms");
+        });
+
+        // Reset and Back buttons
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setOpaque(false);
+        buttonPanel.setLayout(new FlowLayout());
+
+        JButton resetButton = createStyledButton("Reset to Defaults");
+        resetButton.addActionListener(e -> {
+            volumeSlider.setValue(75);
+            aiSpeedSlider.setValue(1000);
+            disableMusicBox.setSelected(false);
+            musicPlayer.setVolume(0.75f);
+            musicPlayer.playMusic("resources/Dark_is_the_Night_-_Soviet_WW2_Song.wav");
+        });
 
         JButton backButton = createStyledButton("Back to Main Menu");
         backButton.addActionListener(e -> {
             MusicPlayer.playSoundEffect(filePath);
             _cardLayout.show(_mainPanel, "Main Menu");
         });
-        optionsPanel.add(backButton, BorderLayout.SOUTH);
+
+        buttonPanel.add(resetButton);
+        buttonPanel.add(backButton);
+
+        // Assemble
+        optionsPanel.add(volumePanel);
+        optionsPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        optionsPanel.add(disableMusicBox);
+        optionsPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        optionsPanel.add(aiLabel);
+        optionsPanel.add(aiSpeedSlider);
+        optionsPanel.add(Box.createRigidArea(new Dimension(0, 30)));
+        optionsPanel.add(buttonPanel);
 
         return optionsPanel;
     }
+
 
     private void startGameFlow() {
         MusicPlayer.playSoundEffect(filePath);
