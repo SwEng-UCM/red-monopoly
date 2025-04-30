@@ -309,4 +309,10 @@ public class Controller {
     public void endTurn() {
          _game.nextTurn();
     }
+
+    public void setAITurnDelay(int delayMs) {
+        TurnHandler.setGlobalDelay(delayMs);
+    }
+
+
 }
