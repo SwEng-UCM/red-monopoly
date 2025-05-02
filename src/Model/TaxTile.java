@@ -1,5 +1,7 @@
 package Model;
 
+import javax.swing.JOptionPane;
+
 public class TaxTile extends Tile {
     private int taxAmount;
 
@@ -10,8 +12,11 @@ public class TaxTile extends Tile {
 
     @Override
     public void action(Player player) {
-        // Deduct money from the player using `this.taxAmount`
-        System.out.println("Player " + player.getName() + " must pay " + taxAmount + " at " + name);
+        JOptionPane.showMessageDialog(null,
+                "You landed on " + name + " tax tile. Pay " + taxAmount + " ₽.",
+                "Tax Tile",
+                JOptionPane.INFORMATION_MESSAGE);
+        player.deductMoney(taxAmount);
     }
 
     public int getTaxAmount() {
