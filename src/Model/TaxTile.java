@@ -9,9 +9,9 @@ public class TaxTile extends Tile {
     }
 
     @Override
-    public void action(Player player) {
-        // Deduct money from the player using `this.taxAmount`
-        System.out.println("Player " + player.getName() + " must pay " + taxAmount + " at " + name);
+    public String action(Player player) {
+        player.deductMoney(taxAmount);
+        return player.getName() + " paid " + taxAmount + " ₽ in taxes at " + name + ".";
     }
 
     public int getTaxAmount() {

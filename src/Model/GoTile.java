@@ -7,8 +7,8 @@ public class GoTile extends Tile {
     }
 
     @Override
-    public void action(Player player) {
-        // Implement go tile behavior here (e.g., give money for passing GO)
-        System.out.println("Player " + player.getName() + " landed on GO: " + name);
+    public String action(Player player) {
+        player.addMoney(200); // Optional, depends on rules
+        return player.getName() + " landed on GO and collected 200 ₽.";
     }
 }

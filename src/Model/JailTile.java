@@ -7,9 +7,11 @@ public class JailTile extends Tile {
     }
 
     @Override
-    public void action(Player player) {
-        // Implement jail tile behavior here
-        // This could be just a "visiting" tile if not in jail
-        System.out.println("Player " + player.getName() + " is just visiting Gulag: " + name);
+    public String action(Player player) {
+        if (player.isInJail()) {
+            return player.getName() + " is in Gulag.";
+        } else {
+            return player.getName() + " is just visiting the Gulag.";
+        }
     }
 }
