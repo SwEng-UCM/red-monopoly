@@ -6,7 +6,6 @@ import javax.swing.*;
 import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.List;
-import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -18,11 +17,7 @@ public class MainWindow extends JFrame {
     private MusicPlayer musicPlayer;
 
     public MainWindow(Controller controller) {
-        try {
-            UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
-        } catch (UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
+
 
         _controller = controller;
         musicPlayer = new MusicPlayer();

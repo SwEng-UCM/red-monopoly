@@ -24,6 +24,14 @@ public class GameWindow extends JFrame {
     private DualDicePanel dualDicePanel;
     private PlayerInfoWindow playerInfoWindow;
 
+    /** Called by GameManager after a roll that came from a socket client. */
+    public void refreshUIAfterExternalMove() {
+        updateCurrentPlayerLabel();
+        updateCurrentBalanceLabel();
+        boardView.refreshBoard();
+    }
+
+
     public GameWindow(Controller controller, MainWindow mainWindow) {
         _controller = controller;
         _mainWindow = mainWindow;
@@ -36,6 +44,8 @@ public class GameWindow extends JFrame {
         inGameMusic = new MusicPlayer();
         inGameMusic.playMusic("resources/Russia-Theme-Atomic-_Civilization-6-OST_-Kalinka_1.wav");
         inGameMusic.setVolume(0.7f);
+
+
 
         addWindowListener(new WindowAdapter() {
             @Override
