@@ -1,6 +1,5 @@
 package Model;
 
-import javax.swing.JOptionPane;
 import java.util.Random;
 
 public class ChanceTile extends Tile {
@@ -27,59 +26,44 @@ public class ChanceTile extends Tile {
     }
 
     @Override
-    public void action(Player player) {
+    public String action(Player player) {
         Random random = new Random();
         int index = random.nextInt(CHANCE_CARDS.length);
         String card = CHANCE_CARDS[index];
+        String effect = applyChanceEffect(player, index);
 
-        JOptionPane.showMessageDialog(null,
-                "Chance Card: " + card,
-                "Chance!",
-                JOptionPane.INFORMATION_MESSAGE);
-
-        applyChanceEffect(player, index);
+        return "Chance Card: " + card + "\n" + effect;
     }
 
-    private void applyChanceEffect(Player player, int index) {
+    private String applyChanceEffect(Player player, int index) {
         switch (index) {
-            case 0: // Five-Year Plan Success!
+            case 0:
                 player.addMoney(200);
-                break;
-            case 1: // Promotion - Move to Moscow (assuming position 0 for Moscow)
+                return "You received 200 ₽.";
+            case 1:
                 player.setPosition(0);
                 player.addMoney(50);
-                break;
-            case 2: // Factory Inefficiency
+                return "You advanced to Moscow and received 50 ₽.";
+            case 2:
                 player.deductMoney(100);
-                break;
-            case 3: // Loyalty Reward
+                return "You paid 100 ₽ for factory inefficiency.";
+            case 3:
                 player.addMoney(100);
-                break;
-            case 4: // Housing Relocation - Move to the nearest unowned property.
+                return "You gained 100 ₽ for party loyalty.";
+            case 4:
                 Board board = Board.getInstance();
                 int currentPos = player.getPosition();
                 int boardSize = board.getSize();
-                boolean found = false;
                 for (int i = 1; i < boardSize; i++) {
                     int newPos = (currentPos + i) % boardSize;
                     Tile tile = board.getTile(newPos);
-                    if (tile instanceof PropertyTile) {
-                        PropertyTile propertyTile = (PropertyTile) tile;
-                        if (propertyTile.getOwner() == null) {
-                            player.setPosition(newPos);
-                            found = true;
-                            break;
-                        }
+                    if (tile instanceof PropertyTile propertyTile && propertyTile.getOwner() == null) {
+                        player.setPosition(newPos);
+                        return "You moved to the nearest unowned property: " + tile.getName();
                     }
                 }
-                if (!found) {
-                    JOptionPane.showMessageDialog(null,
-                            "No unowned property found. You remain at your current position.",
-                            "Housing Relocation",
-                            JOptionPane.INFORMATION_MESSAGE);
-                }
-                break;
-            case 5: // Agricultural Harvest - Collect 50 ₽ from each player.
+                return "No unowned property found. You stay in place.";
+            case 5:
                 MonopolyGame game = MonopolyGame.getInstance();
                 for (Player other : game.getPlayers()) {
                     if (!other.equals(player)) {
@@ -87,39 +71,38 @@ public class ChanceTile extends Tile {
                         player.addMoney(50);
                     }
                 }
-                break;
-            case 6: // Work Unit Overperformance - Move forward 3 spaces and collect 25 ₽.
+                return "You collected 50 ₽ from each player.";
+            case 6:
                 player.setPosition(player.getPosition() + 3);
                 player.addMoney(25);
-                break;
-
-            case 7: // KGB Investigation - Lose a turn.
+                return "You moved forward 3 spaces and collected 25 ₽.";
+            case 7:
                 player.skipNextTurn();
-
-                break;
-            case 8: // Power Outage
+                return "You are under KGB investigation and will skip your next turn.";
+            case 8:
                 player.deductMoney(75);
-                break;
-
-            case 9: // Sent to Siberia - Go to Jail.
+                return "You paid 75 ₽ for power outage repairs.";
+            case 9:
                 player.goToJail();
-                break;
-            case 10: // Infrastructure Project
+                return "You were sent to Siberia (Jail).";
+            case 10:
                 player.deductMoney(150);
-                break;
-            case 11: // Worker Uprising - Skip your next turn.
+                return "You paid 150 ₽ for the state infrastructure project.";
+            case 11:
                 player.skipNextTurn();
-                break;
-            case 12: // Bribe Official - Pay 50 ₽, then take another turn.
+                return "Worker uprising! You will skip your next turn.";
+            case 12:
                 player.deductMoney(50);
                 player.setExtraTurn(true);
-                break;
-            case 13: // Propaganda Poster
+                return "You bribed a party official. Pay 50 ₽ and take another turn.";
+            case 13:
                 player.addMoney(50);
-                break;
-            case 14: // Consumer Goods Shortage
+                return "You earned 50 ₽ for your propaganda poster.";
+            case 14:
                 player.deductMoney(25);
-                break;
+                return "You paid 25 ₽ for ration coupons.";
+            default:
+                return "";
         }
     }
 }

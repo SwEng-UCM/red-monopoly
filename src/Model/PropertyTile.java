@@ -1,9 +1,5 @@
 package Model;
 
-import javax.swing.JOptionPane;
-import javax.swing.UIManager;
-import java.awt.*;
-
 public class PropertyTile extends Tile {
     private transient Player owner;
     private final int rent;
@@ -13,7 +9,7 @@ public class PropertyTile extends Tile {
         super(name, position);
         this.rent = rent;
         this.price = price;
-        this.owner = null; // Initially, no owner
+        this.owner = null;
     }
 
     public Player getOwner() {
@@ -33,77 +29,22 @@ public class PropertyTile extends Tile {
     }
 
     @Override
-    public void action(Player player) {
-        if (player instanceof AIPlayer) {
-            AIPlayer ai = (AIPlayer) player;
-            if (((AIStrategy) ai.getStrategy()).shouldBuyTile(ai, this)) {
-                if (ai.getMoney() >= price) {
-                    owner = ai;
-                    ai.deductMoney(price);
-
-                    // ✅ ADD ownership tracking
-                    ai.addProperty(this);
-
-                    JOptionPane.showMessageDialog(null,
-                            ai.getName() + " bought " + getName() + " for " + price + " ₽",
-                            "AI Purchase",
-                            JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(null,
-                            ai.getName() + " couldn't afford " + getName() + ".",
-                            "AI Error",
-                            JOptionPane.ERROR_MESSAGE);
-                }
+    public String action(Player player) {
+        if (owner == null) {
+            if (player.getMoney() >= price) {
+                owner = player;
+                player.deductMoney(price);
+                player.addProperty(this);
+                return player.getName() + " bought " + getName() + " for " + price + " ₽.";
             } else {
-                JOptionPane.showMessageDialog(null,
-                        ai.getName() + " chose not to buy " + getName() + ".",
-                        "AI Decision",
-                        JOptionPane.INFORMATION_MESSAGE);
+                return player.getName() + " cannot afford to buy " + getName() + ".";
             }
+        } else if (owner != player) {
+            player.deductMoney(rent);
+            owner.addMoney(rent);
+            return player.getName() + " paid " + rent + " ₽ rent to " + owner.getName() + " for " + getName() + ".";
         } else {
-            if (owner == null) {
-                // Unowned property
-                UIManager.put("OptionPane.messageFont", new Font("Arial", Font.PLAIN, 18));
-                UIManager.put("OptionPane.buttonFont", new Font("Arial", Font.PLAIN, 16));
-
-                int choice = JOptionPane.showConfirmDialog(
-                        null,
-                        player.getName() + " landed on " + getName() + ". This property is unowned. Buy for " + price + " ₽?",
-                        "Buy Property",
-                        JOptionPane.YES_NO_OPTION
-                );
-
-                if (choice == JOptionPane.YES_OPTION) {
-                    if (player.getMoney() >= price) {
-                        owner = player;
-                        player.deductMoney(price);
-
-                        // ✅ ADD ownership tracking
-                        player.addProperty(this);
-
-                        JOptionPane.showMessageDialog(null,
-                                player.getName() + " bought " + getName() + " for " + price + " ₽",
-                                "Success",
-                                JOptionPane.INFORMATION_MESSAGE);
-                    } else {
-                        JOptionPane.showMessageDialog(null,
-                                player.getName() + " does not have enough money to buy " + getName() + ".",
-                                "Error",
-                                JOptionPane.ERROR_MESSAGE);
-                    }
-                } else {
-                    System.out.println(player.getName() + " chose not to buy " + getName() + ".");
-                }
-            } else if (owner != player) {
-                // Pay rent
-                System.out.println(player.getName() + " landed on " + getName() +
-                        " owned by " + owner.getName() + ". Paying rent: " + rent + " ₽");
-                player.deductMoney(rent);
-                owner.addMoney(rent);
-            } else {
-                // Landed on own property
-                System.out.println(player.getName() + " landed on their own property: " + getName());
-            }
+            return player.getName() + " landed on their own property: " + getName() + ".";
         }
     }
 }

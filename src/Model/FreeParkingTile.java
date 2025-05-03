@@ -7,8 +7,7 @@ public class FreeParkingTile extends Tile {
     }
 
     @Override
-    public void action(Player player) {
-        // Implement free parking behavior here
-        System.out.println("Player " + player.getName() + " landed on Free Parking: " + name);
+    public String action(Player player) {
+        return player.getName() + " landed on Free Parking. Nothing happens.";
     }
 }

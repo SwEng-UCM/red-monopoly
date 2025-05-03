@@ -55,9 +55,13 @@ public class AIPlayer extends Player {
         strategy.playTurn(this, game, controller);
     }
 
-    public void takeTurnWithDice(int[] diceValues, MonopolyGame game, Controller controller) {
-        strategy.playTurn(this, game, controller, diceValues);
+    public String takeTurnWithDice(int[] dice, MonopolyGame game, Controller controller) {
+        int total = dice[0] + dice[1];
+        game.movePlayer(this, total);
+        Tile tile = game.getBoard().getTile(this.getPosition());
+        return tile.action(this); // Now returns summary
     }
+
 
     @Override
     @com.google.gson.annotations.SerializedName("type")

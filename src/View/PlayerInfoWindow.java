@@ -36,7 +36,7 @@ public class PlayerInfoWindow extends JFrame {
         };
 
         playerTable = new JTable(tableModel);
-        playerTable.setFont(new Font("Arial", Font.PLAIN, 16));
+        playerTable.setFont(new Font("Serif", Font.PLAIN, 16));
         playerTable.setRowHeight(40);
         playerTable.setForeground(Color.WHITE);
         playerTable.setBackground(new Color(40, 40, 40));
@@ -45,7 +45,7 @@ public class PlayerInfoWindow extends JFrame {
         playerTable.setSelectionForeground(Color.WHITE);
 
         JTableHeader header = playerTable.getTableHeader();
-        header.setFont(new Font("Arial", Font.BOLD, 16));
+        header.setFont(new Font("Serif", Font.BOLD, 16));
         header.setBackground(new Color(100, 0, 0));
         header.setForeground(Color.WHITE);
 
@@ -78,7 +78,7 @@ public class PlayerInfoWindow extends JFrame {
         add(scrollPane, BorderLayout.CENTER);
 
         JButton refreshButton = new JButton("Refresh Data");
-        refreshButton.setFont(new Font("Arial", Font.BOLD, 16));
+        refreshButton.setFont(new Font("Serif", Font.BOLD, 16));
         refreshButton.setBackground(new Color(150, 0, 0));
         refreshButton.setForeground(Color.WHITE);
         refreshButton.setFocusPainted(false);

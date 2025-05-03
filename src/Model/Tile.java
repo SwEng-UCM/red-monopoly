@@ -17,5 +17,5 @@ public abstract class Tile { //abstract class that will represent all the differ
         return position;
     }
 
-    public abstract void action(Player player);
+    public abstract String action(Player player);
 }

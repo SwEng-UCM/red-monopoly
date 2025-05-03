@@ -1,7 +1,5 @@
 package Model;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,99 +47,23 @@ public class RailroadTile extends Tile {
     }
 
     @Override
-    public void action(Player player) {
-        if (player instanceof AIPlayer) {
-            AIPlayer ai = (AIPlayer) player;
-            if (((AIStrategy) ai.getStrategy()).shouldBuyTile(ai, this)) {
-                if (ai.getMoney() >= price) {
-                    owner = ai;
-                    ai.deductMoney(price);
-
-                    // ✅ ADD THIS LINE
-                    ai.addRailroad(this);
-
-                    JOptionPane.showMessageDialog(
-                            null,
-                            ai.getName() + " bought " + getName() + " for " + price + " ₽",
-                            "AI Purchase",
-                            JOptionPane.INFORMATION_MESSAGE
-                    );
-                } else {
-                    JOptionPane.showMessageDialog(
-                            null,
-                            ai.getName() + " couldn't afford " + getName() + ".",
-                            "AI Error",
-                            JOptionPane.ERROR_MESSAGE
-                    );
-                }
+    public String action(Player player) {
+        if (owner == null) {
+            if (player.getMoney() >= price) {
+                owner = player;
+                player.deductMoney(price);
+                player.addRailroad(this);
+                return player.getName() + " bought railroad " + getName() + " for " + price + " ₽.";
             } else {
-                JOptionPane.showMessageDialog(
-                        null,
-                        ai.getName() + " chose not to buy " + getName() + ".",
-                        "AI Decision",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
+                return player.getName() + " cannot afford to buy " + getName() + ".";
             }
+        } else if (owner != player) {
+            int rent = calculateRent();
+            player.deductMoney(rent);
+            owner.addMoney(rent);
+            return player.getName() + " paid " + rent + " ₽ rent to " + owner.getName() + " for " + getName() + ".";
         } else {
-            if (owner == null) {
-                UIManager.put("OptionPane.messageFont", new Font("Arial", Font.PLAIN, 18));
-                UIManager.put("OptionPane.buttonFont", new Font("Arial", Font.PLAIN, 16));
-
-                int choice = JOptionPane.showConfirmDialog(
-                        null,
-                        player.getName() + " landed on " + getName() + " Railroad. Buy for " + price + " ₽?",
-                        "Buy Railroad",
-                        JOptionPane.YES_NO_OPTION
-                );
-
-                if (choice == JOptionPane.YES_OPTION) {
-                    if (player.getMoney() >= price) {
-                        owner = player;
-                        player.deductMoney(price);
-
-                        // ✅ ADD THIS LINE
-                        player.addRailroad(this);
-
-                        JOptionPane.showMessageDialog(
-                                null,
-                                player.getName() + " bought " + getName() + " for " + price + " ₽",
-                                "Success",
-                                JOptionPane.INFORMATION_MESSAGE
-                        );
-                    } else {
-                        JOptionPane.showMessageDialog(
-                                null,
-                                player.getName() + " doesn't have enough money to buy " + getName() + ".",
-                                "Error",
-                                JOptionPane.ERROR_MESSAGE
-                        );
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(
-                            null,
-                            player.getName() + " chose not to buy " + getName() + ".",
-                            "Decision",
-                            JOptionPane.INFORMATION_MESSAGE
-                    );
-                }
-            } else if (owner != player) {
-                int rent = calculateRent();
-                player.deductMoney(rent);
-                owner.addMoney(rent);
-                JOptionPane.showMessageDialog(
-                        null,
-                        player.getName() + " paid " + rent + " ₽ rent to " + owner.getName() + " for " + getName(),
-                        "Rent Paid",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-            } else {
-                JOptionPane.showMessageDialog(
-                        null,
-                        player.getName() + " landed on their own railroad: " + getName(),
-                        "Your Property",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-            }
+            return player.getName() + " landed on their own railroad: " + getName() + ".";
         }
     }
 }
