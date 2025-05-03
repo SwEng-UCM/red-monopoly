@@ -1,11 +1,7 @@
 package Model;
 
-import javax.swing.JOptionPane;
-import javax.swing.UIManager;
-import java.awt.*;
-
 public class PropertyTile extends Tile {
-    private Player owner;
+    private transient Player owner;
     private final int rent;
     private final int price;
 
@@ -13,7 +9,7 @@ public class PropertyTile extends Tile {
         super(name, position);
         this.rent = rent;
         this.price = price;
-        this.owner = null; // Initially, no owner
+        this.owner = null;
     }
 
     public Player getOwner() {
@@ -33,51 +29,22 @@ public class PropertyTile extends Tile {
     }
 
     @Override
-    public void action(Player player) {
+    public String action(Player player) {
         if (owner == null) {
-            // Property is unowned
-            //System.out.println(player.getName() + " landed on " + name + ". This property is unowned.");
-
-            UIManager.put("OptionPane.messageFont", new Font("Arial", Font.PLAIN, 18)); // Increase font size for messages
-            UIManager.put("OptionPane.buttonFont", new Font("Arial", Font.PLAIN, 16));  // Increase font size for buttons
-
-            // Ask the player if they want to buy the property
-            int choice = JOptionPane.showConfirmDialog(
-                    null,
-                    player.getName() + " landed on " + name + ". This property is unowned. Would you like to buy for " + price + " ₽ ?",
-                    "Buy Property",
-                    JOptionPane.YES_NO_OPTION
-            );
-
-            if (choice == JOptionPane.YES_OPTION) {
-                if (player.getMoney() >= price) {
-                    // Player has enough money, assign property to them and deduct the price
-                    owner = player;
-                    player.deductMoney(price);
-                    JOptionPane.showMessageDialog(null,
-                            player.getName() + " bought " + name + " for " + price + " ₽",
-                            "Success",
-                            JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(null,
-                            player.getName() + " does not have enough money to buy " + name + ".",
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
-                    // Player doesn't have enough money
-
-                }
+            if (player.getMoney() >= price) {
+                owner = player;
+                player.deductMoney(price);
+                player.addProperty(this);
+                return player.getName() + " bought " + getName() + " for " + price + " ₽.";
             } else {
-                // Player chose not to buy the property
-                System.out.println(player.getName() + " chose not to buy " + name + ".");
+                return player.getName() + " cannot afford to buy " + getName() + ".";
             }
         } else if (owner != player) {
-            // Property is owned by another player, pay rent
-            System.out.println(player.getName() + " landed on " + name + " owned by " + owner.getName() + ". Paying rent: " + rent + " ₽");
-            player.deductMoney(rent); // Deduct rent from the player
-            owner.addMoney(rent);     // Add rent to the owner's balance
+            player.deductMoney(rent);
+            owner.addMoney(rent);
+            return player.getName() + " paid " + rent + " ₽ rent to " + owner.getName() + " for " + getName() + ".";
         } else {
-            // Property is owned by the current player
-            System.out.println(player.getName() + " landed on their own property: " + name);
+            return player.getName() + " landed on their own property: " + getName() + ".";
         }
     }
 }

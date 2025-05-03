@@ -7,10 +7,7 @@ import Model.RailroadTile;
 import Model.Tile;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
+import javax.swing.table.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,9 +20,10 @@ public class PlayerInfoWindow extends JFrame {
     public PlayerInfoWindow(Controller controller) {
         this.controller = controller;
         setTitle("Player Info - Properties & Railroads");
-        setSize(800, 600);
+        setSize(900, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        getContentPane().setBackground(new Color(30, 30, 30));
 
         String[] columnNames = {"Player", "Money (₽)", "Position", "In Gulag?", "Properties", "Railroads"};
         Object[][] data = buildPlayerData();
@@ -38,8 +36,18 @@ public class PlayerInfoWindow extends JFrame {
         };
 
         playerTable = new JTable(tableModel);
-        playerTable.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        playerTable.setFont(new Font("Serif", Font.PLAIN, 16));
         playerTable.setRowHeight(40);
+        playerTable.setForeground(Color.WHITE);
+        playerTable.setBackground(new Color(40, 40, 40));
+        playerTable.setGridColor(new Color(70, 70, 70));
+        playerTable.setSelectionBackground(new Color(80, 0, 0));
+        playerTable.setSelectionForeground(Color.WHITE);
+
+        JTableHeader header = playerTable.getTableHeader();
+        header.setFont(new Font("Serif", Font.BOLD, 16));
+        header.setBackground(new Color(100, 0, 0));
+        header.setForeground(Color.WHITE);
 
         playerTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
@@ -50,26 +58,42 @@ public class PlayerInfoWindow extends JFrame {
                 String rowPlayerName = table.getModel().getValueAt(row, 0).toString();
 
                 if (rowPlayerName.equals(currentPlayerName)) {
-                    c.setBackground(new Color(255, 255, 200));
+                    c.setBackground(new Color(80, 40, 0));
                     c.setFont(c.getFont().deriveFont(Font.BOLD));
+                    c.setForeground(Color.YELLOW);
                 } else {
-                    c.setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
+                    c.setBackground(isSelected ? table.getSelectionBackground() : new Color(40, 40, 40));
                     c.setFont(c.getFont().deriveFont(Font.PLAIN));
+                    c.setForeground(Color.WHITE);
                 }
                 return c;
             }
         });
 
         JScrollPane scrollPane = new JScrollPane(playerTable);
+        scrollPane.getViewport().setBackground(new Color(30, 30, 30));
+        scrollPane.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
+
         adjustColumnWidths(playerTable);
         add(scrollPane, BorderLayout.CENTER);
 
         JButton refreshButton = new JButton("Refresh Data");
+        refreshButton.setFont(new Font("Serif", Font.BOLD, 16));
+        refreshButton.setBackground(new Color(150, 0, 0));
+        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setFocusPainted(false);
+        refreshButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
         refreshButton.addActionListener(e -> {
             refreshPlayerData();
             adjustColumnWidths(playerTable);
         });
-        add(refreshButton, BorderLayout.SOUTH);
+
+        JPanel bottom = new JPanel();
+        bottom.setBackground(new Color(30, 30, 30));
+        bottom.add(refreshButton);
+
+        add(bottom, BorderLayout.SOUTH);
     }
 
     private Object[][] buildPlayerData() {
@@ -101,16 +125,8 @@ public class PlayerInfoWindow extends JFrame {
     }
 
     private String getPropertyNamesAsString(Player p) {
-        List<PropertyTile> ownedProps = new ArrayList<>();
-        for (Tile tile : controller.getBoardTiles()) {
-            if (tile instanceof PropertyTile && ((PropertyTile) tile).getOwner() == p) {
-                ownedProps.add((PropertyTile) tile);
-            }
-        }
-        if (ownedProps.isEmpty()) return "None";
-        return ownedProps.stream()
-                .map(PropertyTile::getName)
-                .collect(Collectors.joining(", "));
+        return p.getOwnedProperties().isEmpty() ? "None"
+                : p.getOwnedProperties().stream().map(PropertyTile::getName).collect(Collectors.joining(", "));
     }
 
     private String getRailroadNamesAsString(Player p, List<RailroadTile> allRailroads) {

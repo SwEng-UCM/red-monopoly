@@ -1,5 +1,8 @@
 package Model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Player {
     private String name;
     private int position;
@@ -7,9 +10,16 @@ public class Player {
     private boolean inJail;
     private int jailTurnCount = 0;
 
+    private String avatarPath;
+
+    private List<PropertyTile> ownedProperties = new ArrayList<>();
+    private List<RailroadTile> ownedRailroads = new ArrayList<>();
+
     // New fields for turn management
     private boolean skipTurn = false;
     private boolean extraTurn = false;
+
+    protected String type;
 
     public Player(String name) {
         this.name = name;
@@ -101,5 +111,52 @@ public class Player {
         resetJailTurn();
         System.out.println(name + " has been sent to jail!");
         // Additional logic for moving the player to the jail tile can be added here.
+    }
+
+    // Property ownership
+    public List<PropertyTile> getOwnedProperties() {
+        return ownedProperties;
+    }
+
+    public void addProperty(PropertyTile property) {
+        ownedProperties.add(property);
+    }
+
+    public void setOwnedProperties(List<PropertyTile> properties) {
+        this.ownedProperties = properties;
+    }
+
+    // Railroad ownership
+    public List<RailroadTile> getOwnedRailroads() {
+        return ownedRailroads;
+    }
+
+    public void addRailroad(RailroadTile railroad) {
+        ownedRailroads.add(railroad);
+    }
+
+    public void setOwnedRailroads(List<RailroadTile> railroads) {
+        this.ownedRailroads = railroads;
+    }
+
+    @com.google.gson.annotations.SerializedName("type")
+    public String getType() {
+        return "Human";
+    }
+
+    public void setMoney(int oldMoney) {
+        this.money = oldMoney;
+    }
+
+    public void setJailTurnCount(int oldJailTurns) {
+        this.jailTurnCount = oldJailTurns;
+    }
+
+    public String getAvatarPath() {
+        return avatarPath;
+         }
+
+ public void setAvatarPath(String avatarPath) {
+               this.avatarPath = avatarPath;
     }
 }

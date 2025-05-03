@@ -7,11 +7,9 @@ public class GoToJailTile extends Tile {
     }
 
     @Override
-    public void action(Player player) {
-        // Implement go to jail behavior here
-        System.out.println("Player " + player.getName() + " landed on Go To Gulag: " + name);
-        // You might want to add logic to move the player to the jail position
-        //player.setPosition(position);
+    public String action(Player player) {
         player.setInJail(true);
+        player.setPosition(10); // Assuming jail is at index 10
+        return player.getName() + " was sent to Gulag!";
     }
 }

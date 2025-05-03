@@ -82,4 +82,12 @@ public class MonopolyGame {
     public int getCurrentPlayerIndex() {
         return currentPlayerIndex;
     }
+
+    public void setBoard(Board board) {
+        this.board = board;
+    }
+
+    public void setCurrentPlayerIndex(int currentPlayerIndex) {
+        this.currentPlayerIndex = currentPlayerIndex;
+    }
 }

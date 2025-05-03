@@ -1,6 +1,5 @@
 package Model;
 
-import javax.swing.JOptionPane;
 import java.util.Random;
 
 public class CommunityChestTile extends Tile {
@@ -22,46 +21,44 @@ public class CommunityChestTile extends Tile {
     }
 
     @Override
-    public void action(Player player) {
+    public String action(Player player) {
         Random random = new Random();
         int index = random.nextInt(COMMUNITY_CARDS.length);
         String card = COMMUNITY_CARDS[index];
+        String effect = applyCommunityEffect(player, index);
 
-        JOptionPane.showMessageDialog(null,
-                "Community Chest Card: " + card,
-                "Community Chest!",
-                JOptionPane.INFORMATION_MESSAGE);
-
-        applyCommunityEffect(player, index);
+        return "Community Chest Card: " + card + "\n" + effect;
     }
 
-    private void applyCommunityEffect(Player player, int index) {
+    private String applyCommunityEffect(Player player, int index) {
         switch (index) {
-            case 0: // Glorious Contribution to the Motherland: Collect 200 ₽.
+            case 0:
                 player.addMoney(200);
-                break;
-            case 1: // Exposing Saboteurs of Progress: Collect 100 ₽.
+                return "You collected 200 ₽ for your contribution.";
+            case 1:
                 player.addMoney(100);
-                break;
-            case 2: // Central Planning Glitch: Pay 50 ₽.
+                return "You collected 100 ₽ for exposing saboteurs.";
+            case 2:
                 player.deductMoney(50);
-                break;
-            case 3: // Celebration of Revolutionary Innovation: Collect 150 ₽.
+                return "You paid 50 ₽ due to a planning glitch.";
+            case 3:
                 player.addMoney(150);
-                break;
-            case 4: // Mandatory Technological Reorganization: Pay 75 ₽.
+                return "You collected 150 ₽ for your innovation.";
+            case 4:
                 player.deductMoney(75);
-                break;
-            case 5: // Advance to Red Square: Collect 200 ₽.
-                // Assuming Red Square is at position 0
+                return "You paid 75 ₽ for reorganization.";
+            case 5:
                 player.setPosition(0);
                 player.addMoney(200);
-                break;
-            case 6: // Get Out of Gulag Free Card.
-                if (player.isInJail())
+                return "You advanced to Red Square and collected 200 ₽.";
+            case 6:
+                if (player.isInJail()) {
                     player.setInJail(false);
-                break;
-            case 7: // Comrade Solidarity Contribution: Collect 50 ₽ from each player.
+                    return "You used a Get Out of Gulag Free card.";
+                } else {
+                    return "You received a Get Out of Gulag Free card (but are not in jail).";
+                }
+            case 7:
                 MonopolyGame game = MonopolyGame.getInstance();
                 for (Player other : game.getPlayers()) {
                     if (!other.equals(player)) {
@@ -69,16 +66,15 @@ public class CommunityChestTile extends Tile {
                         player.addMoney(50);
                     }
                 }
-                break;
-            case 8: // Bureaucratic Delay: Skip your next turn.
+                return "You collected 50 ₽ from each player.";
+            case 8:
                 player.skipNextTurn();
-                break;
-            case 9: // Breach of State Security: Pay 100 ₽ for damages.
+                return "Bureaucratic delay! You will skip your next turn.";
+            case 9:
                 player.deductMoney(100);
-                break;
+                return "You paid 100 ₽ for state security damages.";
             default:
-                // Default case if needed in future modifications
-                break;
+                return "";
         }
     }
 }
