@@ -62,7 +62,7 @@ public class ClientHandler implements Runnable {
        We need a way to reach the GameServer from here without a circular ref.
        Easiest quick hack: a tiny holder with a public static reference.
        Put this inner class at bottom of this file or in its own file. */
-    private static class GameServerHolder {
+    static class GameServerHolder {
         private static GameServer INSTANCE;
         static void set(GameServer srv) { INSTANCE = srv; }
     }

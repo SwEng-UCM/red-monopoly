@@ -18,10 +18,13 @@ public class GameServer {
     private final List<ClientHandler> clients = new CopyOnWriteArrayList<>();
     private final GameManager gameManager;               // now needs controller
 
-    public GameServer(Controller ctrl) {                 // <-- new ctor
+    public GameServer(Controller ctrl) {
         this.controller  = ctrl;
-        this.gameManager = new GameManager(this, ctrl);  // pass bridge
+        this.gameManager = new GameManager(this, ctrl);
+        // <<< ADD THIS LINE >>>
+        ClientHandler.GameServerHolder.set(this);
     }
+
 
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
