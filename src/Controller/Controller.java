@@ -315,4 +315,62 @@ public class Controller {
     }
 
 
+
+    public void loadGameState(GameState state) {
+        // 1. Restore player list
+        _game.getPlayers().clear();
+        _game.getPlayers().addAll(state.getPlayers());
+
+        // 2. Restore board tiles
+        _game.getBoard().setTiles(state.getBoard().getTiles());
+
+        // 3. Restore current player index
+        _game.setCurrentPlayerIndex(state.getCurrentPlayerIndex());
+
+        // 4. Fix up ownership pointers on tiles and players
+        for (Player player : _game.getPlayers()) {
+            // Properties
+            List<PropertyTile> linkedProps = new ArrayList<>();
+            List<PropertyTile> savedProps = player.getOwnedProperties();
+            if (savedProps != null) {
+                for (PropertyTile p : savedProps) {
+                    for (Tile t : _game.getBoard().getTiles()) {
+                        if (t instanceof PropertyTile && t.getName().equals(p.getName())) {
+                            PropertyTile boardProp = (PropertyTile) t;
+                            boardProp.setOwner(player);
+                            linkedProps.add(boardProp);
+                            break;
+                        }
+                    }
+                }
+            }
+            player.setOwnedProperties(linkedProps);
+
+            // Railroads
+            List<RailroadTile> linkedRails = new ArrayList<>();
+            List<RailroadTile> savedRails = player.getOwnedRailroads();
+            if (savedRails != null) {
+                for (RailroadTile r : savedRails) {
+                    for (Tile t : _game.getBoard().getTiles()) {
+                        if (t instanceof RailroadTile && t.getName().equals(r.getName())) {
+                            RailroadTile boardRail = (RailroadTile) t;
+                            boardRail.setOwner(player);
+                            linkedRails.add(boardRail);
+                            break;
+                        }
+                    }
+                }
+            }
+            player.setOwnedRailroads(linkedRails);
+
+            // Restore AI strategy if needed
+            if (player instanceof AIPlayer ai) {
+                ai.restoreStrategyFromDifficulty();
+            }
+        }
+
+        // (Optional) Clear undo history
+        commandHistory.clear();
+    }
+
 }
