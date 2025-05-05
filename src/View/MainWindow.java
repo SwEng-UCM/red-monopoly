@@ -1,10 +1,11 @@
-// src/View/MainWindow.java
 package View;
 
 import Controller.Controller;
 import Controller.GameServer;
 import Controller.NetworkClient;
+import Model.Player;
 import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.UIManager;
@@ -65,7 +66,7 @@ public class MainWindow extends JFrame {
         JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.setPreferredSize(new Dimension(800, 800));
 
-        // Background
+        // Background image
         JLabel bg = new JLabel(new ImageIcon(
                 new ImageIcon("resources/redmonopolyLogo.jpg")
                         .getImage()
@@ -253,20 +254,13 @@ public class MainWindow extends JFrame {
         return opts;
     }
 
-    /**
-     * Fully restores the old single-player flow:
-     *  select difficulty, number of players, names & avatars,
-     *  then open a GameWindow with netClient=null.
-     */
     private void startGameFlow() {
         List<String> names   = new ArrayList<>();
         List<String> avatars = new ArrayList<>();
-        // reuse the shared setup dialog
         if (!askPlayerSetup(names, avatars)) return;
 
         _controller.setNumberOfPlayers(names.size(), names, avatars);
 
-        // stop main menu music, launch game window in single-player mode
         musicPlayer.stopMusic();
         GameWindow gw = new GameWindow(_controller, this, null, null);
         setVisible(false);
@@ -310,13 +304,11 @@ public class MainWindow extends JFrame {
         if (myId == null || myId.isBlank()) return;
 
         try {
-            NetworkClient net = new NetworkClient(
-                    host.trim(), GameServer.PORT, myId.trim()
-            );
+            NetworkClient net = new NetworkClient(host.trim(), GameServer.PORT, myId.trim());
             musicPlayer.stopMusic();
             new GameWindow(_controller, this, net, myId.trim()).setVisible(true);
             setVisible(false);
-        } catch (IOException ex) {
+        } catch(IOException ex) {
             JOptionPane.showMessageDialog(this,
                     "Failed to connect: " + ex.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE
@@ -324,11 +316,8 @@ public class MainWindow extends JFrame {
         }
     }
 
-    /**
-     * Shared dialog for both single- and multiplayer.
-     */
+
     private boolean askPlayerSetup(List<String> names, List<String> avatars) {
-        // difficulty
         JPanel diffP = new JPanel(new GridLayout(0,1));
         diffP.add(new JLabel("Select AI Difficulty:"));
         JComboBox<String> diffC = new JComboBox<>(
@@ -341,7 +330,6 @@ public class MainWindow extends JFrame {
         ) != JOptionPane.OK_OPTION) return false;
         _controller.setAIDifficulty((String)diffC.getSelectedItem());
 
-        // number of players
         String input = JOptionPane.showInputDialog(
                 this, "How many players? (2-8)", "Number of Players",
                 JOptionPane.QUESTION_MESSAGE
@@ -358,7 +346,6 @@ public class MainWindow extends JFrame {
             return false;
         }
 
-        // per-player details
         for (int i = 1; i <= n; i++) {
             JPanel p = new JPanel(new GridLayout(0,1));
             JTextField tf = new JTextField();

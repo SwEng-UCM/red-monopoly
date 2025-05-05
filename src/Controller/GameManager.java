@@ -69,9 +69,14 @@ public class GameManager {
                 .orElse(null);
 
         if (p == null) {
-            pm(id, "ERR:No such player in current game. Create '" + id + "' in the GUI first, then reconnect.");
-            return;
+            // auto-create a new human player if not pre-registered
+            System.out.println("Auto-creating new Human player '" + id + "'");
+            p = new Model.Player(id);
+            // you may want to give them a default avatar path here
+            p.setAvatarPath("resources/players/8.png");
+            controller.getMonopolyGame().getPlayers().add(p);
         }
+
 
         idToPlayer.put(id, p);
         server.broadcast("INFO:" + id + " joined from terminal");

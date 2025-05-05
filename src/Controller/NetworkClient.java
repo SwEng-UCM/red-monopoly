@@ -1,3 +1,4 @@
+// src/Controller/NetworkClient.java
 package Controller;
 
 import com.google.gson.Gson;
@@ -29,45 +30,38 @@ import java.net.Socket;
  */
 public class NetworkClient {
     public interface GameMessageListener {
-        /** Initial BAL:… POS:… OWN:… props for a player */
         void onBalance(String playerId, int money, int position, int props);
-        /** MOVE:<player>:<die1>+<die2> */
         void onMove(String playerId, int die1, int die2);
-        /** STATE:<outcome> */
         void onState(String outcome);
-        /** TURN:<playerId> */
         void onTurn(String currentPlayerId);
-        /** FULLSTATE:<json> */
         void onFullState(GameState state);
-        /** INFO:<message> */
         void onInfo(String message);
-        /** ERRORS sent as PM:<you>:ERR:<msg> */
         void onError(String playerId, String errorMsg);
     }
 
     private final Socket socket;
     private final DataInputStream in;
     private final DataOutputStream out;
-    private Thread readerThread;
+    private final Thread readerThread;
     private GameMessageListener listener;
 
     // Gson setup (must match server adapters!)
     private final RuntimeTypeAdapterFactory<Tile> tileAdapterFactory =
             RuntimeTypeAdapterFactory.of(Tile.class, "tileType")
-                    .registerSubtype(GoTile.class,             "GoTile")
-                    .registerSubtype(PropertyTile.class,       "PropertyTile")
-                    .registerSubtype(ChanceTile.class,         "ChanceTile")
-                    .registerSubtype(JailTile.class,           "JailTile")
-                    .registerSubtype(GoToJailTile.class,       "GoToJailTile")
-                    .registerSubtype(TaxTile.class,            "TaxTile")
+                    .registerSubtype(GoTile.class, "GoTile")
+                    .registerSubtype(PropertyTile.class, "PropertyTile")
+                    .registerSubtype(ChanceTile.class, "ChanceTile")
+                    .registerSubtype(JailTile.class, "JailTile")
+                    .registerSubtype(GoToJailTile.class, "GoToJailTile")
+                    .registerSubtype(TaxTile.class, "TaxTile")
                     .registerSubtype(CommunityChestTile.class, "CommunityChestTile")
-                    .registerSubtype(FreeParkingTile.class,    "FreeParkingTile")
-                    .registerSubtype(RailroadTile.class,       "RailroadTile")
-                    .registerSubtype(UtilityTile.class,        "UtilityTile");
+                    .registerSubtype(FreeParkingTile.class, "FreeParkingTile")
+                    .registerSubtype(RailroadTile.class, "RailroadTile")
+                    .registerSubtype(UtilityTile.class, "UtilityTile");
 
     private final RuntimeTypeAdapterFactory<Player> playerAdapterFactory =
             RuntimeTypeAdapterFactory.of(Player.class, "type")
-                    .registerSubtype(Player.class,   "Human")
+                    .registerSubtype(Player.class, "Human")
                     .registerSubtype(AIPlayer.class, "AI");
 
     private final Gson gson = new GsonBuilder()
@@ -89,15 +83,16 @@ public class NetworkClient {
         out.writeUTF("JOIN:" + playerName);
         out.flush();
 
-        // START READER
+        // prepare reader thread but do NOT start it yet
         readerThread = new Thread(this::readLoop, "Monopoly-NetReader");
         readerThread.setDaemon(true);
-        readerThread.start();
     }
 
     /** Set this before doing anything else so you get callbacks. */
     public void setListener(GameMessageListener listener) {
         this.listener = listener;
+        // only now start reading incoming server messages
+        readerThread.start();
     }
 
     /** Send a ROLL command to the server. */
@@ -119,7 +114,6 @@ public class NetworkClient {
                 dispatchLine(line);
             }
         } catch (IOException e) {
-            // connection dropped
             if (listener != null) listener.onInfo("Disconnected from server.");
         }
     }
@@ -131,9 +125,7 @@ public class NetworkClient {
                 String[] parts = line.split(":", 3);
                 String pid = parts[1];
                 String msg = parts[2];
-
                 if (msg.startsWith("BAL:")) {
-                    // "BAL:1000 POS:5 OWN:2 props"
                     String[] toks = msg.split("\\s+");
                     int money = Integer.parseInt(toks[0].substring(4));
                     int pos   = Integer.parseInt(toks[1].substring(4));
@@ -142,12 +134,10 @@ public class NetworkClient {
                 } else if (msg.startsWith("ERR:")) {
                     if (listener != null) listener.onError(pid, msg.substring(4));
                 } else {
-                    // other PM
                     if (listener != null) listener.onInfo("PM from " + pid + ": " + msg);
                 }
             }
             else if (line.startsWith("MOVE:")) {
-                // "MOVE:Alice:3+4"
                 String[] p = line.split(":", 3);
                 String pid = p[1];
                 String[] dice = p[2].split("\\+");
@@ -163,17 +153,16 @@ public class NetworkClient {
                 String pid = line.substring("TURN:".length());
                 if (listener != null) listener.onTurn(pid);
             }
-            else if (line.startsWith("INFO:")) {
-                String info = line.substring("INFO:".length());
-                if (listener != null) listener.onInfo(info);
-            }
             else if (line.startsWith("FULLSTATE:")) {
                 String json = line.substring("FULLSTATE:".length());
                 GameState state = gson.fromJson(json, GameState.class);
                 if (listener != null) listener.onFullState(state);
             }
+            else if (line.startsWith("INFO:")) {
+                String info = line.substring("INFO:".length());
+                if (listener != null) listener.onInfo(info);
+            }
         } catch (Exception ex) {
-            // parsing error
             if (listener != null) listener.onInfo("Failed to parse line: " + line);
         }
     }
