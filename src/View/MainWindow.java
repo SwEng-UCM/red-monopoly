@@ -4,14 +4,11 @@ package View;
 import Controller.Controller;
 import Controller.GameServer;
 import Controller.NetworkClient;
-
 import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
-
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
@@ -68,7 +65,7 @@ public class MainWindow extends JFrame {
         JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.setPreferredSize(new Dimension(800, 800));
 
-        // Background image
+        // Background
         JLabel bg = new JLabel(new ImageIcon(
                 new ImageIcon("resources/redmonopolyLogo.jpg")
                         .getImage()
@@ -77,13 +74,7 @@ public class MainWindow extends JFrame {
         bg.setBounds(0, 0, 800, 800);
         layeredPane.add(bg, Integer.valueOf(0));
 
-        // Center panel with buttons
-        JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
-        centerPanel.setOpaque(false);
-        centerPanel.setBounds(250, 200, 300, 400);
-
-        // Translucent rounded background
+        // Translucent rounded container
         JPanel rounded = new JPanel() {
             @Override protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -100,7 +91,12 @@ public class MainWindow extends JFrame {
         rounded.setOpaque(false);
         rounded.setBounds(250, 200, 300, 400);
 
-        // Buttons
+        // Button panel
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+        centerPanel.setOpaque(false);
+        centerPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         JButton playBtn = createStyledButton("Play Game");
         playBtn.addActionListener(e -> {
             MusicPlayer.playSoundEffect(filePath);
@@ -137,7 +133,6 @@ public class MainWindow extends JFrame {
             System.exit(0);
         });
 
-        // Layout the buttons
         centerPanel.add(Box.createVerticalGlue());
         centerPanel.add(playBtn);
         centerPanel.add(Box.createRigidArea(new Dimension(0,15)));
@@ -188,7 +183,7 @@ public class MainWindow extends JFrame {
         opts.setBackground(new Color(30, 0, 0));
         opts.setBorder(BorderFactory.createEmptyBorder(40, 60, 40, 60));
 
-        // Music volume
+        // Volume slider
         JPanel volP = new JPanel(new BorderLayout());
         volP.setOpaque(false);
         JLabel volL = new JLabel("Music Volume:");
@@ -258,24 +253,35 @@ public class MainWindow extends JFrame {
         return opts;
     }
 
+    /**
+     * Fully restores the old single-player flow:
+     *  select difficulty, number of players, names & avatars,
+     *  then open a GameWindow with netClient=null.
+     */
     private void startGameFlow() {
-        // existing single-player setup unchanged...
+        List<String> names   = new ArrayList<>();
+        List<String> avatars = new ArrayList<>();
+        // reuse the shared setup dialog
+        if (!askPlayerSetup(names, avatars)) return;
+
+        _controller.setNumberOfPlayers(names.size(), names, avatars);
+
+        // stop main menu music, launch game window in single-player mode
+        musicPlayer.stopMusic();
+        GameWindow gw = new GameWindow(_controller, this, null, null);
+        setVisible(false);
+        gw.setVisible(true);
     }
 
     private void hostMultiplayerFlow() {
-        // 1️⃣ Gather players
         List<String> names   = new ArrayList<>();
         List<String> avatars = new ArrayList<>();
         if (!askPlayerSetup(names, avatars)) return;
         _controller.setNumberOfPlayers(names.size(), names, avatars);
 
-        // 2️⃣ Start server
         new Thread(() -> new GameServer(_controller).start(), "Server-Thread").start();
-
-        // 3️⃣ Give it a moment to bind
         try { Thread.sleep(200); } catch (InterruptedException ignored) {}
 
-        // 4️⃣ Connect back as host-player
         String myId = names.get(0);
         try {
             NetworkClient net = new NetworkClient("localhost", GameServer.PORT, myId);
@@ -318,8 +324,11 @@ public class MainWindow extends JFrame {
         }
     }
 
+    /**
+     * Shared dialog for both single- and multiplayer.
+     */
     private boolean askPlayerSetup(List<String> names, List<String> avatars) {
-        // select difficulty
+        // difficulty
         JPanel diffP = new JPanel(new GridLayout(0,1));
         diffP.add(new JLabel("Select AI Difficulty:"));
         JComboBox<String> diffC = new JComboBox<>(
@@ -349,7 +358,7 @@ public class MainWindow extends JFrame {
             return false;
         }
 
-        // per-player name & avatar
+        // per-player details
         for (int i = 1; i <= n; i++) {
             JPanel p = new JPanel(new GridLayout(0,1));
             JTextField tf = new JTextField();
@@ -379,7 +388,6 @@ public class MainWindow extends JFrame {
             names.add(nm);
             avatars.add(ap);
         }
-
         return true;
     }
 

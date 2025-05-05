@@ -49,7 +49,10 @@ public class TokenOverlayPanel extends JPanel {
             JLabel tileLabel = boardPanel.getTileLabel(tileIndex);
             if (tileLabel == null) continue;
 
+            //Rectangle bounds = tileLabel.getBounds();
             Rectangle bounds = tileLabel.getBounds();
+            //SwingUtilities.convertRectangle(boardPanel, bounds, this);
+
 
             int iconSize = 60;
             int x = bounds.x + bounds.width - iconSize - 4;
