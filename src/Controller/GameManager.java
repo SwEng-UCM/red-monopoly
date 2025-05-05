@@ -1,3 +1,4 @@
+// src/Controller/GameManager.java
 package Controller;
 
 import com.google.gson.Gson;
@@ -60,7 +61,7 @@ public class GameManager {
 
     /* === player lifecycle === */
     public synchronized void addPlayer(String id, ClientHandler ch) {
-        // 1.  look ONLY for already-created players
+        // 1.  find or reject
         Player p = controller.getAllPlayers()
                 .stream()
                 .filter(pl -> pl.getName().equalsIgnoreCase(id))
@@ -68,32 +69,34 @@ public class GameManager {
                 .orElse(null);
 
         if (p == null) {
-            pm(id, "ERR:No such player in current game. "
-                    + "Create '" + id + "' in the GUI first, then reconnect.");
+            pm(id, "ERR:No such player in current game. Create '" + id + "' in the GUI first, then reconnect.");
             return;
         }
 
         idToPlayer.put(id, p);
         server.broadcast("INFO:" + id + " joined from terminal");
 
-        // 2.  send that player a one-line snapshot
+        // 2.  tell them their own balance/position snapshot
         pm(id, "BAL:" + p.getMoney()
                 + " POS:" + p.getPosition()
                 + " OWN:" + p.getOwnedProperties().size() + " props");
 
-        // 3.  if it’s already their turn, prompt them right away
+        // 3.  whisper “YOURTURN” if it's them
         if (id.equals(controller.getCurrentPlayerName())) {
             pm(id, "YOURTURN");
-            server.broadcast("TURN:" + id);
         }
 
-        // 4.  send everyone a fresh snapshot of the entire game
+        // 4.  broadcast EVERYONE whose turn it is now (unconditional!)
+        server.broadcast("TURN:" + controller.getCurrentPlayerName());
+
+        // 5.  finally broadcast full state
         broadcastFullState();
     }
 
     public synchronized void removePlayer(String id) {
         idToPlayer.remove(id);
         server.broadcast("INFO:" + id + " disconnected");
+        // n.b. no TURN broadcast here, turn continues as normal
     }
 
     /* === command router === */
@@ -102,7 +105,6 @@ public class GameManager {
             pm(playerId, "ERR:Unknown cmd");
             return;
         }
-
         if (!playerId.equals(controller.getCurrentPlayerName())) {
             pm(playerId, "ERR:Not your turn");
             return;
@@ -112,7 +114,7 @@ public class GameManager {
             int[] dice = controller.rollDice();
             String outcome = controller.movePlayerAfterDiceRoll(dice);
 
-            // GUI refresh for every open GameWindow
+            // update all GUI windows
             for (Frame f : Frame.getFrames()) {
                 if (f instanceof View.GameWindow) {
                     ((View.GameWindow) f).refreshUIAfterExternalMove();
@@ -121,10 +123,10 @@ public class GameManager {
 
             server.broadcast(String.format("MOVE:%s:%d+%d",
                     playerId, dice[0], dice[1]));
-            server.broadcast("STATE:" + outcome.replace('\n', ' '));
-            server.broadcast("TURN:" + controller.getCurrentPlayerName());
+            server.broadcast("STATE:" + outcome.replace('\n',' '));
 
-            // 4.  broadcast the updated full game state
+            // **always** broadcast new TURN
+            server.broadcast("TURN:" + controller.getCurrentPlayerName());
             broadcastFullState();
         });
     }
@@ -133,7 +135,7 @@ public class GameManager {
         server.broadcast("PM:" + playerId + ":" + msg);
     }
 
-    /** Serialize the current GameState and send as FULLSTATE:… */
+    /** Send a JSON snapshot to everyone */
     private void broadcastFullState() {
         GameState state = new GameState(
                 controller.getAllPlayers(),
@@ -143,8 +145,4 @@ public class GameManager {
         String json = gson.toJson(state);
         server.broadcast("FULLSTATE:" + json);
     }
-
-
-
-
 }
