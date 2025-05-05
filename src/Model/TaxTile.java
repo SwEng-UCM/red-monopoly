@@ -12,11 +12,14 @@ public class TaxTile extends Tile {
 
     @Override
     public void action(Player player) {
+        int taxToDeduct;
+        taxToDeduct = player.getMoney()/taxAmount;
         JOptionPane.showMessageDialog(null,
-                "You landed on " + name + " tax tile. Pay " + taxAmount + " ₽.",
+                "You landed on " + name + " tax tile. Pay " + taxAmount + " % of your balance(" + taxToDeduct + "₽)",
                 "Tax Tile",
                 JOptionPane.INFORMATION_MESSAGE);
-        player.deductMoney(taxAmount);
+
+        player.deductMoney(taxToDeduct);
     }
 
     public int getTaxAmount() {
