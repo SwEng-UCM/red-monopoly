@@ -71,6 +71,13 @@ public class Controller {
             } else {
                 System.out.println("Creating Human player '" + name + "' at index " + i);
                 p = new Model.Player(name);
+                final int playerIndex = i;  // Make i final here
+
+                // Pass the player's index as the third argument when creating FigurePicker
+                System.out.println("Creating Human player '" + name + "' at index " + playerIndex);
+                javax.swing.SwingUtilities.invokeLater(() -> {
+                    new View.FigurePicker(null, p, playerIndex);  // Make sure to pass player instance and index
+                });
             }
             _game.getPlayers().add(p);
         }

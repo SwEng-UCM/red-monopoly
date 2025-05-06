@@ -9,7 +9,7 @@ public class Player {
     private int money;
     private boolean inJail;
     private int jailTurnCount = 0;
-
+    private String figureImagePath;
     private List<PropertyTile> ownedProperties = new ArrayList<>();
     private List<RailroadTile> ownedRailroads = new ArrayList<>();
 
@@ -135,6 +135,13 @@ public class Player {
 
     public void setOwnedRailroads(List<RailroadTile> railroads) {
         this.ownedRailroads = railroads;
+    }
+    public void setFigureImagePath(String figureImagePath) {
+        this.figureImagePath = figureImagePath;
+    }
+
+    public String getFigureImagePath() {
+        return figureImagePath;
     }
 
     @com.google.gson.annotations.SerializedName("type")
