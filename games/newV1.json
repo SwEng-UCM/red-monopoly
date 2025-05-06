@@ -1,17 +1,18 @@
 {
   "players": [
     {
-      "name": "AI",
-      "position": 9,
-      "money": 1380,
+      "name": "LOLO",
+      "position": 14,
+      "money": 1440,
       "inJail": false,
       "jailTurnCount": 0,
+      "avatarPath": "resources/players/player6.png",
       "ownedProperties": [
         {
-          "rent": 8,
-          "price": 120,
-          "name": "Tomsk",
-          "position": 9,
+          "rent": 12,
+          "price": 160,
+          "name": "Irkutsk",
+          "position": 14,
           "tileType": "PropertyTile"
         }
       ],
@@ -21,14 +22,23 @@
       "type": "Human"
     },
     {
-      "name": "me",
-      "position": 7,
-      "money": 1500,
-      "inJail": false,
+      "name": "MASHA",
+      "position": 10,
+      "money": 1300,
+      "inJail": true,
       "jailTurnCount": 0,
+      "avatarPath": "resources/players/player7.png",
       "ownedProperties": [],
-      "ownedRailroads": [],
-      "skipTurn": true,
+      "ownedRailroads": [
+        {
+          "price": 200,
+          "rent": 25,
+          "name": "Trans-Siberian Railway",
+          "position": 5,
+          "tileType": "RailroadTile"
+        }
+      ],
+      "skipTurn": false,
       "extraTurn": false,
       "type": "Human"
     }

@@ -9,13 +9,16 @@ public class Player {
     private int money;
     private boolean inJail;
     private int jailTurnCount = 0;
-    private String figureImagePath;
+
+    private String avatarPath;
+
     private List<PropertyTile> ownedProperties = new ArrayList<>();
     private List<RailroadTile> ownedRailroads = new ArrayList<>();
 
     // New fields for turn management
     private boolean skipTurn = false;
     private boolean extraTurn = false;
+    private String figureImagePath;
 
     protected String type;
 
@@ -136,17 +139,35 @@ public class Player {
     public void setOwnedRailroads(List<RailroadTile> railroads) {
         this.ownedRailroads = railroads;
     }
-    public void setFigureImagePath(String figureImagePath) {
-        this.figureImagePath = figureImagePath;
-    }
-
-    public String getFigureImagePath() {
-        return figureImagePath;
-    }
 
     @com.google.gson.annotations.SerializedName("type")
     public String getType() {
         return "Human";
     }
 
+    public void setMoney(int oldMoney) {
+        this.money = oldMoney;
+    }
+
+    public void setJailTurnCount(int oldJailTurns) {
+        this.jailTurnCount = oldJailTurns;
+    }
+
+    public String getAvatarPath() {
+        return avatarPath;
+         }
+
+ public void setAvatarPath(String avatarPath) {
+               this.avatarPath = avatarPath;
+
+    }
+    public String getFigureImagePath() {
+        return figureImagePath;
+    }
+
+    public void setFigureImagePath(String figureImagePath) {
+        this.figureImagePath = figureImagePath;
+    }
 }
+
+

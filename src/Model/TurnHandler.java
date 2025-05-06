@@ -196,4 +196,16 @@ public class TurnHandler {
         }
         return message.toString();
     }
+
+    private static int GLOBAL_DELAY_MS = 1000;
+
+    public static void setGlobalDelay(int ms) {
+        GLOBAL_DELAY_MS = ms;
+    }
+
+    public static int getGlobalDelay() {
+        return GLOBAL_DELAY_MS;
+    }
+
+
 }

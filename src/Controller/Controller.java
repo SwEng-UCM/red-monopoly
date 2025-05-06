@@ -30,10 +30,6 @@ public class Controller {
         this.turnHandler = new TurnHandler(game);
     }
 
-    public void run_game(){
-        // Your game loop logic here.
-    }
-
     // --- AI Difficulty and Player Setup ---
     public void setAIDifficulty(String difficulty) {
         aiDifficulty = difficulty;
@@ -43,16 +39,17 @@ public class Controller {
         return aiDifficulty;
     }
 
-    public void setNumberOfPlayers(int count, List<String> playerNames) {
+    public void setNumberOfPlayers(int count, List<String> playerNames, List<String> playerAvatars) {
+
         if (count < 1) count = 1;
         if (count > 8) count = 8;
 
         _game.getPlayers().clear();
+
         for (int i = 0; i < count; i++) {
             String name = playerNames.get(i).trim();
             Player p;
             if(name.equalsIgnoreCase("ai")) {
-                // Create an AI player with the selected difficulty.
                 AIStrategy strategy;
                 switch(aiDifficulty.toLowerCase()){
                     case "easy":
@@ -79,10 +76,12 @@ public class Controller {
                     new View.FigurePicker(null, p, playerIndex);  // Make sure to pass player instance and index
                 });
             }
+
+            // Set avatar from selection
+            p.setAvatarPath(playerAvatars.get(i));
+
             _game.getPlayers().add(p);
         }
-        // Reset turn index if needed. For example:
-        // _game.setCurrentPlayerIndex(0);
     }
 
     public String getCurrentPlayerName() {
@@ -110,8 +109,12 @@ public class Controller {
      * @return a message describing the outcome of the turn.
      */
     public String movePlayerAfterDiceRoll(int[] dice) {
+        MoveCommand command = new MoveCommand(_game, _game.getCurrentPlayer(), dice);
+        executeCommand(command);
+
         return turnHandler.processTurn(_game.getCurrentPlayer(), dice);
     }
+
 
     // --- Command Pattern Support ---
     public void executeCommand(Command command) {
@@ -313,4 +316,68 @@ public class Controller {
     public void endTurn() {
          _game.nextTurn();
     }
+
+    public void setAITurnDelay(int delayMs) {
+        TurnHandler.setGlobalDelay(delayMs);
+    }
+
+
+
+    public void loadGameState(GameState state) {
+        // 1. Restore player list
+        _game.getPlayers().clear();
+        _game.getPlayers().addAll(state.getPlayers());
+
+        // 2. Restore board tiles
+        _game.getBoard().setTiles(state.getBoard().getTiles());
+
+        // 3. Restore current player index
+        _game.setCurrentPlayerIndex(state.getCurrentPlayerIndex());
+
+        // 4. Fix up ownership pointers on tiles and players
+        for (Player player : _game.getPlayers()) {
+            // Properties
+            List<PropertyTile> linkedProps = new ArrayList<>();
+            List<PropertyTile> savedProps = player.getOwnedProperties();
+            if (savedProps != null) {
+                for (PropertyTile p : savedProps) {
+                    for (Tile t : _game.getBoard().getTiles()) {
+                        if (t instanceof PropertyTile && t.getName().equals(p.getName())) {
+                            PropertyTile boardProp = (PropertyTile) t;
+                            boardProp.setOwner(player);
+                            linkedProps.add(boardProp);
+                            break;
+                        }
+                    }
+                }
+            }
+            player.setOwnedProperties(linkedProps);
+
+            // Railroads
+            List<RailroadTile> linkedRails = new ArrayList<>();
+            List<RailroadTile> savedRails = player.getOwnedRailroads();
+            if (savedRails != null) {
+                for (RailroadTile r : savedRails) {
+                    for (Tile t : _game.getBoard().getTiles()) {
+                        if (t instanceof RailroadTile && t.getName().equals(r.getName())) {
+                            RailroadTile boardRail = (RailroadTile) t;
+                            boardRail.setOwner(player);
+                            linkedRails.add(boardRail);
+                            break;
+                        }
+                    }
+                }
+            }
+            player.setOwnedRailroads(linkedRails);
+
+            // Restore AI strategy if needed
+            if (player instanceof AIPlayer ai) {
+                ai.restoreStrategyFromDifficulty();
+            }
+        }
+
+        // (Optional) Clear undo history
+        commandHistory.clear();
+    }
+
 }

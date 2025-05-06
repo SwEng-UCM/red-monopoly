@@ -54,4 +54,17 @@ public class MusicPlayer {
             e.printStackTrace();
         }
     }
+
+    public float getVolume() {
+        if (volumeControl != null) {
+            float min = volumeControl.getMinimum();
+            float max = volumeControl.getMaximum();
+            float current = volumeControl.getValue();
+            return (current - min) / (max - min);
+        }
+        return 0.5f; // Default fallback
+    }
+
+
+
 }

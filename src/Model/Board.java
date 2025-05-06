@@ -21,7 +21,7 @@ public class Board {
         _tiles.add(new PropertyTile("Yakutsk", 3, 4, 60)); 
     
         // Tax
-        _tiles.add(new TaxTile("Income Tax", 4, 200));
+        _tiles.add(new TaxTile("Income Tax", 4, 10));
     
         // Railroad #1
         _tiles.add(new RailroadTile("Trans-Siberian Railway", 5, 25, 200));
@@ -98,7 +98,7 @@ public class Board {
         _tiles.add(new PropertyTile("Minsk", 37, 35, 350));
     
         // Luxury Tax
-        _tiles.add(new TaxTile("Luxury Tax", 38, 100));
+        _tiles.add(new TaxTile("Luxury Tax", 38, 20));
     
         // Dark Blue
         _tiles.add(new PropertyTile("Moscow", 39, 50, 400));

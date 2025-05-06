@@ -1,41 +1,69 @@
 package Model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MoveCommand implements Command {
     private MonopolyGame game;
     private Player player;
-    private int[] diceValues;
-    private int prevPosition;
-    private int prevMoney;
+    private int[] dice;
 
-    public MoveCommand(MonopolyGame game, Player player, int[] diceValues) {
+    private int oldPosition;
+    private int oldMoney;
+    private boolean wasInJail;
+    private int oldJailTurns;
+    private boolean passedGo;
+
+    private List<PropertyTile> previousProperties;
+    private List<RailroadTile> previousRailroads;
+
+    public MoveCommand(MonopolyGame game, Player player, int[] dice) {
         this.game = game;
         this.player = player;
-        this.diceValues = diceValues;
-        // Capture state before executing the move.
-        this.prevPosition = player.getPosition();
-        this.prevMoney = player.getMoney();
+        this.dice = dice;
+
+        // Snapshot state BEFORE turn
+        this.oldPosition = player.getPosition();
+        this.oldMoney = player.getMoney();
+        this.wasInJail = player.isInJail();
+        this.oldJailTurns = player.getJailTurnCount();
+        this.passedGo = false;
+
+        this.previousProperties = new ArrayList<>(player.getOwnedProperties());
+        this.previousRailroads = new ArrayList<>(player.getOwnedRailroads());
     }
 
     @Override
     public void execute() {
-        // Execute the move.
-        int total = diceValues[0] + diceValues[1];
-        game.movePlayer(player, total);
+        // Intentionally empty.
+        // TurnHandler will process the move and update player state.
     }
 
     @Override
     public void undo() {
-        // Restore player's previous position and money.
-        player.setPosition(prevPosition);
-        // Adjust money: For simplicity, restore exactly the previous amount.
-        // In a full implementation, you'd want to reverse any side-effects (e.g. property purchase, rent, etc.)
-        if(player.getMoney() != prevMoney) {
-            if(player.getMoney() < prevMoney) {
-                player.addMoney(prevMoney - player.getMoney());
-            } else {
-                player.deductMoney(player.getMoney() - prevMoney);
-            }
+        // Restore position and basic state
+        player.setPosition(oldPosition);
+        player.setMoney(oldMoney);
+        player.setInJail(wasInJail);
+        player.setJailTurnCount(oldJailTurns);
+
+        // Revert properties
+        for (PropertyTile property : player.getOwnedProperties()) {
+            property.setOwner(null);
         }
-        System.out.println("Undo move: Restored " + player.getName() + " to position " + prevPosition);
+        player.setOwnedProperties(new ArrayList<>(previousProperties));
+        for (PropertyTile p : previousProperties) {
+            p.setOwner(player);
+        }
+
+        // Revert railroads
+        for (RailroadTile railroad : player.getOwnedRailroads()) {
+            railroad.setOwner(null);
+        }
+        player.setOwnedRailroads(new ArrayList<>(previousRailroads));
+        for (RailroadTile r : previousRailroads) {
+            r.setOwner(player);
+        }
+
     }
 }
