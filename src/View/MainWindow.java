@@ -1,23 +1,32 @@
 package View;
 
 import Controller.Controller;
-import java.awt.*;
-import javax.swing.*;
-import java.awt.event.ItemEvent;
-import java.util.ArrayList;
-import java.util.List;
+import Controller.GameServer;
+import Controller.NetworkClient;
+import Model.Player;
 import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainWindow extends JFrame {
-    protected static String filePath = "resources/click-buttons-ui-menu-sounds-effects-button-8-205394.wav";
-    private Controller _controller;
-    private CardLayout _cardLayout;
-    private JPanel _mainPanel;
-    private MusicPlayer musicPlayer;
+    protected static final String filePath =
+            "resources/click-buttons-ui-menu-sounds-effects-button-8-205394.wav";
+
+    private final Controller  _controller;
+    private final CardLayout  _cardLayout;
+    private final JPanel      _mainPanel;
+    private final MusicPlayer musicPlayer;
 
     public MainWindow(Controller controller) {
+        super();
         try {
             UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
         } catch (UnsupportedLookAndFeelException e) {
@@ -28,10 +37,10 @@ public class MainWindow extends JFrame {
         musicPlayer = new MusicPlayer();
         musicPlayer.playMusic("resources/Dark_is_the_Night_-_Soviet_WW2_Song.wav");
 
-
+        _cardLayout = new CardLayout();
+        _mainPanel  = new JPanel(_cardLayout);
 
         initGUI();
-
     }
 
     public MusicPlayer getMusicPlayer() {
@@ -40,17 +49,15 @@ public class MainWindow extends JFrame {
 
     private void initGUI() {
         setTitle("[RED MONOPOLY]");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(800, 800);
         setResizable(false);
         setLocationRelativeTo(null);
 
-        _cardLayout = new CardLayout();
-        _mainPanel = new JPanel(_cardLayout);
-        _mainPanel.add(createMainMenu(), "Main Menu");
+        _mainPanel.add(createMainMenu(),   "Main Menu");
         _mainPanel.add(createOptionsMenu(), "Options");
-
         add(_mainPanel);
+
         _cardLayout.show(_mainPanel, "Main Menu");
         setVisible(true);
     }
@@ -59,286 +66,327 @@ public class MainWindow extends JFrame {
         JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.setPreferredSize(new Dimension(800, 800));
 
-        JLabel backgroundLabel = new JLabel(new ImageIcon(
-                new ImageIcon("resources/redmonopolyLogo.jpg").getImage()
-                        .getScaledInstance(800, 800, Image.SCALE_SMOOTH)));
-        backgroundLabel.setBounds(0, 0, 800, 800);
-        layeredPane.add(backgroundLabel, Integer.valueOf(0));
+        // Background image
+        JLabel bg = new JLabel(new ImageIcon(
+                new ImageIcon("resources/redmonopolyLogo.jpg")
+                        .getImage()
+                        .getScaledInstance(800, 800, Image.SCALE_SMOOTH)
+        ));
+        bg.setBounds(0, 0, 800, 800);
+        layeredPane.add(bg, Integer.valueOf(0));
 
-        JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
-        centerPanel.setOpaque(false);
-        centerPanel.setBounds(250, 200, 300, 400);
-
-        JPanel roundedBackground = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
+        // Translucent rounded container
+        JPanel rounded = new JPanel() {
+            @Override protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                Graphics2D g2 = (Graphics2D) g;
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                Graphics2D g2 = (Graphics2D)g;
+                g2.setRenderingHint(
+                        RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON
+                );
                 g2.setColor(new Color(0, 0, 0, 150));
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
             }
         };
-        roundedBackground.setLayout(new BoxLayout(roundedBackground, BoxLayout.Y_AXIS));
-        roundedBackground.setOpaque(false);
-        roundedBackground.setBounds(250, 200, 300, 400);
+        rounded.setLayout(new BoxLayout(rounded, BoxLayout.Y_AXIS));
+        rounded.setOpaque(false);
+        rounded.setBounds(250, 200, 300, 400);
 
-        JButton playButton = createStyledButton("Play Game");
-        playButton.addActionListener(e -> startGameFlow());
+        // Button panel
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+        centerPanel.setOpaque(false);
+        centerPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JButton loadGameButton = createStyledButton("Load Game");
-        loadGameButton.addActionListener(e -> loadSavedGame());
+        JButton playBtn = createStyledButton("Play Game");
+        playBtn.addActionListener(e -> {
+            MusicPlayer.playSoundEffect(filePath);
+            startGameFlow();
+        });
 
-        JButton optionsButton = createStyledButton("Options");
-        optionsButton.addActionListener(e -> {
+        JButton hostBtn = createStyledButton("Host Multiplayer");
+        hostBtn.addActionListener(e -> {
+            MusicPlayer.playSoundEffect(filePath);
+            hostMultiplayerFlow();
+        });
+
+        JButton joinBtn = createStyledButton("Join Multiplayer");
+        joinBtn.addActionListener(e -> {
+            MusicPlayer.playSoundEffect(filePath);
+            joinMultiplayerFlow();
+        });
+
+        JButton loadBtn = createStyledButton("Load Game");
+        loadBtn.addActionListener(e -> {
+            MusicPlayer.playSoundEffect(filePath);
+            loadSavedGame();
+        });
+
+        JButton optionsBtn = createStyledButton("Options");
+        optionsBtn.addActionListener(e -> {
             MusicPlayer.playSoundEffect(filePath);
             _cardLayout.show(_mainPanel, "Options");
         });
 
-        JButton exitButton = createStyledButton("Exit");
-        exitButton.addActionListener(e -> {
+        JButton exitBtn = createStyledButton("Exit");
+        exitBtn.addActionListener(e -> {
             MusicPlayer.playSoundEffect(filePath);
             System.exit(0);
         });
 
         centerPanel.add(Box.createVerticalGlue());
-        centerPanel.add(playButton);
-        centerPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        centerPanel.add(loadGameButton);
-        centerPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        centerPanel.add(optionsButton);
-        centerPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        centerPanel.add(exitButton);
+        centerPanel.add(playBtn);
+        centerPanel.add(Box.createRigidArea(new Dimension(0,15)));
+        centerPanel.add(hostBtn);
+        centerPanel.add(Box.createRigidArea(new Dimension(0,15)));
+        centerPanel.add(joinBtn);
+        centerPanel.add(Box.createRigidArea(new Dimension(0,15)));
+        centerPanel.add(loadBtn);
+        centerPanel.add(Box.createRigidArea(new Dimension(0,15)));
+        centerPanel.add(optionsBtn);
+        centerPanel.add(Box.createRigidArea(new Dimension(0,15)));
+        centerPanel.add(exitBtn);
         centerPanel.add(Box.createVerticalGlue());
 
-        roundedBackground.add(centerPanel);
-        layeredPane.add(roundedBackground, Integer.valueOf(1));
+        rounded.add(centerPanel);
+        layeredPane.add(rounded, Integer.valueOf(1));
 
-        JPanel menuPanel = new JPanel(new BorderLayout());
-        menuPanel.add(layeredPane, BorderLayout.CENTER);
-        return menuPanel;
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.add(layeredPane, BorderLayout.CENTER);
+        return wrapper;
     }
 
     private JButton createStyledButton(String text) {
-        JButton button = new JButton(text);
-        button.setFont(new Font("Arial", Font.BOLD, 20));
-        button.setForeground(Color.RED);
-        button.setBackground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createLineBorder(Color.RED, 2));
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(Color.RED);
-                button.setForeground(Color.WHITE);
+        JButton b = new JButton(text);
+        b.setFont(new Font("Arial", Font.BOLD, 20));
+        b.setForeground(Color.RED);
+        b.setBackground(Color.WHITE);
+        b.setFocusPainted(false);
+        b.setBorder(BorderFactory.createLineBorder(Color.RED, 2));
+        b.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        b.setAlignmentX(Component.CENTER_ALIGNMENT);
+        b.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) {
+                b.setBackground(Color.RED);
+                b.setForeground(Color.WHITE);
             }
-
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(Color.WHITE);
-                button.setForeground(Color.RED);
+            @Override public void mouseExited(MouseEvent e) {
+                b.setBackground(Color.WHITE);
+                b.setForeground(Color.RED);
             }
         });
-
-        return button;
+        return b;
     }
 
     private JPanel createOptionsMenu() {
-        JPanel optionsPanel = new JPanel();
-        optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
-        optionsPanel.setBackground(new Color(30, 0, 0)); // Deep red-brown for background
-        optionsPanel.setBorder(BorderFactory.createEmptyBorder(40, 60, 40, 60));
+        JPanel opts = new JPanel();
+        opts.setLayout(new BoxLayout(opts, BoxLayout.Y_AXIS));
+        opts.setBackground(new Color(30, 0, 0));
+        opts.setBorder(BorderFactory.createEmptyBorder(40, 60, 40, 60));
 
-        // Volume Panel
-        JPanel volumePanel = new JPanel(new BorderLayout());
-        volumePanel.setOpaque(false);
-        JLabel volumeLabel = new JLabel("Music Volume:");
-        volumeLabel.setFont(new Font("Arial", Font.PLAIN, 18));
-        volumeLabel.setForeground(Color.WHITE);
+        // Volume slider
+        JPanel volP = new JPanel(new BorderLayout());
+        volP.setOpaque(false);
+        JLabel volL = new JLabel("Music Volume:");
+        volL.setFont(new Font("Arial", Font.PLAIN, 18));
+        volL.setForeground(Color.WHITE);
+        JSlider volS = new JSlider(0,100,(int)(musicPlayer.getVolume()*100));
+        volS.setOpaque(false);
+        volS.addChangeListener(e -> musicPlayer.setVolume(volS.getValue()/100f));
+        volP.add(volL, BorderLayout.WEST);
+        volP.add(volS, BorderLayout.CENTER);
+        volP.setMaximumSize(new Dimension(Integer.MAX_VALUE,50));
 
-        JSlider volumeSlider = new JSlider(0, 100, (int) (musicPlayer.getVolume() * 100));
-        volumeSlider.setOpaque(false);
-        volumeSlider.addChangeListener(e -> {
-            float volume = volumeSlider.getValue() / 100f;
-            musicPlayer.setVolume(volume);
-        });
-
-        volumePanel.add(volumeLabel, BorderLayout.WEST);
-        volumePanel.add(volumeSlider, BorderLayout.CENTER);
-        volumePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
-
-        // Background Music Checkbox
-        JCheckBox disableMusicBox = new JCheckBox("Disable Background Music");
-        disableMusicBox.setOpaque(false);
-        disableMusicBox.setForeground(Color.WHITE);
-        disableMusicBox.setFont(new Font("Arial", Font.PLAIN, 16));
-        disableMusicBox.setAlignmentX(Component.CENTER_ALIGNMENT);
-        disableMusicBox.setSelected(false);
-
-        disableMusicBox.addItemListener(e -> {
-            if (disableMusicBox.isSelected()) {
-                musicPlayer.stopMusic();
-            } else {
+        JCheckBox disableMusic = new JCheckBox("Disable Background Music");
+        disableMusic.setOpaque(false);
+        disableMusic.setForeground(Color.WHITE);
+        disableMusic.setFont(new Font("Arial", Font.PLAIN, 16));
+        disableMusic.setAlignmentX(Component.CENTER_ALIGNMENT);
+        disableMusic.addItemListener(e -> {
+            if (disableMusic.isSelected()) musicPlayer.stopMusic();
+            else {
                 musicPlayer.playMusic("resources/Dark_is_the_Night_-_Soviet_WW2_Song.wav");
-                musicPlayer.setVolume(volumeSlider.getValue() / 100f); // retain volume level
+                musicPlayer.setVolume(volS.getValue()/100f);
             }
         });
 
+        JLabel aiL = new JLabel("AI Turn Speed:");
+        aiL.setForeground(Color.WHITE);
+        aiL.setFont(new Font("Arial", Font.PLAIN, 18));
+        aiL.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JSlider aiS = new JSlider(500,2000,1000);
+        aiS.setOpaque(false);
+        aiS.setMajorTickSpacing(500);
+        aiS.setPaintTicks(true);
+        aiS.setPaintLabels(true);
+        aiS.setAlignmentX(Component.CENTER_ALIGNMENT);
+        aiS.addChangeListener(e ->
+                System.out.println("Set AI turn delay to " + aiS.getValue() + " ms")
+        );
 
-        // AI Turn Speed Slider
-        JLabel aiLabel = new JLabel("AI Turn Speed:");
-        aiLabel.setForeground(Color.WHITE);
-        aiLabel.setFont(new Font("Arial", Font.PLAIN, 18));
-        aiLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JSlider aiSpeedSlider = new JSlider(500, 2000, 1000);
-        aiSpeedSlider.setOpaque(false);
-        aiSpeedSlider.setMajorTickSpacing(500);
-        aiSpeedSlider.setPaintTicks(true);
-        aiSpeedSlider.setPaintLabels(true);
-        aiSpeedSlider.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        // TODO: Connect this value to your AI logic
-        aiSpeedSlider.addChangeListener(e -> {
-            int delay = aiSpeedSlider.getValue();
-            System.out.println("Set AI turn delay to " + delay + " ms");
-        });
-
-        // Reset and Back buttons
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setOpaque(false);
-        buttonPanel.setLayout(new FlowLayout());
-
-        JButton resetButton = createStyledButton("Reset to Defaults");
-        resetButton.addActionListener(e -> {
-            volumeSlider.setValue(75);
-            aiSpeedSlider.setValue(1000);
-            disableMusicBox.setSelected(false);
+        JPanel btnP = new JPanel(new FlowLayout());
+        btnP.setOpaque(false);
+        JButton resetB = createStyledButton("Reset to Defaults");
+        resetB.addActionListener(e -> {
+            volS.setValue(75);
+            aiS.setValue(1000);
+            disableMusic.setSelected(false);
             musicPlayer.setVolume(0.75f);
             musicPlayer.playMusic("resources/Dark_is_the_Night_-_Soviet_WW2_Song.wav");
         });
-
-        JButton backButton = createStyledButton("Back to Main Menu");
-        backButton.addActionListener(e -> {
+        JButton backB = createStyledButton("Back to Main Menu");
+        backB.addActionListener(e -> {
             MusicPlayer.playSoundEffect(filePath);
             _cardLayout.show(_mainPanel, "Main Menu");
         });
+        btnP.add(resetB);
+        btnP.add(backB);
 
-        buttonPanel.add(resetButton);
-        buttonPanel.add(backButton);
+        opts.add(volP);
+        opts.add(Box.createRigidArea(new Dimension(0,20)));
+        opts.add(disableMusic);
+        opts.add(Box.createRigidArea(new Dimension(0,20)));
+        opts.add(aiL);
+        opts.add(aiS);
+        opts.add(Box.createRigidArea(new Dimension(0,30)));
+        opts.add(btnP);
 
-        // Assemble
-        optionsPanel.add(volumePanel);
-        optionsPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-        optionsPanel.add(disableMusicBox);
-        optionsPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-        optionsPanel.add(aiLabel);
-        optionsPanel.add(aiSpeedSlider);
-        optionsPanel.add(Box.createRigidArea(new Dimension(0, 30)));
-        optionsPanel.add(buttonPanel);
-
-        return optionsPanel;
+        return opts;
     }
 
-
     private void startGameFlow() {
-        MusicPlayer.playSoundEffect(filePath);
+        List<String> names   = new ArrayList<>();
+        List<String> avatars = new ArrayList<>();
+        if (!askPlayerSetup(names, avatars)) return;
 
-        JPanel difficultyPanel = new JPanel(new GridLayout(0, 1));
-        difficultyPanel.add(new JLabel("Select AI Difficulty:"));
-        String[] difficulties = {"Easy", "Medium", "Hard"};
-        JComboBox<String> difficultyCombo = new JComboBox<>(difficulties);
-        difficultyPanel.add(difficultyCombo);
+        _controller.setNumberOfPlayers(names.size(), names, avatars);
 
-        int diffResult = JOptionPane.showConfirmDialog(
-                this, difficultyPanel, "AI Difficulty Selection",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+        musicPlayer.stopMusic();
+        GameWindow gw = new GameWindow(_controller, this, null, null);
+        setVisible(false);
+        gw.setVisible(true);
+    }
 
-        if (diffResult != JOptionPane.OK_OPTION) return;
+    private void hostMultiplayerFlow() {
+        List<String> names   = new ArrayList<>();
+        List<String> avatars = new ArrayList<>();
+        if (!askPlayerSetup(names, avatars)) return;
+        _controller.setNumberOfPlayers(names.size(), names, avatars);
 
-        String chosenDifficulty = (String) difficultyCombo.getSelectedItem();
-        _controller.setAIDifficulty(chosenDifficulty);
+        new Thread(() -> new GameServer(_controller).start(), "Server-Thread").start();
+        try { Thread.sleep(200); } catch (InterruptedException ignored) {}
 
-        String input = JOptionPane.showInputDialog(
-                this, "How many players? (2-8)",
-                "Number of Players", JOptionPane.QUESTION_MESSAGE);
-
-        if (input != null) {
-            try {
-                int numPlayers = Integer.parseInt(input);
-                if (numPlayers < 2 || numPlayers > 8) {
-                    JOptionPane.showMessageDialog(this,
-                            "Number of players must be between 2 and 8!",
-                            "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                List<String> playerNames = new ArrayList<>();
-                List<String> playerAvatars = new ArrayList<>();
-
-                for (int i = 1; i <= numPlayers; i++) {
-                    JPanel panel = new JPanel(new GridLayout(0, 1));
-                    JTextField nameField = new JTextField();
-                    panel.add(new JLabel("Enter name for Player " + i + " (type 'AI' for AI player):"));
-                    panel.add(nameField);
-
-                    int result = JOptionPane.showConfirmDialog(this, panel,
-                            "Player " + i + " Setup", JOptionPane.OK_CANCEL_OPTION);
-
-                    if (result != JOptionPane.OK_OPTION) {
-                        return; // User cancelled
-                    }
-
-                    String name = nameField.getText().trim();
-                    if (name.isEmpty()) {
-                        JOptionPane.showMessageDialog(this,
-                                "Player name cannot be empty!",
-                                "Error", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-
-                    // After name input, open Avatar Selection Window
-                    AvatarSelectionWindow avatarWindow = new AvatarSelectionWindow(this);
-                    String avatarPath = avatarWindow.getSelectedAvatarPath();
-                    if (avatarPath == null) {
-                        JOptionPane.showMessageDialog(this,
-                                "You must select an avatar!",
-                                "Error", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-
-                    playerNames.add(name);
-                    playerAvatars.add(avatarPath);
-                }
-
-
-                _controller.setNumberOfPlayers(numPlayers, playerNames, playerAvatars);
-                musicPlayer.stopMusic();
-                GameWindow gameWindow = new GameWindow(_controller, this);
-                this.setVisible(false);
-                gameWindow.setVisible(true);
-
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this,
-                        "Invalid number of players!",
-                        "Error", JOptionPane.ERROR_MESSAGE);
-            }
+        String myId = names.get(0);
+        try {
+            NetworkClient net = new NetworkClient("localhost", GameServer.PORT, myId);
+            musicPlayer.stopMusic();
+            new GameWindow(_controller, this, net, myId).setVisible(true);
+            setVisible(false);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Unable to start/join server: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
-    private void loadSavedGame() {
-        MusicPlayer.playSoundEffect(filePath);
-        JFileChooser fileChooser = new JFileChooser("games");
-        int returnVal = fileChooser.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            String saveFile = fileChooser.getSelectedFile().getAbsolutePath();
-            _controller.loadGame(saveFile);
+    private void joinMultiplayerFlow() {
+        String host = JOptionPane.showInputDialog(
+                this, "Enter server IP:", "Join Multiplayer",
+                JOptionPane.QUESTION_MESSAGE
+        );
+        if (host == null || host.isBlank()) return;
+
+        String myId = JOptionPane.showInputDialog(
+                this, "Enter your player name:", "Join Multiplayer",
+                JOptionPane.QUESTION_MESSAGE
+        );
+        if (myId == null || myId.isBlank()) return;
+
+        try {
+            NetworkClient net = new NetworkClient(host.trim(), GameServer.PORT, myId.trim());
             musicPlayer.stopMusic();
-            GameWindow gameWindow = new GameWindow(_controller, this);
-            this.setVisible(false);
-            gameWindow.setVisible(true);
+            new GameWindow(_controller, this, net, myId.trim()).setVisible(true);
+            setVisible(false);
+        } catch(IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Failed to connect: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+
+    private boolean askPlayerSetup(List<String> names, List<String> avatars) {
+        JPanel diffP = new JPanel(new GridLayout(0,1));
+        diffP.add(new JLabel("Select AI Difficulty:"));
+        JComboBox<String> diffC = new JComboBox<>(
+                new String[]{"Easy","Medium","Hard"}
+        );
+        diffP.add(diffC);
+        if (JOptionPane.showConfirmDialog(
+                this, diffP, "AI Difficulty",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE
+        ) != JOptionPane.OK_OPTION) return false;
+        _controller.setAIDifficulty((String)diffC.getSelectedItem());
+
+        String input = JOptionPane.showInputDialog(
+                this, "How many players? (2-8)", "Number of Players",
+                JOptionPane.QUESTION_MESSAGE
+        );
+        if (input == null) return false;
+        int n;
+        try { n = Integer.parseInt(input); }
+        catch (NumberFormatException ex) { return false; }
+        if (n < 2 || n > 8) {
+            JOptionPane.showMessageDialog(this,
+                    "Number of players must be between 2 and 8!",
+                    "Error", JOptionPane.ERROR_MESSAGE
+            );
+            return false;
+        }
+
+        for (int i = 1; i <= n; i++) {
+            JPanel p = new JPanel(new GridLayout(0,1));
+            JTextField tf = new JTextField();
+            p.add(new JLabel("Name for Player " + i + " (type 'AI'):"));
+            p.add(tf);
+            if (JOptionPane.showConfirmDialog(
+                    this, p, "Player " + i,
+                    JOptionPane.OK_CANCEL_OPTION
+            ) != JOptionPane.OK_OPTION) return false;
+            String nm = tf.getText().trim();
+            if (nm.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Player name cannot be empty!",
+                        "Error", JOptionPane.ERROR_MESSAGE
+                );
+                return false;
+            }
+            AvatarSelectionWindow av = new AvatarSelectionWindow(this);
+            String ap = av.getSelectedAvatarPath();
+            if (ap == null) {
+                JOptionPane.showMessageDialog(this,
+                        "You must select an avatar!",
+                        "Error", JOptionPane.ERROR_MESSAGE
+                );
+                return false;
+            }
+            names.add(nm);
+            avatars.add(ap);
+        }
+        return true;
+    }
+
+    private void loadSavedGame() {
+        JFileChooser chooser = new JFileChooser("games");
+        chooser.setFileFilter(new FileNameExtensionFilter("JSON files", "json"));
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            String path = chooser.getSelectedFile().getAbsolutePath();
+            _controller.loadGame(path);
+            musicPlayer.stopMusic();
+            new GameWindow(_controller, this, null, null).setVisible(true);
+            setVisible(false);
         }
     }
 }

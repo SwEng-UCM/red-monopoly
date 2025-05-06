@@ -249,7 +249,22 @@ public class BoardPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (backgroundImage != null) {
-            g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+            int panelW = getWidth();
+            int panelH = getHeight();
+            // same scale/offset logic as in doLayout()
+            double scale = Math.min(panelW / (double) DESIGN_SIZE,
+                    panelH / (double) DESIGN_SIZE);
+            int boardSize = (int) (DESIGN_SIZE * scale);
+            int offsetX = (panelW - boardSize) / 2;
+            int offsetY = (panelH - boardSize) / 2;
+
+            g.drawImage(
+                    backgroundImage,
+                    offsetX, offsetY,
+                    boardSize, boardSize,
+                    this
+            );
         }
     }
+
 }
