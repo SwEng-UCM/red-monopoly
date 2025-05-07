@@ -96,18 +96,16 @@ Below you will find the rules and features of Red Monopoly. Jump straight to any
 
 - **Player Info Box**: Click the icon to view owned properties.
   
-**Screenshots:**
+
 ![Player Info Box](docs/screenshots/PlayerInfo.png)  
 
 - **Tile Hints**: Hover over any tile for description and price.
 
-**Screenshots**
-![Tile Hints](docs/screenshots/tile-hints.png)  
+![Tile Hints](docs/screenshots/RMMouseOver.png)  
 
 - **Undo Move**: Click **Undo** to revert your last action.
 
 ![Undo Button](docs/screenshots/playerinfobutton.png)
-
 
 ---
 ## Project Configuration
