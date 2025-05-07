@@ -43,7 +43,7 @@ Below you will find the rules and features of Red Monopoly. Jump straight to any
 
 1. After naming your player, you’ll see 8 Soviet-themed avatars.  
 2. Click an avatar to select.  
-3. Confirm to return to the main menu.
+3. Click cancel to return to the main menu.
 
 **Screenshot**:  
 ![Character Selection](docs/screenshots/CHARACTERSCREEN.png)
