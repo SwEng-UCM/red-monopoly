@@ -1,4 +1,3 @@
-// src/View/GameWindow.java
 package View;
 
 import Controller.Controller;

@@ -3,7 +3,6 @@ package View;
 import Controller.Controller;
 import Controller.GameServer;
 import Controller.NetworkClient;
-import Model.Player;
 import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
 
 import javax.swing.*;
