@@ -96,8 +96,14 @@ public class PropertyTile extends Tile {
                 }
             } else if (owner != player) {
                 // Pay rent
-                System.out.println(player.getName() + " landed on " + getName() +
-                        " owned by " + owner.getName() + ". Paying rent: " + rent + " ₽");
+
+                JOptionPane.showMessageDialog(null,
+                        player.getName() + " landed on " + getName() +
+                                " owned by " + owner.getName() + ". Paying rent: " + rent + " ₽",
+                        "Pay rent",
+                        JOptionPane.INFORMATION_MESSAGE);
+               /* System.out.println(player.getName() + " landed on " + getName() +
+                        " owned by " + owner.getName() + ". Paying rent: " + rent + " ₽");*/
                 player.deductMoney(rent);
                 owner.addMoney(rent);
             } else {
