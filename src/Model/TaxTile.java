@@ -15,7 +15,7 @@ public class TaxTile extends Tile {
         int taxToDeduct;
         taxToDeduct = player.getMoney()/taxAmount;
         JOptionPane.showMessageDialog(null,
-                "You landed on " + name + " tax tile. Pay " + taxAmount + " % of your balance(" + taxToDeduct + "₽)",
+                "You landed on " + name + " tile. Pay " + taxAmount + " % of your balance(" + taxToDeduct + "₽)",
                 "Tax Tile",
                 JOptionPane.INFORMATION_MESSAGE);
 
