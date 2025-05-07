@@ -175,18 +175,24 @@ public class TurnHandler {
                 .map(Player::getName)
                 .collect(Collectors.toList());
 
+        StringBuilder message = new StringBuilder();
+
+        // Check eliminations
         if (!eliminatedNames.isEmpty()) {
             String eliminatedMsg = "Eliminated players due to negative balance: " + String.join(", ", eliminatedNames);
-            JOptionPane.showMessageDialog(null, eliminatedMsg, "Eliminations", JOptionPane.INFORMATION_MESSAGE);
-            players.removeIf(p -> p.getMoney() < 0);
+            message.append(eliminatedMsg).append("\n"); // Append to return string
+            JOptionPane.showMessageDialog(null, eliminatedMsg, "Eliminations", JOptionPane.INFORMATION_MESSAGE); // Show dialog
+            players.removeIf(p -> p.getMoney() < 0); // Remove eliminated players
         }
 
+        // Check winner
         if (players.size() == 1) {
             String winnerMsg = "Game Over! Winner: " + players.get(0).getName();
-            JOptionPane.showMessageDialog(null, winnerMsg, "Game Over", JOptionPane.INFORMATION_MESSAGE);
+            message.append(winnerMsg); // Append to return string
+            JOptionPane.showMessageDialog(null, winnerMsg, "Game Over", JOptionPane.INFORMATION_MESSAGE); // Show dialog
         }
 
-        return ""; // No need to return any message since it's displayed in a dialog
+        return message.toString().trim(); // Return the combined message
     }
 
     private static int GLOBAL_DELAY_MS = 1000;
