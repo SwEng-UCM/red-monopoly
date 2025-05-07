@@ -18,11 +18,11 @@ public class GameClient {
              DataOutputStream out = new DataOutputStream(socket.getOutputStream());
              BufferedReader   kb  = new BufferedReader(new InputStreamReader(System.in))) {
 
-            /* 1️⃣  identify ourselves */
+            /*  identify ourselves */
             out.writeUTF("JOIN:" + name);
             out.flush();                         //  <<<  NEW
 
-            /* 2️⃣  listener thread */
+            /* listener thread */
             new Thread(() -> {
                 try {
                     String msg;
@@ -34,7 +34,7 @@ public class GameClient {
                 }
             }).start();
 
-            /* 3️⃣  keyboard loop */
+            /*  keyboard loop */
             String line;
             while ((line = kb.readLine()) != null) {
                 if (line.equalsIgnoreCase("quit")) break;

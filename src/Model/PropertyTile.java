@@ -41,7 +41,7 @@ public class PropertyTile extends Tile {
                     owner = ai;
                     ai.deductMoney(price);
 
-                    // ✅ ADD ownership tracking
+                    //  ADD ownership tracking
                     ai.addProperty(this);
 
                     JOptionPane.showMessageDialog(null,
@@ -78,7 +78,7 @@ public class PropertyTile extends Tile {
                         owner = player;
                         player.deductMoney(price);
 
-                        // ✅ ADD ownership tracking
+                        //  ADD ownership tracking
                         player.addProperty(this);
 
                         JOptionPane.showMessageDialog(null,
