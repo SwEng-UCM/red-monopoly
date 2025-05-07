@@ -141,8 +141,8 @@ Below you will find the rules and features of Red Monopoly. Jump straight to any
 
 ### A. From IntelliJ IDEA
 
-1. In the **Project** view, open `src/main/java/com/yourorg/App.java` (or your main class).  
-2. Click the green ▶️ run icon next to the `main` method.  
+1. In the **src** view, open `src/Launcher/Main.java` (or your main class).  
+2. Click the green ▶️ run icon next to the `main` method. No launch parameters needed.
 3. The game will start (GUI or embedded web server, depending on your setup).
 
 ### B. From the Command Line
@@ -152,8 +152,7 @@ Below you will find the rules and features of Red Monopoly. Jump straight to any
    ```bash
    java -jar target/monopoly-soviet.jar
    ```
-3. If it’s a web-based UI, open your browser at `http://localhost:8080`.  
-   If it’s a desktop GUI, the game window will appear automatically.
+3. It is a desktop GUI, therefore the game window will appear automatically.
 
 ---
 
