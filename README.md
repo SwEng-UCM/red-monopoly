@@ -183,4 +183,4 @@ Please ensure your code builds (`mvn clean package`) and, if applicable, add or 
 
 ## License
 
-This project is licensed under the **MIT License**. See [LICENSE.md](LICENSE.md) for full details.
+This project is licensed under the **MIT License**. See [LICENSE.md](LICENSE) for full details.
