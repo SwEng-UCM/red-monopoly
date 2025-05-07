@@ -53,8 +53,8 @@ public class CommunityChestTile extends Tile {
                 player.deductMoney(75);
                 break;
             case 5: // Advance to Red Square: Collect 200 ₽.
-                // Assuming Red Square is at position 0
-                player.setPosition(0);
+                // Move to Moscow(position 39)
+                player.setPosition(39);
                 player.addMoney(200);
                 break;
             case 6: // Get Out of Gulag Free Card.

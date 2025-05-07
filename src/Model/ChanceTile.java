@@ -45,8 +45,8 @@ public class ChanceTile extends Tile {
             case 0: // Five-Year Plan Success!
                 player.addMoney(200);
                 break;
-            case 1: // Promotion - Move to Moscow (assuming position 0 for Moscow)
-                player.setPosition(0);
+            case 1: // Promotion - Move to Moscow
+                player.setPosition(39);
                 player.addMoney(50);
                 break;
             case 2: // Factory Inefficiency
