@@ -9,7 +9,7 @@ public class EasyAIStrategy implements AIStrategy {
                 + diceValues[0] + " and " + diceValues[1]);
         String result = controller.movePlayerAfterDiceRoll(diceValues);
         System.out.println(result);
-        // Additional simple decisions can be added here.
+
     }
 
     @Override

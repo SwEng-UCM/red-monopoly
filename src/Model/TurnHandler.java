@@ -1,5 +1,6 @@
 package Model;
 
+import javax.swing.JOptionPane;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,51 +41,45 @@ public class TurnHandler {
         StringBuilder message = new StringBuilder();
         int jailTurns = player.getJailTurnCount();
 
-        if (jailTurns < 2) { // First or second turn in jail
-            message.append(player.getName())
-                    .append(" is in Gulag (Turn ")
-                    .append(jailTurns + 1)
-                    .append(") and rolled ")
-                    .append(dice[0])
-                    .append(" and ")
-                    .append(dice[1])
-                    .append(". ");
+        String baseMessage = player.getName() + " is in Gulag (Turn " + (jailTurns + 1) +
+                ") and rolled " + dice[0] + " and " + dice[1] + ".";
+        JOptionPane.showMessageDialog(null, baseMessage);
+        message.append(baseMessage).append("\n");
+
+        if (jailTurns < 2) {
             if (dice[0] == dice[1]) {
-                message.append("Doubles! You're released from Gulag.\n");
+                String msg = "Doubles! You're released from Gulag.";
+                JOptionPane.showMessageDialog(null, msg);
+                message.append(msg).append("\n");
+
                 player.setInJail(false);
                 player.resetJailTurn();
                 int roll = dice[0] + dice[1];
                 game.movePlayer(player, roll);
-                Tile tile = game.getBoard().getTile(player.getPosition());
-                message.append("After release, you landed on ")
-                        .append(tile.getName())
-                        .append(".\n");
             } else {
-                message.append("No doubles. You remain in Gulag.\n");
+                String msg = "No doubles. You remain in Gulag.";
+                JOptionPane.showMessageDialog(null, msg);
+                message.append(msg).append("\n");
+
                 player.incrementJailTurn();
             }
-        } else { // Third turn in jail
-            message.append(player.getName())
-                    .append(" is in Gulag (Turn 3) and rolled ")
-                    .append(dice[0])
-                    .append(" and ")
-                    .append(dice[1])
-                    .append(". ");
+        } else {
             if (dice[0] == dice[1]) {
-                message.append("Doubles! You're released from Gulag.\n");
+                String msg = "Doubles! You're released from Gulag.";
+                JOptionPane.showMessageDialog(null, msg);
+                message.append(msg).append("\n");
+
                 player.setInJail(false);
                 player.resetJailTurn();
                 int roll = dice[0] + dice[1];
                 game.movePlayer(player, roll);
-                Tile tile = game.getBoard().getTile(player.getPosition());
-                message.append("After release, you landed on ")
-                        .append(tile.getName())
-                        .append(".\n");
             } else {
                 if (player.getMoney() >= JAIL_RELEASE_FEE) {
-                    message.append("No doubles. You've been in Gulag for 3 turns so you pay a fee of ")
-                            .append(JAIL_RELEASE_FEE)
-                            .append(" ₽ to get out.\n");
+                    String msg = "No doubles. You've been in Gulag for 3 turns so you pay a fee of " +
+                            JAIL_RELEASE_FEE + " ₽ to get out.";
+                    JOptionPane.showMessageDialog(null, msg);
+                    message.append(msg).append("\n");
+
                     player.deductMoney(JAIL_RELEASE_FEE);
                     player.setInJail(false);
                     player.resetJailTurn();
@@ -92,21 +87,18 @@ public class TurnHandler {
                     int feeDie2 = game.rollSingleDie();
                     int roll = feeDie1 + feeDie2;
                     game.movePlayer(player, roll);
-                    Tile tile = game.getBoard().getTile(player.getPosition());
-                    message.append(player.getName())
-                            .append(" rolled a ")
-                            .append(roll)
-                            .append(" ([").append(feeDie1).append(" + ").append(feeDie2)
-                            .append("]) and landed on ")
-                            .append(tile.getName())
-                            .append(".\n");
                 } else {
-                    message.append("No doubles and you cannot afford the fee. You remain in Gulag.\n");
+                    String msg = "No doubles and you cannot afford the fee. You remain in Gulag.";
+                    JOptionPane.showMessageDialog(null, msg);
+                    message.append(msg).append("\n");
                 }
             }
         }
+
         return message.toString();
     }
+
+
 
     private String processNormalTurn(Player player, int[] dice) {
         StringBuilder message = new StringBuilder();
@@ -182,19 +174,19 @@ public class TurnHandler {
                 .filter(p -> p.getMoney() < 0)
                 .map(Player::getName)
                 .collect(Collectors.toList());
-        StringBuilder message = new StringBuilder();
+
         if (!eliminatedNames.isEmpty()) {
-            message.append("Eliminated players due to negative balance: ")
-                    .append(String.join(", ", eliminatedNames))
-                    .append("\n");
+            String eliminatedMsg = "Eliminated players due to negative balance: " + String.join(", ", eliminatedNames);
+            JOptionPane.showMessageDialog(null, eliminatedMsg, "Eliminations", JOptionPane.INFORMATION_MESSAGE);
             players.removeIf(p -> p.getMoney() < 0);
         }
+
         if (players.size() == 1) {
-            message.append("Game Over! Winner: ")
-                    .append(players.get(0).getName())
-                    .append("\n");
+            String winnerMsg = "Game Over! Winner: " + players.get(0).getName();
+            JOptionPane.showMessageDialog(null, winnerMsg, "Game Over", JOptionPane.INFORMATION_MESSAGE);
         }
-        return message.toString();
+
+        return ""; // No need to return any message since it's displayed in a dialog
     }
 
     private static int GLOBAL_DELAY_MS = 1000;
