@@ -34,8 +34,8 @@ public class HardAIStrategy implements AIStrategy {
             rent = ((RailroadTile) tile).getRent();
         }
 
-        double roi = (double) rent / price; // simple return-on-investment check
-        return aiPlayer.getMoney() > price && roi > 0.05; // buy only if ROI > 5%
+        double roi = (double) rent / price; // Simple return-on-investment check
+        return aiPlayer.getMoney() > price && roi > 0.05; // Buys only if ROI > 5%
     }
 
 }

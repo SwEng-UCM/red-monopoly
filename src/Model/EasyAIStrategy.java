@@ -22,7 +22,7 @@ public class EasyAIStrategy implements AIStrategy {
     public boolean shouldBuyTile(AIPlayer aiPlayer, Tile tile) {
         int price = (tile instanceof PropertyTile) ? ((PropertyTile) tile).getPrice() :
                 (tile instanceof RailroadTile) ? ((RailroadTile) tile).getPrice() : 0;
-        return aiPlayer.getMoney() >= price;
+        return aiPlayer.getMoney() >= price; // Buys property if can afford it
     }
 
 }

@@ -57,7 +57,7 @@ public class RailroadTile extends Tile {
                     owner = ai;
                     ai.deductMoney(price);
 
-                    // ✅ ADD THIS LINE
+                    //  ADD THIS LINE
                     ai.addRailroad(this);
 
                     JOptionPane.showMessageDialog(
@@ -99,7 +99,7 @@ public class RailroadTile extends Tile {
                         owner = player;
                         player.deductMoney(price);
 
-                        // ✅ ADD THIS LINE
+                        //  ADD THIS LINE
                         player.addRailroad(this);
 
                         JOptionPane.showMessageDialog(
