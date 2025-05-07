@@ -9,9 +9,8 @@ A digital twist on the classic Monopoly board game, set in the USSR. Buy, trade,
 1. [User Manual & How to Play](#user-manual--how-to-play)  
 2. [Project Configuration](#project-configuration)  
 3. [Running the Game](#running-the-game)  
-4. [Known Limitations](#known-limitations)  
-5. [Contributing](#contributing)  
-6. [License](#license)  
+4. [Contributing](#contributing)  
+5. [License](#license)  
 
 ---
 
@@ -108,12 +107,80 @@ Below you will find the rules and features of Red Monopoly. Jump straight to any
 ![Undo Button](docs/screenshots/playerinfobutton.png)
 
 ---
+
 ## Project Configuration
 
-1. **Clone the Repository**  
+1. **Prerequisites**  
+   - Java 17 or higher  
+   - Maven 3.x  
+   - Git  
+
+2. **Clone the repository**  
    ```bash
    git clone https://github.com/SwEng-UCM/red-monopoly.git
    cd red-monopoly
+   ```
 
-2. **Run the Game**
-3. 
+3. **Import into IntelliJ IDEA**  
+   - Open IntelliJ IDEA and choose **File → Open…**  
+   - Select the project’s root folder.  
+   - IntelliJ will detect the Maven project and download dependencies.
+
+4. **Build the JAR**  
+   ```bash
+   mvn clean package
+   ```  
+   This produces:
+   ```
+   target/monopoly-soviet.jar
+   ```
+
+---
+
+## Running the Game
+
+### A. From IntelliJ IDEA
+
+1. In the **Project** view, open `src/main/java/com/yourorg/App.java` (or your main class).  
+2. Click the green ▶️ run icon next to the `main` method.  
+3. The game will start (GUI or embedded web server, depending on your setup).
+
+### B. From the Command Line
+
+1. Ensure you’ve built the JAR (`target/monopoly-soviet.jar`).  
+2. Run:
+   ```bash
+   java -jar target/monopoly-soviet.jar
+   ```
+3. If it’s a web-based UI, open your browser at `http://localhost:8080`.  
+   If it’s a desktop GUI, the game window will appear automatically.
+
+---
+
+## Contributing
+
+We welcome contributions! Please:
+
+1. **Fork** the repo.  
+2. **Create a branch**:
+   ```bash
+   git checkout -b feature/YourFeatureName
+   ```
+3. **Make your changes**, following the existing code style.  
+4. **Commit** your work:
+   ```bash
+   git commit -m "Add feature: YourFeatureName"
+   ```
+5. **Push** to your fork:
+   ```bash
+   git push origin feature/YourFeatureName
+   ```
+6. Open a **Pull Request** against `main`.  
+
+Please ensure your code builds (`mvn clean package`) and, if applicable, add or update tests.
+
+---
+
+## License
+
+This project is licensed under the **MIT License**. See [LICENSE.md](LICENSE.md) for full details.
