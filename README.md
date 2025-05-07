@@ -1,4 +1,4 @@
-# Monopoly: Soviet Edition
+# Red Monopoly
 
 A digital twist on the classic Monopoly board game, set in the USSR. Buy, trade, and build your way across the Soviet Union—from Moscow to Vladivostok—while managing five-year plans, factories, and political intrigue.
 
@@ -20,30 +20,24 @@ A digital twist on the classic Monopoly board game, set in the USSR. Buy, trade,
 
 ## User Manual & How to Play
 
-For full rules, examples, and advanced strategies, see the [User Manual (PDF)](docs/User_Manual.pdf).
+For full rules, examples, see the [User Manual (PDF)](docs/User_Manual.pdf).
 
 ### Getting Started
 
 1. **Start a New Game**  
    - From the main menu, click **New Game**.  
-   - Choose number of players (2–6) and starting rubles per player.  
-   - Click **Begin** to place tokens on Red Square.
+   - Choose number of players (2–8) and avatar per player.  
+   - Click **OK** to begin on the game.
 
 2. **Turn Sequence**  
-   - **Roll Dice**: Click “Roll” or press **R**.  
-   - **Move Token**: Your token advances the total pip count.  
+   - **Roll Dice**: Click the DICE button. 
+   - **Move Token**: Your token advances automatically after the dice roll.  
    - **Resolve Space**:  
      - Buy property if unowned (pay the Bank in rubles).  
      - Pay rent if owned by another player.  
-     - Draw a “Commissar Card” for special events.  
-   - **Manage Five-Year Plan**:  
-     - Access your dashboard sidebar.  
-     - Allocate resources to factories, infrastructure, or research.  
-     - Complete tasks to earn bonuses.
+     - Draw a “Cards” for special events.  
 
 3. **Winning Conditions**  
-   - **Economic Victory**: Achieve a net worth of 10,000 rubles.  
-   - **Industrial Victory**: Complete the “Grand Industrialization” five-year plan first.  
    - **Elimination**: Bankrupt all other players.
 
 ---
