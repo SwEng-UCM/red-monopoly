@@ -8,19 +8,19 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Tiny TCP server that relays console commands into the real Monopoly game.
- * Starts once from Launcher.Main.
+ * Started once from Launcher.Main.
  */
 public class GameServer {
 
     public static final int PORT = 6666;
 
-    private final Controller controller;                 // <-- new
+    private final Controller    controller;
+    private final GameManager   gameManager;
     private final List<ClientHandler> clients = new CopyOnWriteArrayList<>();
-    private final GameManager gameManager;               // now needs controller
 
-    public GameServer(Controller ctrl) {                 // <-- new ctor
+    public GameServer(Controller ctrl) {
         this.controller  = ctrl;
-        this.gameManager = new GameManager(this, ctrl);  // pass bridge
+        this.gameManager = new GameManager(this, ctrl);   // bridge layer
     }
 
     public void start() {
@@ -29,7 +29,7 @@ public class GameServer {
 
             while (true) {
                 Socket socket = serverSocket.accept();
-                ClientHandler handler = new ClientHandler(socket, gameManager); // sig changed
+                ClientHandler handler = new ClientHandler(socket, gameManager);
                 clients.add(handler);
                 new Thread(handler, "Client-" + clients.size()).start();
                 System.out.println("➕  Client connected  (" + clients.size() + " total)");
@@ -39,7 +39,7 @@ public class GameServer {
         }
     }
 
-    /* === called from GameManager/ClientHandler === */
+    /* ─── called from GameManager / ClientHandler ────────────────── */
     public void broadcast(String msg) {
         for (ClientHandler c : clients) c.send(msg);
     }

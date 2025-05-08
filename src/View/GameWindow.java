@@ -94,9 +94,34 @@ public class GameWindow extends JFrame {
                 boardView.refreshBoard();
 
                 if (result != null && !result.isBlank()) {
-                    applySovietDialogStyle();
-                    JOptionPane.showMessageDialog(this, result, "Turn Result", JOptionPane.INFORMATION_MESSAGE);
+
+                    if (result.startsWith("ASKBUY:")) {                      // NEW
+                        String[] p = result.split(":");
+                        String tileName = p[1];
+                        int price = Integer.parseInt(p[2]);
+
+                        applySovietDialogStyle();
+                        int choice = JOptionPane.showConfirmDialog(this,
+                                "Buy " + tileName + " for " + price + " ₽ ?", "Purchase",
+                                JOptionPane.YES_NO_OPTION);
+
+                        if (choice == JOptionPane.YES_OPTION) {
+                            // complete purchase directly in the model
+                            _controller.getBoardTiles().stream()
+                                    .filter(t -> t instanceof Model.PropertyTile
+                                            && t.getName().equals(tileName))
+                                    .findFirst()
+                                    .ifPresent(t -> ((Model.PropertyTile) t)
+                                            .completePurchase(_controller.getCurrentPlayer()));
+                            boardView.refreshBoard();
+                        }
+                    } else {
+                        applySovietDialogStyle();
+                        JOptionPane.showMessageDialog(this, result, "Turn Result",
+                                JOptionPane.INFORMATION_MESSAGE);
+                    }
                 }
+
 
                 checkAndTriggerAITurn();
             }).start();
