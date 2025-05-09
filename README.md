@@ -147,12 +147,13 @@ Below you will find the rules and features of Red Monopoly. Jump straight to any
 
 ### B. From the Command Line
 
-1. Ensure you’ve built the JAR (`target/monopoly-soviet.jar`).  
-2. Run:
+1. Install a Java Runtime Environment (JRE), with its latest version. 
+2. Ensure you’ve built or possess the JAR file (`red-monopoly.jar`).  
+3. Run:
    ```bash
-   java -jar target/monopoly-soviet.jar
+   java -jar red-monopoly.jar
    ```
-3. It is a desktop GUI, therefore the game window will appear automatically.
+4. It is a desktop GUI, therefore the game window will appear automatically.
 
 ---
 
