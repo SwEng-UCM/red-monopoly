@@ -1,28 +1,29 @@
 package View;
 
 import javax.sound.sampled.*;
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 public class MusicPlayer {
     private Clip clip;
     private FloatControl volumeControl;
 
-    public void playMusic(String filepath) {
+    public void playMusic(String urlString) {
         try {
-            File audioFile = new File(filepath);
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+            URL audioUrl = new URL(urlString);
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioUrl);
             clip = AudioSystem.getClip();
             clip.open(audioStream);
 
-            // Loop the music indefinitely
+            // Loop music indefinitely
             clip.loop(Clip.LOOP_CONTINUOUSLY);
 
-            // Get volume control
+            // Volume control
             volumeControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-            setVolume(0.5f); // Default volume (50%)
+            setVolume(0.5f);
             clip.start();
-        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+        } catch (Exception e) {
+            System.err.println("Failed to play music: " + urlString);
             e.printStackTrace();
         }
     }
@@ -42,15 +43,14 @@ public class MusicPlayer {
         }
     }
 
-    // New helper to play a sound effect once (non-looping)
-    public static void playSoundEffect(String filepath) {
+    public static void playSoundEffect(URL soundUrl) {
         try {
-            File audioFile = new File(filepath);
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundUrl);
             Clip soundClip = AudioSystem.getClip();
             soundClip.open(audioStream);
             soundClip.start();
         } catch (Exception e) {
+            System.err.println("Failed to play sound effect: " + soundUrl);
             e.printStackTrace();
         }
     }
@@ -62,9 +62,6 @@ public class MusicPlayer {
             float current = volumeControl.getValue();
             return (current - min) / (max - min);
         }
-        return 0.5f; // Default fallback
+        return 0.5f;
     }
-
-
-
 }

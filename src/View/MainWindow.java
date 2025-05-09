@@ -5,6 +5,7 @@ import Controller.GameServer;
 import Controller.NetworkClient;
 import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
 
+import javax.sound.sampled.*;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.UIManager;
@@ -12,12 +13,18 @@ import javax.swing.UnsupportedLookAndFeelException;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainWindow extends JFrame {
-    protected static final String filePath =
-            "resources/click-buttons-ui-menu-sounds-effects-button-8-205394.wav";
+    // Static URLs for resources
+    static final URL CLICK_SOUND_URL =
+            MainWindow.class.getResource("/audio/click-buttons-ui-menu-sounds-effects-button-8-205394.wav");
+    static final URL MENU_MUSIC_URL =
+            MainWindow.class.getResource("/Dark_is_the_Night_-_Soviet_WW2_Song.wav");
+    private static final URL BG_IMAGE_URL =
+            MainWindow.class.getResource("/redmonopolyLogo.jpg");
 
     private final Controller  _controller;
     private final CardLayout  _cardLayout;
@@ -34,7 +41,13 @@ public class MainWindow extends JFrame {
 
         _controller = controller;
         musicPlayer = new MusicPlayer();
-        musicPlayer.playMusic("resources/Dark_is_the_Night_-_Soviet_WW2_Song.wav");
+
+        // Play menu music if available
+        if (MENU_MUSIC_URL != null) {
+            musicPlayer.playMusic(String.valueOf(MENU_MUSIC_URL));
+        } else {
+            System.err.println("Menu music not found!");
+        }
 
         _cardLayout = new CardLayout();
         _mainPanel  = new JPanel(_cardLayout);
@@ -53,7 +66,7 @@ public class MainWindow extends JFrame {
         setResizable(false);
         setLocationRelativeTo(null);
 
-        _mainPanel.add(createMainMenu(),   "Main Menu");
+        _mainPanel.add(createMainMenu(),    "Main Menu");
         _mainPanel.add(createOptionsMenu(), "Options");
         add(_mainPanel);
 
@@ -66,11 +79,14 @@ public class MainWindow extends JFrame {
         layeredPane.setPreferredSize(new Dimension(800, 800));
 
         // Background image
-        JLabel bg = new JLabel(new ImageIcon(
-                new ImageIcon("resources/redmonopolyLogo.jpg")
+        ImageIcon bgIcon = BG_IMAGE_URL != null
+                ? new ImageIcon(
+                new ImageIcon(BG_IMAGE_URL)
                         .getImage()
                         .getScaledInstance(800, 800, Image.SCALE_SMOOTH)
-        ));
+        )
+                : new ImageIcon();
+        JLabel bg = new JLabel(bgIcon);
         bg.setBounds(0, 0, 800, 800);
         layeredPane.add(bg, Integer.valueOf(0));
 
@@ -78,7 +94,7 @@ public class MainWindow extends JFrame {
         JPanel rounded = new JPanel() {
             @Override protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                Graphics2D g2 = (Graphics2D)g;
+                Graphics2D g2 = (Graphics2D) g;
                 g2.setRenderingHint(
                         RenderingHints.KEY_ANTIALIASING,
                         RenderingHints.VALUE_ANTIALIAS_ON
@@ -99,37 +115,37 @@ public class MainWindow extends JFrame {
 
         JButton playBtn = createStyledButton("Play Game");
         playBtn.addActionListener(e -> {
-            MusicPlayer.playSoundEffect(filePath);
+            if (CLICK_SOUND_URL != null) MusicPlayer.playSoundEffect(CLICK_SOUND_URL);
             startGameFlow();
         });
 
         JButton hostBtn = createStyledButton("Host Multiplayer");
         hostBtn.addActionListener(e -> {
-            MusicPlayer.playSoundEffect(filePath);
+            if (CLICK_SOUND_URL != null) MusicPlayer.playSoundEffect(CLICK_SOUND_URL);
             hostMultiplayerFlow();
         });
 
         JButton joinBtn = createStyledButton("Join Multiplayer");
         joinBtn.addActionListener(e -> {
-            MusicPlayer.playSoundEffect(filePath);
+            if (CLICK_SOUND_URL != null) MusicPlayer.playSoundEffect(CLICK_SOUND_URL);
             joinMultiplayerFlow();
         });
 
         JButton loadBtn = createStyledButton("Load Game");
         loadBtn.addActionListener(e -> {
-            MusicPlayer.playSoundEffect(filePath);
+            if (CLICK_SOUND_URL != null) MusicPlayer.playSoundEffect(CLICK_SOUND_URL);
             loadSavedGame();
         });
 
         JButton optionsBtn = createStyledButton("Options");
         optionsBtn.addActionListener(e -> {
-            MusicPlayer.playSoundEffect(filePath);
+            if (CLICK_SOUND_URL != null) MusicPlayer.playSoundEffect(CLICK_SOUND_URL);
             _cardLayout.show(_mainPanel, "Options");
         });
 
         JButton exitBtn = createStyledButton("Exit");
         exitBtn.addActionListener(e -> {
-            MusicPlayer.playSoundEffect(filePath);
+            if (CLICK_SOUND_URL != null) MusicPlayer.playSoundEffect(CLICK_SOUND_URL);
             System.exit(0);
         });
 
@@ -189,12 +205,12 @@ public class MainWindow extends JFrame {
         JLabel volL = new JLabel("Music Volume:");
         volL.setFont(new Font("Arial", Font.PLAIN, 18));
         volL.setForeground(Color.WHITE);
-        JSlider volS = new JSlider(0,100,(int)(musicPlayer.getVolume()*100));
+        JSlider volS = new JSlider(0, 100, (int)(musicPlayer.getVolume() * 100));
         volS.setOpaque(false);
-        volS.addChangeListener(e -> musicPlayer.setVolume(volS.getValue()/100f));
+        volS.addChangeListener(e -> musicPlayer.setVolume(volS.getValue() / 100f));
         volP.add(volL, BorderLayout.WEST);
         volP.add(volS, BorderLayout.CENTER);
-        volP.setMaximumSize(new Dimension(Integer.MAX_VALUE,50));
+        volP.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
 
         JCheckBox disableMusic = new JCheckBox("Disable Background Music");
         disableMusic.setOpaque(false);
@@ -202,10 +218,11 @@ public class MainWindow extends JFrame {
         disableMusic.setFont(new Font("Arial", Font.PLAIN, 16));
         disableMusic.setAlignmentX(Component.CENTER_ALIGNMENT);
         disableMusic.addItemListener(e -> {
-            if (disableMusic.isSelected()) musicPlayer.stopMusic();
-            else {
-                musicPlayer.playMusic("resources/Dark_is_the_Night_-_Soviet_WW2_Song.wav");
-                musicPlayer.setVolume(volS.getValue()/100f);
+            if (disableMusic.isSelected()) {
+                musicPlayer.stopMusic();
+            } else if (MENU_MUSIC_URL != null) {
+                musicPlayer.playMusic(String.valueOf(MENU_MUSIC_URL));
+                musicPlayer.setVolume(volS.getValue() / 100f);
             }
         });
 
@@ -213,7 +230,7 @@ public class MainWindow extends JFrame {
         aiL.setForeground(Color.WHITE);
         aiL.setFont(new Font("Arial", Font.PLAIN, 18));
         aiL.setAlignmentX(Component.CENTER_ALIGNMENT);
-        JSlider aiS = new JSlider(500,2000,1000);
+        JSlider aiS = new JSlider(500, 2000, 1000);
         aiS.setOpaque(false);
         aiS.setMajorTickSpacing(500);
         aiS.setPaintTicks(true);
@@ -231,11 +248,11 @@ public class MainWindow extends JFrame {
             aiS.setValue(1000);
             disableMusic.setSelected(false);
             musicPlayer.setVolume(0.75f);
-            musicPlayer.playMusic("resources/Dark_is_the_Night_-_Soviet_WW2_Song.wav");
+            if (MENU_MUSIC_URL != null) musicPlayer.playMusic(String.valueOf(MENU_MUSIC_URL));
         });
         JButton backB = createStyledButton("Back to Main Menu");
         backB.addActionListener(e -> {
-            MusicPlayer.playSoundEffect(filePath);
+            if (CLICK_SOUND_URL != null) MusicPlayer.playSoundEffect(CLICK_SOUND_URL);
             _cardLayout.show(_mainPanel, "Main Menu");
         });
         btnP.add(resetB);
@@ -315,13 +332,10 @@ public class MainWindow extends JFrame {
         }
     }
 
-
     private boolean askPlayerSetup(List<String> names, List<String> avatars) {
         JPanel diffP = new JPanel(new GridLayout(0,1));
         diffP.add(new JLabel("Select AI Difficulty:"));
-        JComboBox<String> diffC = new JComboBox<>(
-                new String[]{"Easy","Medium","Hard"}
-        );
+        JComboBox<String> diffC = new JComboBox<>(new String[]{"Easy","Medium","Hard"});
         diffP.add(diffC);
         if (JOptionPane.showConfirmDialog(
                 this, diffP, "AI Difficulty",

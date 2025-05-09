@@ -2,6 +2,7 @@ package Model;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.google.gson.annotations.SerializedName;
 
 public class Player {
     private String name;
@@ -10,7 +11,12 @@ public class Player {
     private boolean inJail;
     private int jailTurnCount = 0;
 
-    private String avatarPath;
+    /**
+     * Stores the classpath resource path for the avatar, e.g. "/players/player3.png"
+     * Default is the first avatar.
+     */
+    @SerializedName("avatarPath")
+    private String avatarPath = "/players/player1.png";
 
     private List<PropertyTile> ownedProperties = new ArrayList<>();
     private List<RailroadTile> ownedRailroads = new ArrayList<>();
@@ -42,6 +48,10 @@ public class Player {
 
     public int getMoney() {
         return money;
+    }
+
+    public void setMoney(int money) {
+        this.money = money;
     }
 
     public void addMoney(int amount) {
@@ -91,7 +101,7 @@ public class Player {
     // Methods for extra turn
     public void setExtraTurn(boolean extraTurn) {
         this.extraTurn = extraTurn;
-        if(extraTurn){
+        if (extraTurn) {
             System.out.println(name + " gets an extra turn!");
         }
     }
@@ -106,11 +116,9 @@ public class Player {
 
     // Example placeholder for going to jail
     public void goToJail() {
-
         setInJail(true);
         resetJailTurn();
         System.out.println(name + " has been sent to jail!");
-        // Additional logic for moving the player to the jail tile can be added here.
     }
 
     // Property ownership
@@ -118,12 +126,12 @@ public class Player {
         return ownedProperties;
     }
 
-    public void addProperty(PropertyTile property) {
-        ownedProperties.add(property);
-    }
-
     public void setOwnedProperties(List<PropertyTile> properties) {
         this.ownedProperties = properties;
+    }
+
+    public void addProperty(PropertyTile property) {
+        ownedProperties.add(property);
     }
 
     // Railroad ownership
@@ -131,32 +139,47 @@ public class Player {
         return ownedRailroads;
     }
 
-    public void addRailroad(RailroadTile railroad) {
-        ownedRailroads.add(railroad);
-    }
-
     public void setOwnedRailroads(List<RailroadTile> railroads) {
         this.ownedRailroads = railroads;
     }
 
-    @com.google.gson.annotations.SerializedName("type")
+    public void addRailroad(RailroadTile railroad) {
+        ownedRailroads.add(railroad);
+    }
+
+    /**
+     * Returns the classpath resource path for the avatar (leading slash).
+     */
+    public String getAvatarPath() {
+        return avatarPath;
+    }
+
+    /**
+     * Normalizes and sets the avatar resource path.
+     * Accepts either a resource-style path ("/players/...png")
+     * or a file-style path ("resources/players/...").
+     */
+    public void setAvatarPath(String avatarPath) {
+        if (avatarPath == null || avatarPath.isBlank()) {
+            this.avatarPath = "/players/player1.png";
+            return;
+        }
+        String path = avatarPath;
+        if (path.startsWith("resources/")) {
+            path = path.substring("resources".length());
+        }
+        if (!path.startsWith("/")) {
+            path = "/" + path;
+        }
+        this.avatarPath = path;
+    }
+
+    @SerializedName("type")
     public String getType() {
         return "Human";
     }
 
-    public void setMoney(int oldMoney) {
-        this.money = oldMoney;
-    }
-
     public void setJailTurnCount(int oldJailTurns) {
         this.jailTurnCount = oldJailTurns;
-    }
-
-    public String getAvatarPath() {
-        return avatarPath;
-         }
-
- public void setAvatarPath(String avatarPath) {
-               this.avatarPath = avatarPath;
     }
 }

@@ -1,20 +1,22 @@
+// src/View/DicePanel.java
 package View;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URL;
 import java.util.Random;
 
 public class DicePanel extends JPanel {
-    private JLabel diceLabel;
+    private final JLabel diceLabel;
     private Timer timer;
     private int finalResult;
-    private Random random = new Random();
+    private final Random random = new Random();
 
     // Duration of the animation in milliseconds and update interval.
-    private int animationDuration = 2000;
-    private int updateInterval = 100;
+    private final int animationDuration = 2000;
+    private final int updateInterval    = 100;
 
     public DicePanel() {
         setOpaque(false);
@@ -31,25 +33,32 @@ public class DicePanel extends JPanel {
             timer.stop();
         }
         timer = new Timer(updateInterval, new ActionListener() {
-            long startTime = System.currentTimeMillis();
+            final long startTime = System.currentTimeMillis();
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (System.currentTimeMillis() - startTime >= animationDuration) {
+                long elapsed = System.currentTimeMillis() - startTime;
+                if (elapsed >= animationDuration) {
                     timer.stop();
-                    setDiceImage(finalResult);
+                    setDiceFace(finalResult);
                 } else {
-                    // Display a random face while animating.
                     int randomFace = random.nextInt(6) + 1;
-                    setDiceImage(randomFace);
+                    setDiceFace(randomFace);
                 }
             }
         });
         timer.start();
     }
 
-    private void setDiceImage(int face) {
-        // Make sure "die1.png" to "die6.png" exist in your resources folder.
-        ImageIcon icon = new ImageIcon("resources/die" + face + ".png");
-        diceLabel.setIcon(icon);
+    private void setDiceFace(int face) {
+        String resourcePath = "/die" + face + ".png";
+        URL imgUrl = getClass().getResource(resourcePath);
+        if (imgUrl != null) {
+            diceLabel.setIcon(new ImageIcon(imgUrl));
+            diceLabel.setText("");
+        } else {
+            // fallback to text if image missing
+            diceLabel.setIcon(null);
+            diceLabel.setText(String.valueOf(face));
+        }
     }
 }

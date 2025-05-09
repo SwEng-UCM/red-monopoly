@@ -1,11 +1,13 @@
-// src/View/TokenOverlayPanel.java
 package View;
 
 import Controller.Controller;
 import Model.Player;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,21 +24,39 @@ public class TokenOverlayPanel extends JPanel {
         loadPlayerIcons();
     }
 
-    /** Call this any time the player list changes. */
     public void loadPlayerIcons() {
         playerIcons.clear();
         List<Player> players = controller.getAllPlayers();
         for (int i = 0; i < players.size(); i++) {
-            Player player = players.get(i);
-            String avatarPath = player.getAvatarPath();
-            if (avatarPath == null) {
-                avatarPath = "resources/players/player1.png";
+            String avatarPath = players.get(i).getAvatarPath();
+            URL avatarUrl = null;
+
+            // 1) Strip any "resources/" prefix then ensure leading '/'
+            if (avatarPath != null) {
+                String resourcePath = avatarPath;
+                if (resourcePath.startsWith("resources/"))
+                    resourcePath = resourcePath.substring("resources".length());
+                if (!resourcePath.startsWith("/"))
+                    resourcePath = "/" + resourcePath;
+                avatarUrl = getClass().getResource(resourcePath);
             }
-            ImageIcon icon = new ImageIcon(avatarPath);
-            Image scaled = icon.getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH);
-            playerIcons.put(i, scaled);
+
+            // 2) Fallback only if that failed
+            if (avatarUrl == null)
+                avatarUrl = getClass().getResource("/players/player1.png");
+
+            // 3) Read & scale
+            try {
+                Image img = ImageIO.read(avatarUrl)
+                        .getScaledInstance(60, 60, Image.SCALE_SMOOTH);
+                playerIcons.put(i, img);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+        repaint();  // force a redraw with the new icons
     }
+
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -49,10 +69,9 @@ public class TokenOverlayPanel extends JPanel {
             JLabel tileLabel = boardPanel.getTileLabel(tileIndex);
             if (tileLabel == null) continue;
 
-            //Rectangle bounds = tileLabel.getBounds();
             Rectangle bounds = tileLabel.getBounds();
-            //SwingUtilities.convertRectangle(boardPanel, bounds, this);
-
+            // Convert to this panel's coordinate space if needed:
+            // SwingUtilities.convertRectangle(boardPanel, bounds, this);
 
             int iconSize = 60;
             int x = bounds.x + bounds.width - iconSize - 4;
@@ -60,7 +79,7 @@ public class TokenOverlayPanel extends JPanel {
 
             Image icon = playerIcons.get(i);
             if (icon != null) {
-                g.drawImage(icon, x, y, null);
+                g.drawImage(icon, x, y, this);
             }
         }
     }

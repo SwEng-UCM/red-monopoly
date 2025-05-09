@@ -1,14 +1,14 @@
+// src/View/DualDicePanel.java
 package View;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class DualDicePanel extends JPanel {
-    private DicePanel dicePanel1;
-    private DicePanel dicePanel2;
+    private final DicePanel dicePanel1;
+    private final DicePanel dicePanel2;
 
     public DualDicePanel() {
-        // Use a 1x2 grid with some horizontal gap for spacing.
         setLayout(new GridLayout(1, 2, 10, 0));
         setOpaque(false);
 
